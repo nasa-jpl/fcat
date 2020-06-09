@@ -1,0 +1,4 @@
+bool channel_ch1
+bool channel_ch2
+bool channel_ch3
+bool channel_ch4

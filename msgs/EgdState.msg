@@ -1,4 +1,4 @@
 int32 actual_position
 int32 actual_velocity
-double actual_current
+float64 actual_current
 bool faulted

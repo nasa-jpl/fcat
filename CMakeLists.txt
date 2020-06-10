@@ -17,19 +17,19 @@ endif()
 
 # find dependencies
 find_package(ament_cmake REQUIRED)
-#find_package(builtin_interfaces REQUIRED)
+find_package(builtin_interfaces REQUIRED)
 find_package(rosidl_default_generators REQUIRED)
 #find_package(action_msgs REQUIRED)
 
 rosidl_generate_interfaces(casah_msgs
-  "msg/CommanderEnableCmd.msg"
-  "msg/CommanderState.msg"
-  "msg/EgdCspCmd.msg"
-  "msg/EgdResetCmd.msg"
-  "msg/EgdState.msg"
-  "msg/El2124WriteAllChannelsCmd.msg"
-  "msg/El2124WriteChannelCmd.msg"
-  "msg/FunctionState.msg"
+  "msgs/CommanderEnableCmd.msg"
+  "msgs/CommanderState.msg"
+  "msgs/EgdCspCmd.msg"
+  "msgs/EgdResetCmd.msg"
+  "msgs/EgdState.msg"
+  "msgs/El2124WriteAllChannelsCmd.msg"
+  "msgs/El2124WriteChannelCmd.msg"
+  "msgs/FunctionState.msg"
   #"srv/TareForceTorqueSensor.srv"
   #"action/CommandActuatorPosition.action"
   DEPENDENCIES builtin_interfaces #action_msgs

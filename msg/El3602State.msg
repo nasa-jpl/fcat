@@ -1,0 +1,5 @@
+string device_name
+float64 voltage_ch1
+int32 adc_value_ch1
+float64 voltage_ch2
+int32 adc_value_ch2

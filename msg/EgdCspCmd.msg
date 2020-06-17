@@ -1,3 +1,4 @@
+string device_name
 int32 target_position
 int32 position_offset
 int32 velocity_offset

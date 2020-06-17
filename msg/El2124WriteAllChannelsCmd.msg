@@ -1,3 +1,4 @@
+string device_name
 bool channel_ch1
 bool channel_ch2
 bool channel_ch3

@@ -21,15 +21,22 @@ find_package(builtin_interfaces REQUIRED)
 find_package(rosidl_default_generators REQUIRED)
 #find_package(action_msgs REQUIRED)
 
-rosidl_generate_interfaces(casah_msgs
-  "msgs/CommanderEnableCmd.msg"
-  "msgs/CommanderState.msg"
-  "msgs/EgdCspCmd.msg"
-  "msgs/EgdResetCmd.msg"
-  "msgs/EgdState.msg"
-  "msgs/El2124WriteAllChannelsCmd.msg"
-  "msgs/El2124WriteChannelCmd.msg"
-  "msgs/FunctionState.msg"
+rosidl_generate_interfaces(fcat_msgs_ros2
+  "msg/CommanderEnableCmd.msg"
+  "msg/EgdCspCmd.msg"
+  "msg/EgdProfPosCmd.msg"
+  "msg/EgdResetCmd.msg"
+  "msg/El2124WriteAllChannelsCmd.msg"
+  "msg/El2124WriteChannelCmd.msg"
+  "msg/CommanderState.msg"
+  "msg/SignalGeneratorState.msg"
+  "msg/FunctionState.msg"
+  "msg/ConditionalState.msg"
+  "msg/SchmittTriggerState.msg"
+  "msg/FilterState.msg"
+  "msg/EgdState.msg"
+  "msg/El3602State.msg"
+  "msg/El2124State.msg"
   #"srv/TareForceTorqueSensor.srv"
   #"action/CommandActuatorPosition.action"
   DEPENDENCIES builtin_interfaces #action_msgs

@@ -1,0 +1,7 @@
+string device_name
+int32 target_position
+uint32 profile_velocity
+uint32 profile_accel
+uint32 profile_decel
+uint16 motion_profile_type
+uint8 relative

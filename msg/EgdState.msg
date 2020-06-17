@@ -1,3 +1,4 @@
+string device_name
 int32 actual_position
 int32 actual_velocity
 float64 actual_current

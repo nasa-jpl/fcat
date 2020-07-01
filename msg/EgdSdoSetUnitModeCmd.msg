@@ -1,2 +1,2 @@
 string device_name
-bool enable
+int32 unit_mode

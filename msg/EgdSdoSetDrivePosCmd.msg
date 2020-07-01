@@ -1,0 +1,2 @@
+string device_name
+int32 drive_position

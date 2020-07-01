@@ -1,0 +1,3 @@
+string device_name
+int32 target_torque_amps
+float64 torque_offset_amps

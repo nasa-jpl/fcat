@@ -22,7 +22,6 @@ find_package(rosidl_default_generators REQUIRED)
 #find_package(action_msgs REQUIRED)
 
 rosidl_generate_interfaces(fcat_msgs_ros2
-  "msg/ActuatorState.msg"
   "msg/CommanderEnableCmd.msg"
   "msg/EgdCspCmd.msg"
   "msg/EgdCsvCmd.msg"
@@ -60,6 +59,7 @@ rosidl_generate_interfaces(fcat_msgs_ros2
   "msg/El2124State.msg"
   "msg/ActuatorState.msg"
   "msg/VirtualFtsState.msg"
+  "msg/GlobalState.msg"
   #"srv/TareForceTorqueSensor.srv"
   #"action/CommandActuatorPosition.action"
   DEPENDENCIES builtin_interfaces #action_msgs

@@ -1,0 +1,7 @@
+string device_name
+float64 target_position
+float64 profile_velocity
+float64 end_velocity
+float64 profile_accel
+float64 profile_decel
+uint8 relative

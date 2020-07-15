@@ -59,7 +59,7 @@ rosidl_generate_interfaces(fcat_msgs_ros2
   "msg/El2124State.msg"
   "msg/ActuatorState.msg"
   "msg/VirtualFtsState.msg"
-  "msg/GlobalState.msg"
+  "msg/ModuleState.msg"
   #"srv/TareForceTorqueSensor.srv"
   #"action/CommandActuatorPosition.action"
   DEPENDENCIES builtin_interfaces #action_msgs

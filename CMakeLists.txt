@@ -22,6 +22,8 @@ find_package(rosidl_default_generators REQUIRED)
 #find_package(action_msgs REQUIRED)
 
 rosidl_generate_interfaces(fcat_msgs_ros2
+  "msg/AllDeviceFaultCmd.msg"
+  "msg/AllDeviceResetCmd.msg"
   "msg/CommanderEnableCmd.msg"
   "msg/EgdCspCmd.msg"
   "msg/EgdCsvCmd.msg"

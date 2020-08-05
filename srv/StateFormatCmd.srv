@@ -1,3 +1,5 @@
 bool single_channel
 bool mega_state
 bool joint_states
+---
+bool success

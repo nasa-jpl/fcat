@@ -4,5 +4,4 @@ float64 position_offset
 float64 velocity_offset
 float64 torque_offset_amps
 ---
-bool success
-
+bool error

@@ -6,4 +6,4 @@ float64 profile_accel
 float64 profile_decel
 uint8 relative
 ---
-bool success
+bool error

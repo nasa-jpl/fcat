@@ -1,4 +1,5 @@
 string device_name
+bool device_busy
 float64 raw_fx
 float64 raw_fy
 float64 raw_fz

@@ -1,4 +1,5 @@
 string device_name
+bool device_busy
 float64 actual_position
 float64 actual_velocity
 float64 actual_current

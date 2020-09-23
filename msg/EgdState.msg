@@ -1,5 +1,4 @@
-string device_name
-bool device_busy
+string name
 int32 actual_position
 int32 actual_velocity
 float64 actual_current
@@ -36,4 +35,3 @@ uint8 digital_output_cmd_ch4
 uint8 digital_output_cmd_ch5
 uint8 digital_output_cmd_ch6
 uint32 drive_temperature
-

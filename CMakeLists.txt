@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.5)
-project(fcat_msgs_ros2)
+project(fcat_msgs)
 
 # Default to C99
 if(NOT CMAKE_C_STANDARD)
@@ -19,58 +19,27 @@ endif()
 find_package(ament_cmake REQUIRED)
 find_package(builtin_interfaces REQUIRED)
 find_package(rosidl_default_generators REQUIRED)
-#find_package(action_msgs REQUIRED)
 
-rosidl_generate_interfaces(fcat_msgs_ros2
-  "srv/SingleDeviceFaultCmd.srv"
-  "srv/SingleDeviceResetCmd.srv"
-  "srv/AllDeviceFaultCmd.srv"
-  "srv/AllDeviceResetCmd.srv"
-  "srv/CommanderEnableCmd.srv"
-  "srv/EgdCspCmd.srv"
-  "srv/EgdCsvCmd.srv"
-  "srv/EgdCstCmd.srv"
-  "srv/EgdProfPosCmd.srv"
-  "srv/EgdProfVelCmd.srv"
-  "srv/EgdProfTorqueCmd.srv"
-  "srv/EgdResetCmd.srv"
-  "srv/EgdHaltCmd.srv"
-  "srv/EgdSdoSetDrivePosCmd.srv"
-  "srv/EgdSdoSetUnitModeCmd.srv"
-  "srv/FaulterEnableCmd.srv"
-  "srv/FtsTareCmd.srv"
-  "srv/El2124WriteAllChannelsCmd.srv"
-  "srv/El2124WriteChannelCmd.srv"
-  "srv/ActuatorCspCmd.srv"
-  "srv/ActuatorCsvCmd.srv"
-  "srv/ActuatorCstCmd.srv"
-  "srv/ActuatorProfPosCmd.srv"
-  "srv/ActuatorProfVelCmd.srv"
-  "srv/ActuatorProfTorqueCmd.srv"
-  "srv/ActuatorResetCmd.srv"
-  "srv/ActuatorHaltCmd.srv"
-  "srv/ActuatorSdoSetDrivePosCmd.srv"
-  "srv/ActuatorSdoSetUnitModeCmd.srv"
-  "srv/StateFormatCmd.srv"
-  "msg/SignalGeneratorState.msg"
-  "msg/FunctionState.msg"
-  "msg/CommanderState.msg"
-  "msg/ConditionalState.msg"
-  "msg/SchmittTriggerState.msg"
-  "msg/FaulterState.msg"
-  "msg/FilterState.msg"
-  "msg/FtsState.msg"
-  "msg/EgdState.msg"
-  "msg/El3208State.msg"
-  "msg/El3602State.msg"
-  "msg/El2124State.msg"
-  "msg/ActuatorState.msg"
-  "msg/VirtualFtsState.msg"
-  "msg/ModuleState.msg"
-  "msg/MegaState.msg"
-  #"srv/TareForceTorqueSensor.srv"
-  #"action/CommandActuatorPosition.action"
-  DEPENDENCIES builtin_interfaces #action_msgs
+add_custom_target(ALL #fcgen
+  COMMAND 
+  python3 ${CMAKE_CURRENT_LIST_DIR}/fcgen/fcat_gen_msgs.py
+      ${CMAKE_CURRENT_LIST_DIR}/fcgen/fastcat_types.yaml
+  DEPENDS
+    ${CMAKE_CURRENT_LIST_DIR}/fcgen/fastcat_types.yaml
+    ${CMAKE_CURRENT_LIST_DIR}/fcgen/fcat_gen_msgs.py
+  WORKING_DIRECTORY 
+    ${CMAKE_CURRENT_LIST_DIR}
+  COMMENT
+    "running fcgen - ROS2 msg gen"
+  VERBATIM
+)
+
+file(GLOB SRV_FILES RELATIVE ${CMAKE_CURRENT_LIST_DIR} srv/*.srv)
+file(GLOB MSG_FILES RELATIVE ${CMAKE_CURRENT_LIST_DIR} msg/*.msg)
+rosidl_generate_interfaces(fcat_msgs
+  ${SRV_FILES}
+  ${MSG_FILES}
+  DEPENDENCIES builtin_interfaces 
   )
 
 ament_package()

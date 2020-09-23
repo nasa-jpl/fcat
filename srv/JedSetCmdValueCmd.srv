@@ -1,5 +1,4 @@
 string name
-uint8 channel
-uint8 level
+uint16 cmd
 ---
 bool error

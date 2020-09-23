@@ -12,5 +12,3 @@ El3208State[] el3208_states
 El3602State[] el3602_states
 El2124State[] el2124_states
 ActuatorState[] actuator_states
-VirtualFtsState[] virtual_fts_states
-

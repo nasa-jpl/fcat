@@ -1,7 +1,7 @@
-string device_name
-bool channel_ch1
-bool channel_ch2
-bool channel_ch3
-bool channel_ch4
+string name
+uint8 channel_ch1
+uint8 channel_ch2
+uint8 channel_ch3
+uint8 channel_ch4
 ---
 bool error

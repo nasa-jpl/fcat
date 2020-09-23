@@ -1,6 +1,5 @@
-string device_name
-bool device_busy
-uint8 channel1
-uint8 channel2
-uint8 channel3
-uint8 channel4
+string name
+uint8 level_ch1
+uint8 level_ch2
+uint8 level_ch3
+uint8 level_ch4

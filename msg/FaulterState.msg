@@ -1,4 +1,3 @@
-string device_name
-bool device_busy
+string name
 bool enable
-float64 signal_value
+bool fault_active

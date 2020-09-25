@@ -1,5 +1,2 @@
 bool faulted
 float64 jitter
-bool single_channel
-bool mega_state
-bool joint_states

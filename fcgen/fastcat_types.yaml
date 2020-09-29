@@ -270,6 +270,7 @@ states:
     - name: z
       type: double
 
+
 commands:
   - name: commander_enable
     fields:
@@ -423,12 +424,14 @@ commands:
       type: double
     - name: profile_accel
       type: double
-    - name: profile_decel
+    - name: max_duration
       type: double
 
   - name: actuator_prof_torque
     fields:
     - name: target_torque_amps
+      type: double
+    - name: max_duration
       type: double
 
   - name: actuator_reset

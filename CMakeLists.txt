@@ -39,7 +39,7 @@ file(GLOB MSG_FILES RELATIVE ${CMAKE_CURRENT_LIST_DIR} msg/*.msg)
 rosidl_generate_interfaces(fcat_msgs
   ${SRV_FILES}
   ${MSG_FILES}
-  DEPENDENCIES builtin_interfaces 
+  DEPENDENCIES builtin_interfaces
   )
 
 ament_package()

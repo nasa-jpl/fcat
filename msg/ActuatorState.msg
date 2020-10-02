@@ -7,9 +7,6 @@ float64 cmd_position
 float64 cmd_velocity
 float64 cmd_current
 float64 cmd_max_current
-float64 cmd_ff_position
-float64 cmd_ff_velocity
-float64 cmd_ff_current
 uint8 actual_state_machine_state
 uint8 actual_mode_of_operation
 uint8 sto_engaged

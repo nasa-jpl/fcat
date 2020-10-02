@@ -4,7 +4,7 @@ states:
     fields:
     - name: enable
       type: bool
-      comment: if true, commander will emit a new fastcat command every loop
+      comment: if true, commander will emit fastcat commands
 
   - name: signal_generator
     fields:
@@ -25,10 +25,28 @@ states:
     fields:
     - name: output
       type: uint8_t
+  
+  - name: saturation
+    fields:
+    - name: output
+      type: double
 
   - name: filter
     fields:
     - name: output
+      type: double
+
+  - name: pid
+    fields:
+    - name: active
+      type: bool
+    - name: output
+      type: double
+    - name: kp_term
+      type: double
+    - name: ki_term
+      type: double
+    - name: kd_term
       type: double
 
   - name: fts
@@ -75,12 +93,6 @@ states:
     - name: cmd_current
       type: double
     - name: cmd_max_current
-      type: double
-    - name: cmd_ff_position
-      type: double
-    - name: cmd_ff_velocity
-      type: double
-    - name: cmd_ff_current
       type: double
     - name: actual_state_machine_state
       type: uint8_t
@@ -274,9 +286,14 @@ states:
 commands:
   - name: commander_enable
     fields:
-    - name: enable
+    - name: duration
+      type: double
+      comment: duration in seconds, duration <= 0 indefinite
+
+  - name: commander_disable
+    fields:
+    - name: dummy
       type: bool
-      comment: if true, commander will emit a new fastcat command every loop
 
   - name: egd_csp
     fields: 
@@ -461,3 +478,14 @@ commands:
     fields:
     - name: cmd
       type: uint16_t
+
+  - name: pid_activate
+    fields: 
+    - name: setpoint
+      type: double
+    - name: deadband
+      type: double
+    - name: persistence_duration
+      type: double 
+    - name: max_duration
+      type: double

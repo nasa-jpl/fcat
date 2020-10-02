@@ -1,4 +1,4 @@
 string name
-float64 duration
+bool dummy
 ---
 bool error

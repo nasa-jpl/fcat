@@ -291,9 +291,6 @@ commands:
       comment: duration in seconds, duration <= 0 indefinite
 
   - name: commander_disable
-    fields:
-    - name: dummy
-      type: bool
 
   - name: egd_csp
     fields: 
@@ -352,16 +349,8 @@ commands:
       type: double
 
   - name: egd_reset
-    fields:
-    - name: dummy
-      type: bool
-      comment: unused
 
   - name: egd_halt
-    fields:
-    - name: dummy
-      type: bool
-      comment: unused
 
   - name: egd_sdo_set_drive_pos
     fields:
@@ -374,10 +363,6 @@ commands:
       type: int32_t
 
   - name: fts_tare
-    fields:
-    - name: dummy
-      type: bool
-      comment: unused
 
   - name: el2124_write_channel
     fields:
@@ -452,16 +437,8 @@ commands:
       type: double
 
   - name: actuator_reset
-    fields:
-    - name: dummy
-      type: bool
-      comment: unused
 
   - name: actuator_halt
-    fields:
-    - name: dummy
-      type: bool
-      comment: unused
 
   - name: actuator_set_output_position
     fields:

@@ -40,6 +40,8 @@ class FcatMsgGenerator:
   def gen_msgs(self):
     print("Generating msgs...")
     for state in self.data['states']:
+        if not 'fields' in state:
+            continue;
         filename = "msg/" + snake2camel(state['name']) + "State.msg"
         f = open(filename, 'w')
         f.write(getHeaderStr())
@@ -65,6 +67,10 @@ class FcatMsgGenerator:
     for cmd in self.data['commands']:
         if isCsCommand(cmd['name']):
             continue # these need to be msgs, not services
+
+        if not 'fields' in cmd:
+            continue;
+
         filename = "srv/" + snake2camel(cmd['name']) + "Cmd.srv"
         f = open(filename, 'w')
         f.write(getHeaderStr())

@@ -20,20 +20,6 @@ find_package(ament_cmake REQUIRED)
 find_package(builtin_interfaces REQUIRED)
 find_package(rosidl_default_generators REQUIRED)
 
-add_custom_target(ALL #fcgen
-  COMMAND 
-  python3 ${CMAKE_CURRENT_LIST_DIR}/fcgen/fcat_gen_msgs.py
-      ${CMAKE_CURRENT_LIST_DIR}/fcgen/fastcat_types.yaml
-  DEPENDS
-    ${CMAKE_CURRENT_LIST_DIR}/fcgen/fastcat_types.yaml
-    ${CMAKE_CURRENT_LIST_DIR}/fcgen/fcat_gen_msgs.py
-  WORKING_DIRECTORY 
-    ${CMAKE_CURRENT_LIST_DIR}
-  COMMENT
-    "running fcgen - ROS2 msg gen"
-  VERBATIM
-)
-
 file(GLOB SRV_FILES RELATIVE ${CMAKE_CURRENT_LIST_DIR} srv/*.srv)
 file(GLOB MSG_FILES RELATIVE ${CMAKE_CURRENT_LIST_DIR} msg/*.msg)
 rosidl_generate_interfaces(fcat_msgs

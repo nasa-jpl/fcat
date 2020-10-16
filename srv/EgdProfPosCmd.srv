@@ -6,4 +6,5 @@ uint32 profile_accel
 uint32 profile_decel
 uint8 relative
 ---
-bool error
+bool success
+string message

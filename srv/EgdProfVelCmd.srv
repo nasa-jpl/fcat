@@ -3,4 +3,5 @@ int32 target_velocity
 uint32 profile_accel
 uint32 profile_decel
 ---
-bool error
+bool success
+string message

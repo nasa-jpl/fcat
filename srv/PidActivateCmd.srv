@@ -4,4 +4,5 @@ float64 deadband
 float64 persistence_duration
 float64 max_duration
 ---
-bool error
+bool success
+string message

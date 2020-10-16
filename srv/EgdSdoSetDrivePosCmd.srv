@@ -1,4 +1,5 @@
 string name
 int32 drive_position
 ---
-bool error
+bool success
+string message

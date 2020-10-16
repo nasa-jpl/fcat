@@ -4,4 +4,5 @@ float64 profile_velocity
 float64 profile_accel
 uint8 relative
 ---
-bool error
+bool success
+string message

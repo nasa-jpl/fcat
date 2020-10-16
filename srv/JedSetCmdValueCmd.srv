@@ -1,4 +1,5 @@
 string name
 uint16 cmd
 ---
-bool error
+bool success
+string message

@@ -1,4 +1,5 @@
 string name
 float64 target_torque_amps
 ---
-bool error
+bool success
+string message

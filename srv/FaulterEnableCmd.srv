@@ -1,4 +1,5 @@
 string name
 bool enable
 ---
-bool error
+bool success
+string message

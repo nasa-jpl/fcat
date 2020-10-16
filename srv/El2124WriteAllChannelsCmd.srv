@@ -4,4 +4,5 @@ uint8 channel_ch2
 uint8 channel_ch3
 uint8 channel_ch4
 ---
-bool error
+bool success
+string message

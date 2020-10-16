@@ -1,4 +1,5 @@
 string name
 float64 duration
 ---
-bool error
+bool success
+string message

@@ -1,4 +1,5 @@
 string name
 int32 unit_mode
 ---
-bool error
+bool success
+string message

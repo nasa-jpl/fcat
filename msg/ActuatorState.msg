@@ -7,8 +7,8 @@ float64 cmd_position
 float64 cmd_velocity
 float64 cmd_current
 float64 cmd_max_current
-uint8 actual_state_machine_state
-uint8 actual_mode_of_operation
+uint8 egd_state_machine_state
+uint8 egd_mode_of_operation
 uint8 sto_engaged
 uint8 hall_state
 uint8 target_reached
@@ -18,3 +18,4 @@ float64 bus_voltage
 uint32 drive_temperature
 int32 egd_actual_position
 int32 egd_cmd_position
+uint8 actuator_state_machine_state

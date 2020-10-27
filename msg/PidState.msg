@@ -1,4 +1,3 @@
-string name
 bool active
 float64 output
 float64 kp_term

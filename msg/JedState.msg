@@ -1,4 +1,3 @@
-string name
 uint16 status
 uint16 cmd
 uint32 w_raw

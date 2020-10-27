@@ -1,4 +1,3 @@
-string name
 float64 actual_position
 float64 actual_velocity
 float64 actual_current

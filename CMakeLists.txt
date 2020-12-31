@@ -73,9 +73,18 @@ set(msg_files
   "msg/SignalGeneratorStates.msg"
   )
 
+set(srv_files
+  "srv/ActuatorCalibrateCmd.srv"
+  "srv/ActuatorProfPosCmd.srv"
+  "srv/ActuatorProfTorqueCmd.srv"
+  "srv/ActuatorProfVelCmd.srv"
+  "srv/PidActivateCmd.srv"
+  )
+
 
 rosidl_generate_interfaces(fcat_msgs
   ${msg_files}
+  ${srv_files}
   DEPENDENCIES builtin_interfaces
   )
 #install(DIRECTORY include/${PROJECT_NAME}/

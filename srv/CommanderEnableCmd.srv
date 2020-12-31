@@ -1,5 +1,0 @@
-string name
-float64 duration
----
-bool success
-string message

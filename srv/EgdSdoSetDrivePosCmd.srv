@@ -1,5 +1,0 @@
-string name
-int32 drive_position
----
-bool success
-string message

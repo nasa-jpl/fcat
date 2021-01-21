@@ -20,12 +20,77 @@ find_package(ament_cmake REQUIRED)
 find_package(builtin_interfaces REQUIRED)
 find_package(rosidl_default_generators REQUIRED)
 
-file(GLOB SRV_FILES RELATIVE ${CMAKE_CURRENT_LIST_DIR} srv/*.srv)
-file(GLOB MSG_FILES RELATIVE ${CMAKE_CURRENT_LIST_DIR} msg/*.msg)
+set(msg_files
+  "msg/ActuatorCalibrateCmd.msg"
+  "msg/ActuatorCspCmd.msg"
+  "msg/ActuatorCstCmd.msg"
+  "msg/ActuatorCsvCmd.msg"
+  "msg/ActuatorProfPosCmd.msg"
+  "msg/ActuatorProfTorqueCmd.msg"
+  "msg/ActuatorProfVelCmd.msg"
+  "msg/ActuatorSetOutputPositionCmd.msg"
+  "msg/ActuatorState.msg"
+  "msg/ActuatorStates.msg"
+  "msg/CommanderDisableCmd.msg"
+  "msg/CommanderEnableCmd.msg"
+  "msg/CommanderState.msg"
+  "msg/CommanderStates.msg"
+  "msg/ConditionalState.msg"
+  "msg/ConditionalStates.msg"
+  "msg/EgdCspCmd.msg"
+  "msg/EgdCstCmd.msg"
+  "msg/EgdCsvCmd.msg"
+  "msg/EgdState.msg"
+  "msg/EgdStates.msg"
+  "msg/El2124State.msg"
+  "msg/El2124States.msg"
+  "msg/El2124WriteAllChannelsCmd.msg"
+  "msg/El2124WriteChannelCmd.msg"
+  "msg/El3208State.msg"
+  "msg/El3208States.msg"
+  "msg/El3602State.msg"
+  "msg/El3602States.msg"
+  "msg/FaulterEnableCmd.msg"
+  "msg/FaulterState.msg"
+  "msg/FaulterStates.msg"
+  "msg/FilterState.msg"
+  "msg/FilterStates.msg"
+  "msg/FtsTareCmd.msg"
+  "msg/FunctionState.msg"
+  "msg/FunctionStates.msg"
+  "msg/JedSetCmdValueCmd.msg"
+  "msg/JedState.msg"
+  "msg/JedStates.msg"
+  "msg/ModuleState.msg"
+  "msg/PidActivateCmd.msg"
+  "msg/PidState.msg"
+  "msg/PidStates.msg"
+  "msg/SaturationState.msg"
+  "msg/SaturationStates.msg"
+  "msg/SchmittTriggerState.msg"
+  "msg/SchmittTriggerStates.msg"
+  "msg/SignalGeneratorState.msg"
+  "msg/SignalGeneratorStates.msg"
+  )
+
+set(srv_files
+  "srv/ActuatorCalibrateCmd.srv"
+  "srv/ActuatorProfPosCmd.srv"
+  "srv/ActuatorProfTorqueCmd.srv"
+  "srv/ActuatorProfVelCmd.srv"
+  "srv/PidActivateCmd.srv"
+  )
+
+
 rosidl_generate_interfaces(fcat_msgs
-  ${SRV_FILES}
-  ${MSG_FILES}
+  ${msg_files}
+  ${srv_files}
   DEPENDENCIES builtin_interfaces
   )
+#install(DIRECTORY include/${PROJECT_NAME}/
+#    DESTINATION include/${PROJECT_NAME}
+#    )
+
+ament_export_dependencies(rosidl_default_runtime)
 
 ament_package()

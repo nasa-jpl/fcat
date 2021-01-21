@@ -1,5 +1,3 @@
 string name
 float64 target_torque_amps
----
-bool success
-string message
+float64 max_duration

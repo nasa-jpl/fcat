@@ -1,0 +1,5 @@
+string name
+float64 target_position
+float64 profile_velocity
+float64 profile_accel
+uint8 relative

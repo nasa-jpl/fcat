@@ -1,5 +1,0 @@
-string name
-uint16 cmd
----
-bool success
-string message

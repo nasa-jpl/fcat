@@ -1,5 +1,0 @@
-string name
-int32 unit_mode
----
-bool success
-string message

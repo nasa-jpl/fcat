@@ -14,7 +14,26 @@ An optional ROS2 node called `fcat_srvs` is provided in this package. The purpos
 
 ## Quickstart
 
+Due to a potential issue in the default RMW implementation, the cyclone vendor is recommended for use as of the Feb 2021 ROS2 Foxy release.
+
+``` bash
+sudo apt install ros-${ROS_DISTRO}-rmw-cyclonedds-cpp
+```
+
 **fcat**
+
+If `fcat` is used to interact with real EtherCAT devices, the permissions of the ROS2 node need to be elevated. The best way we have found to do this is to start a root session and source the workspace.  
+
+``` bash
+# start a root session
+sudo -s
+# load in the ld config to find the shared libraries
+source /path/to/ws/install/setup.bash
+# use cyclone
+export RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
+```
+
+Finally, run the `fcat` process. Note: If `fcat` is going to be used to run without real EtherCAT devices, you can safely skip the preceding steps. 
 
 ```bash
 ros2 run fcat fcat --ros-args -p fastcat_config_path:=[FILE_PATH]/[CONFIG].yaml
@@ -27,6 +46,8 @@ ros2 run fcat fcat --ros-args -p fastcat_config_path:=[FILE_PATH]/[CONFIG].yaml 
 ```
 
 **fcat_srvs**
+
+This process does not need to be run with elevated permissions
 
 ``` bash
 ros2 run fcat fcat_srvs
@@ -110,11 +131,11 @@ Device subscribers are only created if at least one device is found on the user-
 
 Services are only created if at least one device is found on the user-specified Fastcat configuration file. Currently, if the bus topology lacks `actuator` or `pid` devices, the `fcat_srvs` will not offer any services and need not be started at all.
 
-| Type                                | Default Name                        | Description                                                  |
-| ----------------------------------- | ----------------------------------- | ------------------------------------------------------------ |
-| fcat_msgs/srv/ActuatorCalibrateCmd  | `fcat/service/actuator_calibrate`   | Executes blocking service to perform Actuator hardstop calibration |
-| fcat_msgs/srv/ActuatorProfPosCmd    | `fcat/service/actuator_prof_pos`    | Executes blocking service to execute a profile position command to target position |
-| fcat_msgs/srv/ActuatorProfVelCmd    | `fcat/service/actuator_prof_vel`    | Executes blocking service to execute a profiled velocity command to target velocity. Returns once target velocity is attained. |
-| fcat_msgs/srv/ActuatorProfTorqueCmd | `fcat/service/actuator_prof_torque` | Executes blocking service to execute a profiled torque command to target current. Returns once target velocity is attained. |
-| fcat_msgs/srv/PidActivateCmd        | `fcat/service/pid_activate`         | Executed blocking service to execute a PID controller. The will return once a timeout is reached or if the input error signal is within the `deadband` argument for `persistence_duration` seconds |
+| Type                                | Default Name                                                 | Description                                                  |
+| ----------------------------------- | ------------------------------------------------------------ | ------------------------------------------------------------ |
+| fcat_msgs/srv/ActuatorCalibrateCmd  | `fcat/service/actuator_calibrate`                            | Executes blocking service to perform Actuator hardstop calibration |
+| fcat_msgs/srv/ActuatorProfPosCmd    | `fcat/service/actuator_prof_pos`                             | Executes blocking service to execute a profile position command to target position |
+| fcat_msgs/srv/ActuatorProfVelCmd    | `root shell and run the fcat node from your user account.fcat/service/actuator_prof_vel` | Executes blocking service to execute a profiled velocity command to target velocity. Returns once target velocity is attained. |
+| fcat_msgs/srv/ActuatorProfTorqueCmd | `fcat/service/actuator_prof_torque`                          | Executes blocking service to execute a profiled torque command to target current. Returns once target velocity is attained. |
+| fcat_msgs/srv/PidActivateCmd        | `fcat/service/pid_activate`                                  | Executed blocking service to execute a PID controller. The will return once a timeout is reached or if the input error signal is within the `deadband` argument for `persistence_duration` seconds |
 

@@ -61,6 +61,8 @@
 const unsigned int FCAT_PUB_QUEUE_SIZE = 32;
 const unsigned int FCAT_SUB_QUEUE_SIZE = 32;
 
+using WrenchPublisher = rclcpp::Publisher<geometry_msgs::msg::Wrench>;
+
 inline double fcat_get_time_sec()
 {
   struct timeval tv;
@@ -131,7 +133,7 @@ private:
   void UpdateStateMap();
 
   void PublishModuleState();
-  //void PublishWrenches();
+  void PublishFtsStates();
 
   void PublishActuatorStates();
   void PublishEgdStates();
@@ -257,8 +259,6 @@ private:
   
   rclcpp::Publisher<sensor_msgs::msg::JointState>::SharedPtr joint_state_pub_; 
   rclcpp::Publisher<fcat_msgs::msg::ModuleState>::SharedPtr  module_state_pub_;
-  rclcpp::Publisher<geometry_msgs::msg::Wrench>::SharedPtr   fts_raw_pub_;
-  rclcpp::Publisher<geometry_msgs::msg::Wrench>::SharedPtr   fts_tared_pub_;
 
   rclcpp::Publisher<fcat_msgs::msg::ActuatorStates>::SharedPtr actuator_pub_;
   rclcpp::Publisher<fcat_msgs::msg::EgdStates>::SharedPtr      egd_pub_;
@@ -277,6 +277,8 @@ private:
   rclcpp::Publisher<fcat_msgs::msg::ConditionalStates>::SharedPtr conditional_pub_;
   rclcpp::Publisher<fcat_msgs::msg::SchmittTriggerStates>::SharedPtr schmitt_trigger_pub_;
 
+  std::unordered_map<std::string, WrenchPublisher::SharedPtr>  fts_raw_pub_map_;
+  std::unordered_map<std::string, WrenchPublisher::SharedPtr>  fts_tared_pub_map_;
 
 
   ////////////////////

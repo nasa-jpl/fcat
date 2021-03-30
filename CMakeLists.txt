@@ -15,19 +15,11 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
 endif()
 
-# find dependencies
-find_package(ament_cmake REQUIRED)
-find_package(builtin_interfaces REQUIRED)
-find_package(rosidl_default_generators REQUIRED)
-
+# Define the files that contain all the messages and services
 set(msg_files
-  "msg/ActuatorCalibrateCmd.msg"
   "msg/ActuatorCspCmd.msg"
   "msg/ActuatorCstCmd.msg"
   "msg/ActuatorCsvCmd.msg"
-  "msg/ActuatorProfPosCmd.msg"
-  "msg/ActuatorProfTorqueCmd.msg"
-  "msg/ActuatorProfVelCmd.msg"
   "msg/ActuatorSetOutputPositionCmd.msg"
   "msg/ActuatorState.msg"
   "msg/ActuatorStates.msg"
@@ -62,7 +54,6 @@ set(msg_files
   "msg/JedState.msg"
   "msg/JedStates.msg"
   "msg/ModuleState.msg"
-  "msg/PidActivateCmd.msg"
   "msg/PidState.msg"
   "msg/PidStates.msg"
   "msg/SaturationState.msg"
@@ -81,16 +72,53 @@ set(srv_files
   "srv/PidActivateCmd.srv"
   )
 
+# Check if ament_cmake is present, indicating ROS2
+find_package(ament_cmake QUIET)
 
-rosidl_generate_interfaces(fcat_msgs
-  ${msg_files}
-  ${srv_files}
-  DEPENDENCIES builtin_interfaces
+# Run build system for ROS2 if ament_cmake was found
+if(ament_cmake_FOUND)
+  find_package(builtin_interfaces REQUIRED)
+  find_package(rosidl_default_generators REQUIRED)
+
+  rosidl_generate_interfaces(fcat_msgs
+    ${msg_files}
+    ${srv_files}
+    DEPENDENCIES builtin_interfaces
+    )
+
+  ament_export_dependencies(rosidl_default_runtime)
+
+  ament_package()
+
+# Else, we must be using catkin and ROS1
+else()
+  find_package(catkin REQUIRED COMPONENTS
+    roscpp
+    rospy
+    message_generation
   )
-#install(DIRECTORY include/${PROJECT_NAME}/
-#    DESTINATION include/${PROJECT_NAME}
-#    )
 
-ament_export_dependencies(rosidl_default_runtime)
+  foreach(FILE ${msg_files})
+    string(REPLACE "msg/" "" new_msg_file ${FILE})
+    set(ros1_msg_files ${ros1_msg_files} ${new_msg_file})
+  endforeach()
+  
+  add_message_files(
+    FILES
+    ${ros1_msg_files}
+  )
 
-ament_package()
+  foreach(FILE ${srv_files})
+    string(REPLACE "srv/" "" new_srv_file ${FILE})
+    set(ros1_srv_files ${ros1_srv_files} ${new_srv_file})
+  endforeach()
+
+  add_service_files(
+    FILES
+    ${ros1_srv_files}
+  )
+  
+  generate_messages()
+  
+  catkin_package()
+endif()

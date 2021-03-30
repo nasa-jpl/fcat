@@ -1,5 +1,0 @@
-string name
-float64 setpoint
-float64 deadband
-float64 persistence_duration
-float64 max_duration

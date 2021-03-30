@@ -17,9 +17,13 @@ endif()
 
 # Define the files that contain all the messages and services
 set(msg_files
+  "msg/ActuatorCalibrateCmd.msg"
   "msg/ActuatorCspCmd.msg"
   "msg/ActuatorCstCmd.msg"
   "msg/ActuatorCsvCmd.msg"
+  "msg/ActuatorProfPosCmd.msg"
+  "msg/ActuatorProfTorqueCmd.msg"
+  "msg/ActuatorProfVelCmd.msg"
   "msg/ActuatorSetOutputPositionCmd.msg"
   "msg/ActuatorState.msg"
   "msg/ActuatorStates.msg"
@@ -54,6 +58,7 @@ set(msg_files
   "msg/JedState.msg"
   "msg/JedStates.msg"
   "msg/ModuleState.msg"
+  "msg/PidActivateCmd.msg"
   "msg/PidState.msg"
   "msg/PidStates.msg"
   "msg/SaturationState.msg"
@@ -65,11 +70,11 @@ set(msg_files
   )
 
 set(srv_files
-  "srv/ActuatorCalibrateCmd.srv"
-  "srv/ActuatorProfPosCmd.srv"
-  "srv/ActuatorProfTorqueCmd.srv"
-  "srv/ActuatorProfVelCmd.srv"
-  "srv/PidActivateCmd.srv"
+  #"srv/ActuatorCalibrateCmd.srv"
+  #"srv/ActuatorProfPosCmd.srv"
+  #"srv/ActuatorProfTorqueCmd.srv"
+  #"srv/ActuatorProfVelCmd.srv"
+  #"srv/PidActivateCmd.srv"
   )
 
 # Check if ament_cmake is present, indicating ROS2

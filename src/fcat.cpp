@@ -11,7 +11,7 @@ Fcat::~Fcat(){
   fcat_manager_.Shutdown();
 }
 
-Fcat::Fcat() : Node("fcat", "fcat") {
+Fcat::Fcat() : FcatNode("fcat", "fcat") {
 
   std::string fastcat_config_path;
   this->declare_parameter<std::string>("fastcat_config_path", "");
@@ -35,13 +35,10 @@ Fcat::Fcat() : Node("fcat", "fcat") {
   InitializePublishersAndMessages();
   InitializeSubscribers();
 
-  loop_period_sec_ = 1.0e3 / fcat_manager_.GetTargetLoopRate();
-  chrono_loop_duration_ = std::chrono::duration<double,std::milli>(loop_period_sec_);
-  timer_ = this->create_wall_timer( chrono_loop_duration_, 
-      std::bind(&Fcat::Process, this));
-  MSG("Starting Wall Timer with Period of %lf msec", loop_period_sec_);
-
+  SetTimerRate(fcat_manager_.GetTargetLoopRate());
   last_time_ = fcat_get_time_sec();
+  MSG("Starting Wall Timer at %lf hz", fcat_manager_.GetTargetLoopRate());
+  InitializeTimer();
 }
 
 void Fcat::PopulateDeviceStateFields(){

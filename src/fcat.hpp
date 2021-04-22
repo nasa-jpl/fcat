@@ -2,6 +2,7 @@
 #define FCAT_HPP_
 
 #include "rclcpp/rclcpp.hpp"
+#include "fcat/fcat_node.hpp"
 
 #include <functional>
 #include <memory>
@@ -116,12 +117,14 @@ fcat_msgs::msg::SignalGeneratorState SignalGeneratorStateToMsg(
     std::shared_ptr<const fastcat::DeviceState> state);
 
 
-class Fcat: public rclcpp::Node{
+class Fcat: public FcatNode {
 public:
   ~Fcat();
   Fcat();
 
 private:
+
+  void Process() override;
 
   void PopulateDeviceStateFields();
   bool DeviceExistsOnBus(std::string name, fastcat::DeviceStateType type);
@@ -129,7 +132,6 @@ private:
   void InitializePublishersAndMessages();
   void InitializeSubscribers();
 
-  void Process();
   void UpdateStateMap();
 
   void PublishModuleState();
@@ -297,9 +299,6 @@ private:
 
   double loop_period_sec_;
   double last_time_;
-  std::chrono::duration<double, std::milli> chrono_loop_duration_;
-
-  rclcpp::TimerBase::SharedPtr timer_;
 
   fastcat::Manager fcat_manager_;
 

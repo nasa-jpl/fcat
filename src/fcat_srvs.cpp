@@ -487,7 +487,7 @@ void FcatSrvs::ActuatorCalibrateSrvCb(
     timer.sleep();
   }
 
-  MSG("Completed ACTUATOR_PROF_TORQUE for: %s", request->name.c_str());
+  MSG("Completed ACTUATOR_CALIBRATE for: %s", request->name.c_str());
   response->message = "";
   response->success = true;
 }

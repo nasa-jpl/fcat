@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.11)
 project(fcat
-    VERSION 0.5.2
+    VERSION 0.6.0
     LANGUAGES C CXX
     DESCRIPTION "ROS2 Fastcat Node"
     )
@@ -51,7 +51,7 @@ endforeach()
 
 # Create fcat node
 add_executable(fcat
-    src/fcat_node.cpp
+    src/fcat_main.cpp
     src/fcat.cpp
     src/fcat_callbacks.cpp
     )
@@ -69,7 +69,7 @@ target_link_libraries(fcat
 
 # Create fcat_srvs node
 add_executable(fcat_srvs
-  src/fcat_srvs_node.cpp 
+  src/fcat_srvs_main.cpp 
   src/fcat_srvs.cpp
   )
 ament_target_dependencies(fcat_srvs 

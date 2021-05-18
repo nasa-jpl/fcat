@@ -2,7 +2,7 @@
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
   <name>fcat</name>
-  <version>0.1.0</version>
+  <version>0.6.0</version>
   <description>fastcat ROS2 Node</description>
   <maintainer email="alexander.brinkman@jpl.nasa.gov">dev</maintainer>
   <license>2021_CALTECH (see License.md)</license>

@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.11)
 project(fcat
-    VERSION 0.5.2
+    VERSION 0.6.0
     LANGUAGES C CXX
     DESCRIPTION "ROS2 Fastcat Node"
     )

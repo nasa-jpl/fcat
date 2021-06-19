@@ -19,9 +19,11 @@ endif()
 set(msg_files
   "msg/ActuatorCalibrateCmd.msg"
   "msg/ActuatorCspCmd.msg"
+  "msg/ActuatorCspCmds.msg"
   "msg/ActuatorCstCmd.msg"
   "msg/ActuatorCsvCmd.msg"
   "msg/ActuatorProfPosCmd.msg"
+  "msg/ActuatorProfPosCmds.msg"
   "msg/ActuatorProfTorqueCmd.msg"
   "msg/ActuatorProfVelCmd.msg"
   "msg/ActuatorSetOutputPositionCmd.msg"

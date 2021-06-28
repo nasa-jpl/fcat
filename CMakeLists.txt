@@ -50,6 +50,8 @@ set(msg_files
   "msg/El3208States.msg"
   "msg/El3602State.msg"
   "msg/El3602States.msg"
+  "msg/El3104State.msg"
+  "msg/El3104States.msg"
   "msg/FaulterEnableCmd.msg"
   "msg/FaulterState.msg"
   "msg/FaulterStates.msg"

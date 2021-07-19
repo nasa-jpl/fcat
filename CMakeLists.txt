@@ -72,11 +72,11 @@ set(msg_files
   )
 
 set(srv_files
-  #"srv/ActuatorCalibrateCmd.srv"
-  #"srv/ActuatorProfPosCmd.srv"
-  #"srv/ActuatorProfTorqueCmd.srv"
-  #"srv/ActuatorProfVelCmd.srv"
-  #"srv/PidActivateCmd.srv"
+  "srv/ActuatorCalibrateService.srv"
+  "srv/ActuatorProfPosService.srv"
+  "srv/ActuatorProfTorqueService.srv"
+  "srv/ActuatorProfVelService.srv"
+  "srv/PidActivateService.srv"
   )
 
 # Check if ament_cmake is present, indicating ROS2

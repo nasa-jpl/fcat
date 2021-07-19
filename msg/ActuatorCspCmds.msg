@@ -1,1 +1,1 @@
-fcat_msgs/ActuatorCspCmd[] joint
+fcat_msgs/ActuatorCspCmd[] commands

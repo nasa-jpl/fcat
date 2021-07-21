@@ -1,1 +1,1 @@
-fcat_msgs/ActuatorProfPosCmd[] joint
+fcat_msgs/ActuatorProfPosCmd[] commands

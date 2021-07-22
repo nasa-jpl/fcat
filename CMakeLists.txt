@@ -1,19 +1,17 @@
 cmake_minimum_required(VERSION 3.5)
 project(fcat_msgs)
 
-# Default to C99
-if(NOT CMAKE_C_STANDARD)
-  set(CMAKE_C_STANDARD 99)
-endif()
+include(FetchContent)
+FetchContent_Declare(
+    cfw_cmake
+    GIT_REPOSITORY git@fornat1.jpl.nasa.gov:casah/libs/cfw_cmake.git
+    GIT_TAG v0.1.27
+)
+FetchContent_MakeAvailable(cfw_cmake)
+include(${cfw_cmake_SOURCE_DIR}/cfw_cmake.cmake)
 
-# Default to C++14
-if(NOT CMAKE_CXX_STANDARD)
-  set(CMAKE_CXX_STANDARD 14)
-endif()
-
-if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-  add_compile_options(-Wall -Wextra -Wpedantic)
-endif()
+cfw_add_target_tag()
+cfw_get_project_default_options()
 
 # Define the files that contain all the messages and services
 set(msg_files

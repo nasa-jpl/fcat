@@ -1,0 +1,32 @@
+image: casah347rms/casah:ros2
+
+before_script:
+  - eval $(ssh-agent -s)
+  - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
+  - ssh-keyscan fornat1.jpl.nasa.gov >> ~/.ssh/known_hosts
+  - echo "$FORNAT1_CRT" >> /usr/local/share/ca-certificates/fornat1.jpl.nasa.gov.crt
+  - update-ca-certificates
+
+stages:
+  - build
+  - deploy
+
+build:
+  stage: build
+  script:
+    - echo "Building..."
+    - mkdir -p build
+    - cd build
+    - cmake ..
+    - make
+
+deploy:
+  stage: deploy
+  only:
+    - master
+  script:
+    - echo "Deploying..."
+    - mkdir -p build
+    - cd build
+    - cmake ..
+    - make tag

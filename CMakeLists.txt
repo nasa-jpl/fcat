@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.5)
 project(fcat_msgs
-  VERSION 0.5.1
+  VERSION 0.6.0
   DESCRIPTION "ROS FCAT Messages"
   LANGUAGES C CXX
 )

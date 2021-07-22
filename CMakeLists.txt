@@ -1,5 +1,9 @@
 cmake_minimum_required(VERSION 3.5)
-project(fcat_msgs)
+project(fcat_msgs
+  VERSION 0.5.1
+  DESCRIPTION "ROS FCAT Messages"
+  LANGUAGES C CXX
+)
 
 include(FetchContent)
 FetchContent_Declare(

@@ -1,32 +1,57 @@
-image: casah347rms/casah:ros2
+image: casah347rms/casah:rosx
 
 before_script:
+  - DEBIAN_FRONTEND=noninteractive apt update
+  - DEBIAN_FRONTEND=noninteractive apt install -y
+    qt5-default
+    libgsl-dev
+    ros-foxy-rclcpp-action
+    ros-foxy-ros2action
+  - rm -rf /root/.conan
+  - conan profile new default --detect --force
+  - conan profile update settings.compiler.libcxx=libstdc++11 default
   - eval $(ssh-agent -s)
   - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
   - ssh-keyscan fornat1.jpl.nasa.gov >> ~/.ssh/known_hosts
   - echo "$FORNAT1_CRT" >> /usr/local/share/ca-certificates/fornat1.jpl.nasa.gov.crt
   - update-ca-certificates
+  - git clean -ffdx
+  - rm -rf ../build ../install ../devel ../log ../logs ../bin ../src ../.catkin_tools
+  - mkdir ../src
 
 stages:
-  - build
+  - build-ros1
+  - build-ros2
   - deploy
 
-build:
-  stage: build
+build-ros1:
+  stage: build-ros1
   script:
-    - echo "Building..."
-    - mkdir -p build
-    - cd build
-    - cmake ..
-    - make
+    - source /opt/ros/noetic/setup.bash
+    - cd ..
+    - mv fcat_msgs src/
+    - echo "Building ROS1..."
+    - catkin init
+    - catkin build --force-cmake
+    - mv src/fcat_msgs ./
+    - rm -rf build install logs devel .catkin_tools
+
+build-ros2:
+  stage: build-ros2
+  script:
+    - source /opt/ros/foxy/setup.bash
+    - cd ..
+    - echo "Building ROS2..."
+    - colcon build --cmake-force-configure
 
 deploy:
   stage: deploy
   only:
     - master
   script:
+    - cd ..
+    - source /opt/ros/foxy/setup.bash
     - echo "Deploying..."
-    - mkdir -p build
-    - cd build
-    - cmake ..
+    - colcon build
+    - cd build/fcat_msgs
     - make tag

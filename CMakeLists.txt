@@ -61,6 +61,8 @@ set(msg_files
   "msg/FaulterStates.msg"
   "msg/FilterState.msg"
   "msg/FilterStates.msg"
+  "msg/FtsState.msg"
+  "msg/FtsStates.msg"
   "msg/FtsTareCmd.msg"
   "msg/FunctionState.msg"
   "msg/FunctionStates.msg"

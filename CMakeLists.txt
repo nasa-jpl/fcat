@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.5)
 project(fcat_msgs
-  VERSION 0.6.0
+  VERSION 0.6.2
   DESCRIPTION "ROS FCAT Messages"
   LANGUAGES C CXX
 )
@@ -50,6 +50,12 @@ set(msg_files
   "msg/El3208States.msg"
   "msg/El3602State.msg"
   "msg/El3602States.msg"
+  "msg/El3104State.msg"
+  "msg/El3104States.msg"
+  "msg/El3202State.msg"
+  "msg/El3202States.msg"
+  "msg/El3318State.msg"
+  "msg/El3318States.msg"
   "msg/FaulterEnableCmd.msg"
   "msg/FaulterState.msg"
   "msg/FaulterStates.msg"

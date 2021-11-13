@@ -135,7 +135,10 @@ else()
     ${ros1_srv_files}
   )
   
-  generate_messages()
+  generate_messages(
+    DEPENDENCIES
+    std_msgs
+    )
   
   catkin_package()
 endif()

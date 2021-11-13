@@ -112,6 +112,7 @@ else()
     roscpp
     rospy
     message_generation
+    std_msgs
   )
 
   foreach(FILE ${msg_files})

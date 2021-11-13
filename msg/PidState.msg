@@ -1,3 +1,4 @@
+float64 read_time
 bool active
 float64 output
 float64 kp_term

@@ -87,12 +87,13 @@ find_package(ament_cmake QUIET)
 # Run build system for ROS2 if ament_cmake was found
 if(ament_cmake_FOUND)
   find_package(builtin_interfaces REQUIRED)
+  find_package(std_msgs REQUIRED)
   find_package(rosidl_default_generators REQUIRED)
 
   rosidl_generate_interfaces(fcat_msgs
     ${msg_files}
     ${srv_files}
-    DEPENDENCIES builtin_interfaces
+    DEPENDENCIES builtin_interfaces std_msgs
     )
 
   ament_export_dependencies(rosidl_default_runtime)

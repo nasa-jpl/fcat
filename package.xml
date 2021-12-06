@@ -2,7 +2,7 @@
 <?xml-model href="http://download.ros.org/schema/package_format2.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
   <name>fcat_msgs</name>
-  <version>0.6.2</version>
+  <version>0.7.0</version>
   <description>ROS FCAT Messages</description>
   <maintainer email="alexander.brinkman@jpl.nasa.gov">dev</maintainer>
   <license>JPL/Caltech</license>

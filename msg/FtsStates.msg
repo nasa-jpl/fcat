@@ -1,3 +1,3 @@
 std_msgs/Header header
 string[] names
-fcat_msgs/FunctionState[] states
+fcat_msgs/FtsState[] states

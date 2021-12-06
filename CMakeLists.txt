@@ -61,6 +61,8 @@ set(msg_files
   "msg/FaulterStates.msg"
   "msg/FilterState.msg"
   "msg/FilterStates.msg"
+  "msg/FtsState.msg"
+  "msg/FtsStates.msg"
   "msg/FtsTareCmd.msg"
   "msg/FunctionState.msg"
   "msg/FunctionStates.msg"
@@ -93,12 +95,13 @@ find_package(ament_cmake QUIET)
 # Run build system for ROS2 if ament_cmake was found
 if(ament_cmake_FOUND)
   find_package(builtin_interfaces REQUIRED)
+  find_package(std_msgs REQUIRED)
   find_package(rosidl_default_generators REQUIRED)
 
   rosidl_generate_interfaces(fcat_msgs
     ${msg_files}
     ${srv_files}
-    DEPENDENCIES builtin_interfaces
+    DEPENDENCIES builtin_interfaces std_msgs
     )
 
   ament_export_dependencies(rosidl_default_runtime)
@@ -111,6 +114,7 @@ else()
     roscpp
     rospy
     message_generation
+    std_msgs
   )
 
   foreach(FILE ${msg_files})
@@ -133,7 +137,10 @@ else()
     ${ros1_srv_files}
   )
   
-  generate_messages()
+  generate_messages(
+    DEPENDENCIES
+    std_msgs
+    )
   
   catkin_package()
 endif()

@@ -19,3 +19,4 @@ uint32 drive_temperature
 int32 egd_actual_position
 int32 egd_cmd_position
 uint8 actuator_state_machine_state
+float64 power

@@ -79,6 +79,8 @@ set(msg_files
   "msg/SchmittTriggerStates.msg"
   "msg/SignalGeneratorState.msg"
   "msg/SignalGeneratorStates.msg"
+  "msg/JcbState.msg"
+  "msg/JcbStates.msg"
   )
 
 set(srv_files

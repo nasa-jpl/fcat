@@ -1,19 +1,12 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.11)
 project(fcat_msgs
   VERSION 0.7.2
   DESCRIPTION "ROS FCAT Messages"
   LANGUAGES C CXX
 )
 
-include(FetchContent)
-FetchContent_Declare(
-    cfw_cmake
-    GIT_REPOSITORY git@fornat1.jpl.nasa.gov:casah/libs/cfw_cmake.git
-    GIT_TAG v0.1.27
-)
-FetchContent_MakeAvailable(cfw_cmake)
-include(${cfw_cmake_SOURCE_DIR}/cfw_cmake.cmake)
-
+set(CMAKE_PREFIX_PATH "$ENV{HOME}/.cmake/packages/")
+find_package(CfwCmake)
 cfw_add_target_tag()
 cfw_get_project_default_options()
 
@@ -112,6 +105,8 @@ if(ament_cmake_FOUND)
 
 # Else, we must be using catkin and ROS1
 else()
+
+  unset(CMAKE_PREFIX_PATH)
   find_package(catkin REQUIRED COMPONENTS
     roscpp
     rospy
@@ -123,7 +118,7 @@ else()
     string(REPLACE "msg/" "" new_msg_file ${FILE})
     set(ros1_msg_files ${ros1_msg_files} ${new_msg_file})
   endforeach()
-  
+
   add_message_files(
     FILES
     ${ros1_msg_files}
@@ -138,11 +133,13 @@ else()
     FILES
     ${ros1_srv_files}
   )
-  
+
   generate_messages(
     DEPENDENCIES
     std_msgs
     )
-  
+
   catkin_package()
 endif()
+
+

@@ -5,6 +5,7 @@ before_script:
   - DEBIAN_FRONTEND=noninteractive apt install -y
     qt5-default
     libgsl-dev
+    ros-noetic-roscpp
     ros-foxy-rclcpp-action
     ros-foxy-ros2action
   - rm -rf /root/.conan
@@ -15,9 +16,14 @@ before_script:
   - ssh-keyscan fornat1.jpl.nasa.gov >> ~/.ssh/known_hosts
   - echo "$FORNAT1_CRT" >> /usr/local/share/ca-certificates/fornat1.jpl.nasa.gov.crt
   - update-ca-certificates
+  - rm -rf ~/.casah ~/.cmake cfw_cmake # remove cached packages and previous cfw_cmake version
+  - git clone git@fornat1.jpl.nasa.gov:casah/libs/cfw_cmake.git
+  - pwd
+  - mkdir -p cfw_cmake/build && cd cfw_cmake/build && cmake .. && make && make install && cd -
+  - rm -rf cfw_cmake
   - git clean -ffdx
-  - rm -rf ../build ../install ../devel ../log ../logs ../bin ../src ../.catkin_tools
-  - mkdir ../src
+  - rm -rf /ros1 /ros2
+  - mkdir -p /ros1/src /ros2/src
 
 stages:
   - build-ros1
@@ -29,18 +35,20 @@ build-ros1:
   script:
     - source /opt/ros/noetic/setup.bash
     - cd ..
-    - mv fcat_msgs src/
+    - cp -r fcat_msgs /ros1/src
+    - cd /ros1
     - echo "Building ROS1..."
     - catkin init
     - catkin build --force-cmake
-    - mv src/fcat_msgs ./
-    - rm -rf build install logs devel .catkin_tools
+    - rm -rf /ros1/build /ros1/install /ros1/logs /ros1/devel /ros1/.catkin_tools
 
 build-ros2:
   stage: build-ros2
   script:
     - source /opt/ros/foxy/setup.bash
     - cd ..
+    - cp -r fcat_msgs /ros2/src
+    - cd /ros2
     - echo "Building ROS2..."
     - colcon build --cmake-force-configure
 

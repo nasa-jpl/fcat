@@ -5,8 +5,11 @@ project(fcat_msgs
   LANGUAGES C CXX
 )
 
-set(CMAKE_PREFIX_PATH "$ENV{HOME}/.cmake/packages/")
+# Append .casah/packages to cmake path (instead of replacing it)
+string(REPLACE ":" ";" CMAKE_PREFIX_PATH "$ENV{CMAKE_PREFIX_PATH}")
+list(APPEND CMAKE_PREFIX_PATH "$ENV{HOME}/.cmake/packages")
 find_package(CfwCmake)
+
 cfw_add_target_tag()
 cfw_get_project_default_options()
 

@@ -25,6 +25,7 @@ set(msg_files
   "msg/ActuatorProfTorqueCmd.msg"
   "msg/ActuatorProfVelCmd.msg"
   "msg/ActuatorSetOutputPositionCmd.msg"
+  "msg/ActuatorSetMaxCurrentCmd.msg"
   "msg/ActuatorState.msg"
   "msg/ActuatorStates.msg"
   "msg/CommanderDisableCmd.msg"

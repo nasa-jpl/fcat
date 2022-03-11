@@ -20,6 +20,7 @@ set(msg_files
   "msg/ActuatorCspCmds.msg"
   "msg/ActuatorCstCmd.msg"
   "msg/ActuatorCsvCmd.msg"
+  "msg/ActuatorHaltCmd.msg"
   "msg/ActuatorProfPosCmd.msg"
   "msg/ActuatorProfPosCmds.msg"
   "msg/ActuatorProfTorqueCmd.msg"

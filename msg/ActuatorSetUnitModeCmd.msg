@@ -1,2 +1,2 @@
 string name
-int32_t mode
+int32 mode

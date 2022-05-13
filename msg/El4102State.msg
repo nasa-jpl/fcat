@@ -1,0 +1,3 @@
+float64 read_time
+float64 voltage_output_ch1
+float64 voltage_output_ch2

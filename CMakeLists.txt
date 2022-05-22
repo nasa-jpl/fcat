@@ -30,6 +30,8 @@ set(msg_files
   "msg/ActuatorSetUnitModeCmd.msg"
   "msg/ActuatorState.msg"
   "msg/ActuatorStates.msg"
+  "msg/ActuatorSetGainSchedulingModeCmd.msg"
+  "msg/ActuatorSetGainSchedulingIndexCmd.msg"
   "msg/CommanderDisableCmd.msg"
   "msg/CommanderEnableCmd.msg"
   "msg/CommanderState.msg"

@@ -1,0 +1,1 @@
+fcat_msgs/ActuatorSetGainSchedulingModeCmd[] commands

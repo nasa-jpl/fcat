@@ -78,6 +78,7 @@ Device publishers are only created if at least one device is found on the user-s
 | fcat_msgs/El2124States          | `/fcat/state/el2124s`           | Variable-sized Array of El2124State Telemetry          |
 | fcat_msgs/El3208States          | `/fcat/state/el3208s`           | Variable-sized Array of El3208State Telemetry          |
 | fcat_msgs/El3602States          | `/fcat/state/el3602s`           | Variable-sized Array of El3602State Telemetry          |
+| fcat_msgs/Ild1900States         | `/fcat/state/ild1900s`          | Variable-sized Array of Ild1900State Telemetry         |
 | fcat_msgs/JedStates             | `/fcat/state/jeds`              | Variable-sized Array of JedState Telemetry             |
 | fcat_msgs/CommanderStates       | `/fcat/state/commanders`        | Variable-sized Array of CommanderState Telemetry       |
 | fcat_msgs/ConditionalStates     | `/fcat/state/conditionals`      | Variable-sized Array of ConditionalState Telemetry     |

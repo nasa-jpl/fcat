@@ -47,6 +47,7 @@
 #include "fcat_msgs/msg/el2124_states.hpp"
 #include "fcat_msgs/msg/el3208_states.hpp"
 #include "fcat_msgs/msg/el3602_states.hpp"
+#include "fcat_msgs/msg/ild1900_states.hpp"
 #include "fcat_msgs/msg/jed_states.hpp"
 
 #include "fcat_msgs/msg/commander_states.hpp"
@@ -85,6 +86,8 @@ fcat_msgs::msg::El3208State El3208StateToMsg(
 
 fcat_msgs::msg::El3602State El3602StateToMsg(
     std::shared_ptr<const fastcat::DeviceState> state);
+
+fcat_msgs::msg::Ild1900State Ild1900StateToMsg(std::shared_ptr<const fastcat::DeviceState> state);
 
 fcat_msgs::msg::JedState JedStateToMsg(
     std::shared_ptr<const fastcat::DeviceState> state);
@@ -142,6 +145,7 @@ private:
   void PublishEl2124States();
   void PublishEl3208States();
   void PublishEl3602States();
+  void PublishIld1900States();
   void PublishJedStates();
 
   void PublishCommanderStates();
@@ -267,6 +271,7 @@ private:
   rclcpp::Publisher<fcat_msgs::msg::El3602States>::SharedPtr   el3602_pub_;
   rclcpp::Publisher<fcat_msgs::msg::El2124States>::SharedPtr   el2124_pub_;
   rclcpp::Publisher<fcat_msgs::msg::El3208States>::SharedPtr   el3208_pub_;
+  rclcpp::Publisher<fcat_msgs::msg::Ild1900States>::SharedPtr ild1900_pub_;
   rclcpp::Publisher<fcat_msgs::msg::JedStates>::SharedPtr      jed_pub_;
 
   rclcpp::Publisher<fcat_msgs::msg::SaturationStates>::SharedPtr saturation_pub_;
@@ -307,6 +312,7 @@ private:
   fcat_msgs::msg::El2124States   el2124_states_msg_;
   fcat_msgs::msg::El3208States   el3208_states_msg_;
   fcat_msgs::msg::El3602States   el3602_states_msg_;
+  fcat_msgs::msg::Ild1900States ild1900_states_msg_;
   fcat_msgs::msg::JedStates      jed_states_msg_;
 
   fcat_msgs::msg::CommanderStates       commander_states_msg_;

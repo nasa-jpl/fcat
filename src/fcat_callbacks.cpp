@@ -130,6 +130,19 @@ fcat_msgs::msg::El3602State El3602StateToMsg(
   return msg;
 }
 
+fcat_msgs::msg::Ild1900State Ild1900StateToMsg(std::shared_ptr<const fastcat::DeviceState> state)
+{
+  auto msg = fcat_msgs::msg::Ild1900State();
+
+  msg.distance = state->ild1900_state.distance;
+  msg.linearized_distance_raw = state->ild1900_state.linearized_distance_raw;
+  msg.timestamp = state->ild1900_state.timestamp;
+  msg.counter = state->ild1900_state.counter;
+  msg.error = state->ild1900_state.error;
+
+  return msg;
+}
+
 fcat_msgs::msg::JedState JedStateToMsg(
     std::shared_ptr<const fastcat::DeviceState> state)
 {

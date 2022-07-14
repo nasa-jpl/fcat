@@ -152,6 +152,17 @@ void Fcat::InitializePublishersAndMessages(){
     el3602_states_msg_.states.resize(vec_state_ptrs.size());
   }
 
+  // Ild1900
+  vec_state_ptrs = device_type_vec_map_[fastcat::ILD1900_STATE];
+  if (vec_state_ptrs.size() > 0)
+  {
+    MSG("Creating Ild1900 pub");
+    ild1900_pub_ = this->create_publisher<fcat_msgs::msg::Ild1900States>("state/ild1900s", FCAT_PUB_QUEUE_SIZE);
+
+    ild1900_states_msg_.names.resize(vec_state_ptrs.size());
+    ild1900_states_msg_.states.resize(vec_state_ptrs.size());
+  }
+
   // Jed
   vec_state_ptrs = device_type_vec_map_[fastcat::JED_STATE];
   if(vec_state_ptrs.size() > 0){
@@ -430,6 +441,7 @@ void Fcat::Process(){
   PublishEl2124States();
   PublishEl3208States();
   PublishEl3602States();
+  PublishIld1900States();
   PublishJedStates();
 
   PublishCommanderStates();
@@ -586,6 +598,23 @@ void Fcat::PublishEl3602States(){
       index++;
     }
     el3602_pub_->publish(el3602_states_msg_);
+  }
+}
+
+void Fcat::PublishIld1900States()
+{
+  auto state_vec = device_type_vec_map_[fastcat::ILD1900_STATE];
+  if (state_vec.size() > 0)
+  {
+    size_t index = 0;
+
+    for (auto state_ptr = state_vec.begin(); state_ptr != state_vec.end(); state_ptr++)
+    {
+      ild1900_states_msg_.names[index] = (*state_ptr)->name;
+      ild1900_states_msg_.states[index] = Ild1900StateToMsg(*state_ptr);
+      index++;
+    }
+    ild1900_pub_->publish(ild1900_states_msg_);
   }
 }
 

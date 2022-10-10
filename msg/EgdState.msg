@@ -12,7 +12,6 @@ int32 cmd_ff_velocity
 float64 cmd_ff_current
 uint8 actual_state_machine_state
 uint8 actual_mode_of_operation
-bool async_sdo_in_prog
 uint8 sto_engaged
 uint8 hall_state
 uint8 in_motion
@@ -20,6 +19,7 @@ uint8 warning
 uint8 target_reached
 uint8 motor_on
 uint8 fault_code
+uint16 emcy_error_code
 float64 bus_voltage
 float64 analog_input_voltage
 uint8 digital_input_ch1

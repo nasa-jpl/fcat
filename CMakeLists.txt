@@ -36,6 +36,7 @@ set(msg_files
   "msg/ActuatorSetGainSchedulingIndexCmds.msg"
   "msg/AsyncSdoWriteCmd.msg"
   "msg/AsyncSdoReadCmd.msg"
+  "msg/AsyncSdoResponse.msg"
   "msg/CommanderDisableCmd.msg"
   "msg/CommanderEnableCmd.msg"
   "msg/CommanderState.msg"

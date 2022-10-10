@@ -34,6 +34,8 @@ set(msg_files
   "msg/ActuatorSetGainSchedulingModeCmds.msg"
   "msg/ActuatorSetGainSchedulingIndexCmd.msg"
   "msg/ActuatorSetGainSchedulingIndexCmds.msg"
+  "msg/AsyncSdoWriteCmd.msg"
+  "msg/AsyncSdoReadCmd.msg"
   "msg/CommanderDisableCmd.msg"
   "msg/CommanderEnableCmd.msg"
   "msg/CommanderState.msg"
@@ -100,6 +102,8 @@ set(srv_files
   "srv/ActuatorProfTorqueService.srv"
   "srv/ActuatorProfVelService.srv"
   "srv/PidActivateService.srv"
+  "srv/AsyncSdoWriteService.srv"
+  "srv/AsyncSdoReadService.srv"
   )
 
 # Check if ament_cmake is present, indicating ROS2

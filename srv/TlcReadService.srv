@@ -1,7 +1,6 @@
 string name
-string sdo_index
-uint8  sdo_subindex
-string data
+string tlc
+uint8 subindex
 string data_type
 ---
 bool success

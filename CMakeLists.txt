@@ -98,13 +98,31 @@ set(msg_files
   )
 
 set(srv_files
+  # fcat_services (long-running)
   "srv/ActuatorCalibrateService.srv"
   "srv/ActuatorProfPosService.srv"
   "srv/ActuatorProfTorqueService.srv"
   "srv/ActuatorProfVelService.srv"
+  "srv/ActuatorSetGainSchedulingModeService.srv"
+  "srv/ActuatorSetUnitModeService.srv"
   "srv/PidActivateService.srv"
   "srv/AsyncSdoWriteService.srv"
   "srv/AsyncSdoReadService.srv"
+  "srv/TlcWriteService.srv"
+  "srv/TlcReadService.srv"
+
+  # fcat (instant responses)
+  "srv/ActuatorHaltService.srv"
+  "srv/ActuatorSetGainSchedulingIndexService.srv"
+  "srv/ActuatorSetMaxCurrentService.srv"
+  "srv/ActuatorSetOutputPositionService.srv"
+  "srv/CommanderEnableService.srv"
+  "srv/CommanderDisableService.srv"
+  "srv/El2124WriteAllChannelsService.srv"
+  "srv/El2124WriteChannelService.srv"
+  "srv/El4102WriteAllChannelsService.srv"
+  "srv/El4102WriteChannelService.srv"
+  "srv/FaulterEnableService.srv"
   )
 
 # Check if ament_cmake is present, indicating ROS2

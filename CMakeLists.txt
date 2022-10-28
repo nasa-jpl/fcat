@@ -83,6 +83,8 @@ set(msg_files
   "msg/JedSetCmdValueCmd.msg"
   "msg/JedState.msg"
   "msg/JedStates.msg"
+  "msg/LinearInterpolationState.msg"
+  "msg/LinearInterpolationStates.msg"
   "msg/ModuleState.msg"
   "msg/PidActivateCmd.msg"
   "msg/PidState.msg"

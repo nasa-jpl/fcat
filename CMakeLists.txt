@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.11)
 project(fcat_msgs
-  VERSION 0.7.11
+  VERSION 0.8.0
   DESCRIPTION "ROS FCAT Messages"
   LANGUAGES C CXX
 )
@@ -83,6 +83,8 @@ set(msg_files
   "msg/JedSetCmdValueCmd.msg"
   "msg/JedState.msg"
   "msg/JedStates.msg"
+  "msg/LinearInterpolationState.msg"
+  "msg/LinearInterpolationStates.msg"
   "msg/ModuleState.msg"
   "msg/PidActivateCmd.msg"
   "msg/PidState.msg"

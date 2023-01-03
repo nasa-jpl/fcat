@@ -14,7 +14,8 @@ uint8 hall_state
 uint8 target_reached
 uint8 motor_on
 uint8 servo_enabled
-uint32 fault_code
+uint32 jsd_fault_code
+uint32 fastcat_fault_code
 uint16 emcy_error_code
 float64 bus_voltage
 uint32 drive_temperature

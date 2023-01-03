@@ -1,55 +1,43 @@
-image: casah347rms/casah:rosx
-
-before_script:
-  - DEBIAN_FRONTEND=noninteractive apt update
-  - DEBIAN_FRONTEND=noninteractive apt install -y
-    qt5-default
-    libgsl-dev
-    ros-noetic-roscpp
-    ros-foxy-rclcpp-action
-    ros-foxy-ros2action
-  - rm -rf /root/.conan
-  - conan profile new default --detect --force
-  - conan profile update settings.compiler.libcxx=libstdc++11 default
-  - eval $(ssh-agent -s)
-  - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
-  - ssh-keyscan fornat1.jpl.nasa.gov >> ~/.ssh/known_hosts
-  - echo "$FORNAT1_CRT" >> /usr/local/share/ca-certificates/fornat1.jpl.nasa.gov.crt
-  - update-ca-certificates
-  - rm -rf ~/.casah ~/.cmake cfw_cmake # remove cached packages and previous cfw_cmake version
-  - git clone git@fornat1.jpl.nasa.gov:casah/libs/cfw_cmake.git
-  - pwd
-  - mkdir -p cfw_cmake/build && cd cfw_cmake/build && cmake .. && make && make install && cd -
-  - rm -rf cfw_cmake
-  - git clean -ffdx
-  - rm -rf /ros1 /ros2
-  - mkdir -p /ros1/src /ros2/src
+image: casah347rms/ros-foxy-base:latest
 
 stages:
-  - build-ros1
-  - build-ros2
+  - build
   - deploy
 
-build-ros1:
-  stage: build-ros1
+build-noetic:
+  stage: build
+  image:
+    name: casah347rms/casah:rosx
   script:
+    - echo "Building..."
     - source /opt/ros/noetic/setup.bash
     - cd ..
-    - cp -r fcat_msgs /ros1/src
-    - cd /ros1
-    - echo "Building ROS1..."
+    - rm -rf /ros-noetic && mkdir -p /ros-noetic/src
+    - cp -r fcat_msgs /ros-noetic/src
+    - cd /ros-noetic
     - catkin init
     - catkin build --force-cmake
-    - rm -rf /ros1/build /ros1/install /ros1/logs /ros1/devel /ros1/.catkin_tools
 
-build-ros2:
-  stage: build-ros2
+build-foxy:
+  stage: build
   script:
-    - source /opt/ros/foxy/setup.bash
+    - echo "Building..."
     - cd ..
-    - cp -r fcat_msgs /ros2/src
-    - cd /ros2
-    - echo "Building ROS2..."
+    - rm -rf /ros-foxy && mkdir -p /ros-foxy/src
+    - cp -r fcat_msgs /ros-foxy/src
+    - cd /ros-foxy
+    - colcon build --cmake-force-configure
+
+build-humble:
+  stage: build
+  image:
+    name: casah347rms/ros-humble-base:latest
+  script:
+    - echo "Building..."
+    - cd ..
+    - rm -rf /ros-humble && mkdir -p /ros-humble/src
+    - cp -r fcat_msgs /ros-humble/src
+    - cd /ros-humble
     - colcon build --cmake-force-configure
 
 deploy:
@@ -57,9 +45,8 @@ deploy:
   only:
     - master
   script:
-    - cd ..
-    - source /opt/ros/foxy/setup.bash
     - echo "Deploying..."
-    - colcon build
-    - cd build/fcat_msgs
+    - mkdir -p build
+    - cd build
+    - cmake -DBUILD=OFF ..
     - make tag

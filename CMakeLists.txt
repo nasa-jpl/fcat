@@ -27,6 +27,8 @@ set(msg_files
   "msg/ActuatorSetUnitModeCmd.msg"
   "msg/ActuatorState.msg"
   "msg/ActuatorStates.msg"
+  "msg/PlatinumActuatorState.msg"
+  "msg/PlatinumActuatorStates.msg"
   "msg/ActuatorSetGainSchedulingModeCmd.msg"
   "msg/ActuatorSetGainSchedulingModeCmds.msg"
   "msg/ActuatorSetGainSchedulingIndexCmd.msg"

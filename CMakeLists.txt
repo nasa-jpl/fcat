@@ -48,6 +48,8 @@ set(msg_files
   "msg/EgdCsvCmd.msg"
   "msg/EgdState.msg"
   "msg/EgdStates.msg"
+  "msg/El1008State.msg"
+  "msg/El1008States.msg"
   "msg/El2124State.msg"
   "msg/El2124States.msg"
   "msg/El2124WriteAllChannelsCmd.msg"

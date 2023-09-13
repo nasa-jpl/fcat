@@ -104,6 +104,8 @@ set(msg_files
   "msg/SignalGeneratorStates.msg"
   "msg/JcbState.msg"
   "msg/JcbStates.msg"
+  "msg/ThreeNodeThermalModelState.msg"
+  "msg/ThreeNodeThermalModelStates.msg"
   )
 
 set(srv_files

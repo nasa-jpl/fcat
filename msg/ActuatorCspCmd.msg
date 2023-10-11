@@ -7,10 +7,16 @@ float64 position_offset
 float64 velocity_offset
 float64 torque_offset_amps
 
-# feed-forward acceleration is only used when interpolation mode is set to IMPLICIT
-# setting feed-forward acceleration allows to generate a second order curve from fcat
+# feed-forward acceleration is only used when interpolation mode is set to IMPLICIT;
+#
+# setting feed-forward acceleration causes fcat to update position and velocity
+# setpoints that are forwarded to the actuator using second order extrapolation
+#
 # acceleration offset is not part of the CSP motor driver spec, and is not sent to
-# motor controller
+# motor controller. It is used for updating fcat's setpoints only. 
+#
+# Set acceleration_offset to zero to use first order extrapolation using 
+# feed-forward velocity only
 float64 acceleration_offset 
 
 # if CSP setpoints are not received synchronously from calling module, 

@@ -1,11 +1,11 @@
 string name
-float64 request_time
+float64 request_time 0.0
 
-float64 target_position
+float64 target_position 0.0
 
-float64 position_offset
-float64 velocity_offset
-float64 torque_offset_amps
+float64 position_offset 0.0
+float64 velocity_offset 0.0
+float64 torque_offset_amps 0.0
 
 # feed-forward acceleration is only used when interpolation mode is set to IMPLICIT;
 #
@@ -17,11 +17,15 @@ float64 torque_offset_amps
 #
 # Set acceleration_offset to zero to use first order extrapolation using 
 # feed-forward velocity only
-float64 acceleration_offset 
+float64 acceleration_offset 0.0
 
 # if CSP setpoints are not received synchronously from calling module, 
 # indicate how fcat should update the CSP setpoint to the motor controller
 # when it has not received a new command
 int16 IMPLICIT=0  # forward interpolation / extrapolation between last setpoint and implied next setpoint
 int16 EXPLICIT=1  # 3rd order cubic spline interpolation, backwards interpolation from second to last setpoint received and previous setpoint - introduces latency by two cycles of calling module
-int16 interpolation_mode
+int16 interpolation_mode 0
+
+# indicate that this is the last CSP command in a sequence of CSP commands, fcat
+# should transition to a halted state after receipt of this message
+bool last_node 0

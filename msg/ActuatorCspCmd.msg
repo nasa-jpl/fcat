@@ -24,4 +24,4 @@ float64 acceleration_offset
 # when it has not received a new command
 int16 IMPLICIT=0  # forward interpolation / extrapolation between last setpoint and implied next setpoint
 int16 EXPLICIT=1  # 3rd order cubic spline interpolation, backwards interpolation from second to last setpoint received and previous setpoint - introduces latency by two cycles of calling module
-int16 interpolation_mode 0
+int16 interpolation_mode

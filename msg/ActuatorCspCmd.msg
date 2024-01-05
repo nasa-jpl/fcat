@@ -23,5 +23,5 @@ float64 acceleration_offset
 # indicate how fcat should update the CSP setpoint to the motor controller
 # when it has not received a new command
 int16 IMPLICIT=0  # forward interpolation / extrapolation between last setpoint and implied next setpoint
-int16 EXPLICIT=1  # 3rd order cubic spline interpolation, backwards interpolation from second to last setpoint received and previous setpoint - introduces latency by two cycles of calling module
+int16 EXPLICIT=1  # backwards interpolation using two setpoints received from the calling module; it uses third order cubic spline interpolation between setpoints by default, with options for other interpolation orders that are configurable via fcat parameters; explicit interpolation introduces latency by a configurable number of cycles of the calling module
 int16 interpolation_mode

@@ -18,6 +18,7 @@ set(msg_files
   "msg/ActuatorCstCmd.msg"
   "msg/ActuatorCsvCmd.msg"
   "msg/ActuatorHaltCmd.msg"
+  "msg/ActuatorHaltCmds.msg"
   "msg/ActuatorProfPosCmd.msg"
   "msg/ActuatorProfPosCmds.msg"
   "msg/ActuatorProfTorqueCmd.msg"

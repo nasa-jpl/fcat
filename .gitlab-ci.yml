@@ -34,11 +34,15 @@ build-humble:
     name: casah347rms/ros-humble-base:latest
   script:
     - echo "Building..."
+    - mkdir -p build
     - cd ..
     - rm -rf /ros-humble && mkdir -p /ros-humble/src
     - cp -r fcat_msgs /ros-humble/src
     - cd /ros-humble
     - colcon build --cmake-force-configure
+    - tar -czv fcat_msgs.tar.gz install/fcat_msgs
+  artifacts:
+    paths: /ros-humble/fcat_msgs.tar.gz
 
 deploy:
   stage: deploy
@@ -49,4 +53,5 @@ deploy:
     - mkdir -p build
     - cd build
     - cmake -DBUILD=OFF ..
-    - make tag
+    - cp /ros-humble/fcat_msgs.tar.gz fcat_msgs-`cat ../version.txt`-humble-amd64.tar.gz
+    - make tag --artifacts fcat_msgs-`cat ../version.txt`-humble-amd64.tar.gz

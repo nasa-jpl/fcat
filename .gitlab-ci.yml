@@ -42,7 +42,8 @@ build-humble:
     - colcon build --cmake-force-configure
     - tar -czv fcat_msgs.tar.gz install/fcat_msgs
   artifacts:
-    paths: /ros-humble/fcat_msgs.tar.gz
+    paths: 
+      - /ros-humble/fcat_msgs.tar.gz
 
 deploy:
   stage: deploy

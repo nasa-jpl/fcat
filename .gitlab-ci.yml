@@ -59,4 +59,4 @@ deploy:
     - cd build
     - cmake -DBUILD=OFF ..
     - mv fcat_msgs-humble-amd64.tar.gz fcat_msgs-`cat ../version.txt`-humble-amd64.tar.gz
-    - make tag --artifacts fcat_msgs-`cat ../version.txt`-humble-amd64.tar.gz
+    - make tag

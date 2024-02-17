@@ -1,4 +1,4 @@
-image: casah347rms/ros-foxy-base:latest
+image: casah347rms/ros-humble-base:latest
 
 stages:
   - build
@@ -20,6 +20,8 @@ build-noetic:
 
 build-foxy:
   stage: build
+  image:
+    name: casah347rms/ros-foxy-base:latest
   script:
     - echo "Building..."
     - cd ..
@@ -30,10 +32,9 @@ build-foxy:
 
 build-humble:
   stage: build
-  image:
-    name: casah347rms/ros-humble-base:latest
   script:
     - echo "Building..."
+    - pwd
     - mkdir -p build
     - cd ..
     - rm -rf /ros-humble && mkdir -p /ros-humble/src

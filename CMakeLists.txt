@@ -11,6 +11,7 @@ cfw_add_target_tag(
     ARTIFACTORY_ARTIFACTS
       "build/fcat_msgs*.tar.gz"
 )
+
 cfw_get_project_default_options()
 
 # Define the files that contain all the messages and services

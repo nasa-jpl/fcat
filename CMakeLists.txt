@@ -6,7 +6,6 @@ project(fcat_msgs
 )
 
 find_package(CfwCmake)
-
 cfw_add_target_tag(
     ARTIFACTORY_ARTIFACTS
       "build/fcat_msgs*.tar.gz"

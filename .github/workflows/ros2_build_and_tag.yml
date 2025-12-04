@@ -30,7 +30,7 @@ env:
   DEPENDENCY_INSTALL_COMMANDS: |
     apt install -y python3-pip libyaml-cpp-dev libreadline-dev doxygen python3-xyz
     pip install pyaml cogapp graphviz ipython==7.9
-    git clone --branch v0.2.0 https://github.com/nasa-jpl/fcat_msgs.git
+    git clone --depth 1 --branch v0.2.0 https://github.com/nasa-jpl/fcat_msgs.git
 
 jobs:
   # ============================================================================

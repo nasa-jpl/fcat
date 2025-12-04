@@ -47,9 +47,12 @@ jobs:
   # ============================================================================
   build:
     name: Build ROS2 Packages
-    #runs-on: [linux, x64] # for JPL GitHub
-    runs-on: ubuntu-latest # for public GitHub
+    #runs-on: [linux, x64] # for JPL GitHub self-hosted runner
+    #runs-on: jpl-linux-x64 # for JPL GitHub institutional runner
+    runs-on: ubuntu-latest # for public GitHub runner
     container: ros:jazzy-ros-base
+    with:
+      cache: 'pip'
     
     steps:
       # 1. Manual Checkout (Required for self-hosted environment)

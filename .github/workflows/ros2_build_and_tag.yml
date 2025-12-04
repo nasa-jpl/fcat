@@ -1,6 +1,13 @@
 # ==============================================================================
 # GitHub Actions Workflow for ROS 2 Test Build and Automated Semantic Tagging
 # ------------------------------------------------------------------------------
+# This GitHub Workflow file will:
+# - On every push to every branch: start up a docker conatiner, clone in the
+#     repository it lives in, install supplied dependencies, then build
+# - On every pull request to main: automatically check for and increment
+#     any semantic version tags within the repository. It searches the PR
+#     description text for "bump minor" or "bump major" or will just increment
+#     the patch number if those are not present
 # NOTE: External Actions (checkout, upload-artifact) have been replaced with
 # native shell commands to comply with JPL Enterprise security policies.
 # ==============================================================================
@@ -28,10 +35,10 @@ env:
   # for your package. This will be run in the src directory so you can clone
   # other git packages via https if needed
   DEPENDENCY_INSTALL_COMMANDS: |
-    apt update
-    apt install -y python3-pip libyaml-cpp-dev libreadline-dev doxygen
-    apt install -y python3-yaml python3-cogapp python3-graphviz python3-ipython
-    #pip install pyaml cogapp graphviz ipython==7.9
+    apt-get update
+    apt-get install -y python3-pip libyaml-cpp-dev libreadline-dev doxygen
+    apt-get install -y python3-yaml python3-graphviz python3-ipython
+    pip3 install cogapp
     git clone --depth 1 --branch v0.2.0 https://github.com/nasa-jpl/fcat_msgs.git
 
 jobs:

@@ -28,8 +28,8 @@ env:
   # for your package. This will be run in the src directory so you can clone
   # other git packages via https if needed
   DEPENDENCY_INSTALL_COMMANDS: |
-    apt install -y python3-pip libyaml-cpp-dev libreadline-dev doxygen python3-xyz
-    pip install pyaml cogapp graphviz ipython==7.9
+    apt install -y python3-pip libyaml-cpp-dev libreadline-dev doxygen python3-xyz &&
+    pip install pyaml cogapp graphviz ipython==7.9 &&
     git clone --depth 1 --branch v0.2.0 https://github.com/nasa-jpl/fcat_msgs.git
 
 jobs:

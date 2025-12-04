@@ -1,5 +1,5 @@
 # ==============================================================================
-# GitHub Actions Workflow for ROS 2 Build and Automated Semantic Tagging
+# GitHub Actions Workflow for ROS 2 Test Build and Automated Semantic Tagging
 # ------------------------------------------------------------------------------
 # NOTE: External Actions (checkout, upload-artifact) have been replaced with
 # native shell commands to comply with JPL Enterprise security policies.
@@ -15,30 +15,26 @@ on:
 permissions:
   contents: write
 
+# Environment variables, modify these for your module's needs
+# You may also need to modify "runs-on" under jobs:build based on if
+# you are using JPL internal GitHub or public GitHub
 env:
-  # Define the ROS distribution that module will be built on
-  # note you also need to set the ROS version in the build container image
-  # chosen around 15 lines below this
+  # Define the ROS distribution that module will be built on. Note you
+  # also need to set the ROS version under jobs:build:container, as
+  # apparently that one field cannot accept environment variables
   ROS_DISTRO: jazzy
-  
-  # List the apt packages your module requires. If none required, leave as
-  # a single space character. Use space as a separator.
-  #APT_PACKAGES: " "
-  APT_PACKAGES: "libyaml-cpp-dev libreadline-dev doxygen"
-  
-  # List the pip packages your module requires. If none requied, leave as
-  # a single space character. Use space as a separator.
-  #PIP_PACKAGES: " "
-  PIP_PACKAGES: "pyaml cogapp graphviz ipython==7.9"
-  
-  # List the other git packages you need in the src directory. If none requied, leave as
-  # a single space character. Use space as a separator.
-  SRC_PACKAGES: "https://github.com/nasa-jpl/fcat_msgs.git"
+
+  # Define the commands that need to be run to establish all the dependencies
+  # for your package. This will be run in the src directory so you can clone
+  # other git packages via https if needed
+  DEPENDENCY_INSTALL_COMMANDS: |
+    apt install -y python3-pip libyaml-cpp-dev libreadline-dev doxygen python3-xyz
+    pip install pyaml cogapp graphviz ipython==7.9
+    git clone --branch v0.2.0 https://github.com/nasa-jpl/fcat_msgs.git
 
 jobs:
   # ============================================================================
-  # Job 1: Build ROS 2 Workspace (Jazzy)
-  # Runs on every push to any branch (default behavior based on 'on: push')
+  # Job 1: Build ROS 2 Workspace. Runs on every push to any branch
   # ============================================================================
   build:
     name: Build ROS2 Packages
@@ -58,18 +54,13 @@ jobs:
           cd ${{ github.repository }}
           git checkout ${{ github.sha }}
 
-          # Also pull in any other src packages we need
-          cd /workspace/src
-          git clone $SRC_PACKAGES
-          # need to turn this into a loop per package
-                
+          # Run any supplied dependecy commands
+          $DEPENDENCY_INSTALL_COMMANDS
+
       - name: Resolve ROS Dependencies
         # 2. Resolve external dependencies using rosdep, apt, and pip
         run: |
           cd /workspace
-          apt update
-          apt install -y python3-pip $APT_PACKAGES
-          pip3 install $PIP_PACKAGES
           rosdep init || true # Initialize rosdep (idempotent)
           rosdep update
           rosdep install --from-paths . --ignore-src -r -y

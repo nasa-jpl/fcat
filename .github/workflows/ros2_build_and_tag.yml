@@ -59,7 +59,7 @@ jobs:
         # 2. Resolve external dependencies given in environment variable
         run: |
           cd /workspace/src
-          $DEPENDENCY_INSTALL_COMMANDS
+          eval "$DEPENDENCY_INSTALL_COMMANDS"
 
       - name: Resolve ROS Dependencies
         # 3. Resolve external dependencies using rosdep

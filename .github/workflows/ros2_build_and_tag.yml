@@ -29,7 +29,7 @@ env:
   # other git packages via https if needed. End each command but the last with &&
   DEPENDENCY_INSTALL_COMMANDS: |
     apt update
-    apt install -y python3-pip libyaml-cpp-dev libreadline-dev doxygen python3-xyz
+    apt install -y python3-pip libyaml-cpp-dev libreadline-dev doxygen
     pip install pyaml cogapp graphviz ipython==7.9
     git clone --depth 1 --branch v0.2.0 https://github.com/nasa-jpl/fcat_msgs.git
 

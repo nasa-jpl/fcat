@@ -67,6 +67,7 @@ jobs:
         # 2. Resolve external dependencies using rosdep, apt, and pip
         run: |
           cd /workspace
+          apt update
           apt install -y python3-pip $APT_PACKAGES
           pip3 install $PIP_PACKAGES
           rosdep init || true # Initialize rosdep (idempotent)

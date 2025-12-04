@@ -26,11 +26,12 @@ env:
 
   # Define the commands that need to be run to establish all the dependencies
   # for your package. This will be run in the src directory so you can clone
-  # other git packages via https if needed. End each command but the last with &&
+  # other git packages via https if needed
   DEPENDENCY_INSTALL_COMMANDS: |
     apt update
     apt install -y python3-pip libyaml-cpp-dev libreadline-dev doxygen
-    pip install pyaml cogapp graphviz ipython==7.9
+    apt install -y python3-pyaml python3-cogapp python3-graphviz python3-ipython
+    #pip install pyaml cogapp graphviz ipython==7.9
     git clone --depth 1 --branch v0.2.0 https://github.com/nasa-jpl/fcat_msgs.git
 
 jobs:
@@ -204,8 +205,6 @@ jobs:
           
           # Create and push the new tag
           git tag $NEW_TAG
-          
-          # Push the tag using the configured GITHUB_TOKEN
           git push origin $NEW_TAG
           
           echo "Successfully pushed tag $NEW_TAG."

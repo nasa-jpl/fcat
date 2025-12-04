@@ -55,6 +55,7 @@ jobs:
           git checkout ${{ github.sha }}
 
           # Run any supplied dependecy commands
+          cd /workspace/src
           $DEPENDENCY_INSTALL_COMMANDS
 
       - name: Resolve ROS Dependencies

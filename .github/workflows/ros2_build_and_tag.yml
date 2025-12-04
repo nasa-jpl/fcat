@@ -1,0 +1,203 @@
+# ==============================================================================
+# GitHub Actions Workflow for ROS 2 Build and Automated Semantic Tagging
+# ------------------------------------------------------------------------------
+# NOTE: External Actions (checkout, upload-artifact) have been replaced with
+# native shell commands to comply with JPL Enterprise security policies.
+# ==============================================================================
+name: ROS2 Build and Release Tagging
+
+on:
+  push:
+    branches:
+      - '**' # Run on push to ANY branch for CI feedback
+      
+# Ensure we clone with sufficient depth to retrieve tags for versioning
+permissions:
+  contents: write
+
+env:
+  # Define the ROS distribution that module will be built on
+  # note you also need to set the ROS version in the build container image
+  # chosen around 15 lines below this
+  ROS_DISTRO: jazzy
+  # List the apt packages your module requires. If none required, leave as
+  # a single space character
+  #APT_PACKAGES: " "
+  APT_PACKAGES: "libyaml-cpp-dev libreadline-dev doxygen"
+  # List the pip packages your module requires. If none requied, leave as
+  # a single space character
+  #PIP_PACKAGES: " "
+  PIP_PACKAGES: "pyaml cogapp graphviz ipython==7.9"
+
+jobs:
+  # ============================================================================
+  # Job 1: Build ROS 2 Workspace (Jazzy)
+  # Runs on every push to any branch (default behavior based on 'on: push')
+  # ============================================================================
+  build:
+    name: Build ROS2 Packages
+    runs-on: [linux, x64]
+    container: ros:jazzy-ros-base
+    
+    steps:
+      # 1. Manual Checkout (Required for self-hosted environment)
+      # Replicate 'actions/checkout' functionality
+      - name: Manual Checkout (Replacing actions/checkout)
+        run: |
+          mkdir -p /workspace/src
+          cd /workspace/src
+          REPO_URL="${{ github.server_url }}/${{ github.repository }}.git"
+          git clone "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@${REPO_URL#*//}" ${{ github.repository }}
+          cd ${{ github.repository }}
+          git checkout ${{ github.sha }}
+                
+      - name: Resolve ROS Dependencies
+        # 2. Resolve external dependencies using rosdep, apt, and pip
+        run: |
+          cd /workspace
+          apt install -y python3-pip $APT_PACKAGES
+          pip3 install $PIP_PACKAGES
+          rosdep init || true # Initialize rosdep (idempotent)
+          rosdep update
+          rosdep install --from-paths . --ignore-src -r -y
+          
+      - name: Build Workspace
+        # 3. Build the ROS 2 workspace using colcon
+        run: |
+          cd /workspace
+          . /opt/ros/$ROS_DISTRO/setup.sh
+          colcon build --symlink-install
+        
+  # ============================================================================
+  # Job 2: Create Semantic Git Tag
+  # Runs only if the build job succeeded AND the push target is the 'main',
+  # which (if main is protected) means it will only be on pull requests.
+  # ============================================================================
+  create_git_tag:
+    name: Auto Semantic Tagging
+    runs-on: [linux, x64]
+    container: alpine/git:latest
+    needs: build
+    # CRITICAL: This conditional ensures the job only runs when pushing to 'main'
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+      - name: Manual Checkout and Fetch Tags (Replacing actions/checkout)
+        run: |
+          # Manually clone the repository with full history (equivalent to fetch-depth: 0)
+          # We use the GITHUB_TOKEN directly in the URL for authentication
+          REPO_URL="${{ github.server_url }}/${{ github.repository }}.git"
+          
+          # Clone the repository
+          cd /tmp
+          git clone "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@${REPO_URL#*//}"  ${{ github.repository }}
+          cd  ${{ github.repository }}
+          
+          # Fetch all tags explicitly
+          git fetch --tags
+          
+          echo "Manual checkout complete. Full history and tags available."
+
+      - name: Determine Version Bump Type
+        id: version_check
+        run: |
+          # The logic requires the 'jq' tool to parse JSON responses from the GitHub API.
+          # Since the runner is ubuntu-latest, we install it here.
+          apk update
+          apk add jq curl
+          
+          echo "--- Starting Semantic Version Check ---"
+          cd /tmp/${{ github.repository }}
+          
+          # 1. Find the Pull Request number from the merge commit message
+          COMMIT_MESSAGE=$(git log -1 --pretty=%B)
+          echo "commit message: $COMMIT_MESSAGE"
+          
+          # Regex to extract the PR number (e.g., "123")
+          PR_ID=$(echo "$COMMIT_MESSAGE" | grep -o -E '#[0-9]+' | head -n 1 | tr -d '#')
+          echo "PR ID: $PR_ID"
+          
+          BUMP_SOURCE=""
+          BUMP_TYPE="patch"
+          
+          if [ -n "$PR_ID" ]; then
+            echo "Found Pull Request ID: $PR_ID. Fetching PR description via GitHub API."
+            
+            # API call to get PR details using the GITHUB_TOKEN for authentication
+            PR_DESCRIPTION=$(curl --header "authorization: Bearer ${{ github.token }}" \
+              --header "Accept: application/vnd.github.v3+json" \
+              --silent \
+              "${{ github.api_url }}/repos/${{ github.repository }}/pulls/${PR_ID}" | jq -r '.body // empty')
+              
+            if [ -z "$PR_DESCRIPTION" ] || [ "$PR_DESCRIPTION" = "null" ]; then
+              echo "PR Description was empty. Falling back to Commit Message."
+              BUMP_SOURCE="$COMMIT_MESSAGE"
+            else
+              echo "Using PR Description for bump check."
+              BUMP_SOURCE="$PR_DESCRIPTION"
+            fi
+          else
+            echo "Could not find Pull Request ID in commit message. Falling back to using Commit Message."
+            BUMP_SOURCE="$COMMIT_MESSAGE"
+          fi
+          
+          # 2. Determine bump type (case-insensitive check)
+          if echo "$BUMP_SOURCE" | grep -iq "bump major"; then
+            BUMP_TYPE="major"
+          elif echo "$BUMP_SOURCE" | grep -iq "bump minor"; then
+            BUMP_TYPE="minor"
+          fi
+          
+          echo "Determined BUMP_TYPE=${BUMP_TYPE}"
+          # Export the result to be used in the next step
+          echo "BUMP_TYPE=${BUMP_TYPE}" >> $GITHUB_OUTPUT
+
+      - name: Calculate and Push New Tag
+        run: |
+          echo "--- Calculating New Version ---"
+          cd /tmp/${{ github.repository }}
+          
+          # Read the BUMP_TYPE from the previous step's output
+          BUMP_TYPE="${{ steps.version_check.outputs.BUMP_TYPE }}"
+          
+          # Find the latest semantic tag
+          LATEST_TAG=$(git tag --sort=-version:refname | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | head -n 1)
+
+          if [ -z "$LATEST_TAG" ]; then
+              NEW_TAG="v0.0.1"
+              echo "No existing semantic tag found. Starting with $NEW_TAG."
+          else
+              echo "Latest existing tag found: $LATEST_TAG"
+              
+              # Extract version components
+              VERSION_NUM="${LATEST_TAG#?}"
+              MAJOR=$(echo $VERSION_NUM | cut -d '.' -f 1)
+              MINOR=$(echo $VERSION_NUM | cut -d '.' -f 2)
+              PATCH=$(echo $VERSION_NUM | cut -d '.' -f 3)
+              
+              # Apply the determined bump logic
+              if [ "$BUMP_TYPE" == "major" ]; then
+                MAJOR=$((MAJOR + 1))
+                MINOR=0
+                PATCH=0
+                echo "Performing Major bump."
+              elif [ "$BUMP_TYPE" == "minor" ]; then
+                MINOR=$((MINOR + 1))
+                PATCH=0
+                echo "Performing Minor bump."
+              else
+                PATCH=$((PATCH + 1))
+                echo "Performing Patch bump."
+              fi
+              
+              NEW_TAG="v${MAJOR}.${MINOR}.${PATCH}"
+              echo "New calculated tag: $NEW_TAG"
+          fi
+          
+          # Create and push the new tag
+          git tag $NEW_TAG
+          
+          # Push the tag using the configured GITHUB_TOKEN
+          git push origin $NEW_TAG
+          
+          echo "Successfully pushed tag $NEW_TAG."

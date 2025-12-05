@@ -34,9 +34,10 @@ env:
   # other git packages via https if needed
   DEPENDENCY_INSTALL_COMMANDS: |
     apt-get update
-    apt-get install -y python3-pip libyaml-cpp-dev libreadline-dev doxygen
+    apt-get install -y libyaml-cpp-dev libreadline-dev doxygen
     apt-get install -y python3-yaml python3-graphviz python3-ipython
-    pip3 install cogapp
+    apt-get install -y python3-pip pipx 
+    pipx install cogapp
     git clone --depth 1 --branch v0.2.0 https://github.com/nasa-jpl/fcat_msgs.git
 
 jobs:

@@ -38,7 +38,7 @@ env:
     apt-get install -y python3-yaml python3-graphviz python3-ipython
     dpkg -i fcat/.github/python3-cogapp_3.3.0-3_all.deb
     #pipx install cogapp
-    #cp fcat/.github/cog /usr/local/bin/
+    cp fcat/.github/cog /usr/local/bin/
     git clone --depth 1 --branch v0.2.0 https://github.com/nasa-jpl/fcat_msgs.git
 
 jobs:

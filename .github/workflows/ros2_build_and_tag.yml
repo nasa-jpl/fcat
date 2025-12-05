@@ -40,7 +40,7 @@ env:
     apt-get install -y python3-pip pipx 
     pipx install cogapp
     pipx ensurepath
-    cp src/${{ github.event.repository.name }}/.github/cog /usr/local/bin/
+    cp fcat/.github/cog /usr/local/bin/
     git clone --depth 1 --branch v0.2.0 https://github.com/nasa-jpl/fcat_msgs.git
 
 jobs:

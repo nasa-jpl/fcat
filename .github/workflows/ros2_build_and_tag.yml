@@ -70,6 +70,7 @@ jobs:
         # 3. Run the commands placed in the environment variable
         run: |
           cd src
+          apt-get update
           eval "$DEPENDENCY_INSTALL_COMMANDS"
 
       - name: Resolve ROS Dependencies

@@ -31,15 +31,13 @@ env:
 
   # Define the commands that need to be run to establish all the dependencies
   # for your package. This will be run in the src directory so you can clone
-  # other git packages via https if needed. Note you may need to use the
-  # virtual env python installer pipx due to directory permissions
+  # other git packages via https if needed. Note you will need to install python
+  # packages using pipx (already installed) due to container permissions
   DEPENDENCY_INSTALL_COMMANDS: |
     apt-get update
     apt-get install -y libyaml-cpp-dev libreadline-dev doxygen
     apt-get install -y python3-yaml python3-graphviz python3-ipython
-    apt-get install -y python3-pip pipx 
     pipx install cogapp
-    pipx ensurepath --global
     cp fcat/.github/cog /usr/local/bin/
     git clone --depth 1 --branch v0.2.0 https://github.com/nasa-jpl/fcat_msgs.git
 
@@ -72,11 +70,14 @@ jobs:
         # 3. Run the commands placed in the environment variable
         run: |
           cd src
+          apt-get install -y python3-pip pipx
+          pipx ensurepath # for any python packages we installed
           eval "$DEPENDENCY_INSTALL_COMMANDS"
 
       - name: Resolve ROS Dependencies
         # 4. Resolve dependencies using rosdep
         run: |
+          pipx ensurepath # for any python packages we installed
           rosdep init || true # Initialize rosdep (idempotent)
           rosdep update
           rosdep install --from-paths . --ignore-src -r -y
@@ -84,6 +85,7 @@ jobs:
       - name: Build Workspace
         # 5. Build the ROS 2 workspace using colcon
         run: |
+          pipx ensurepath # for any python packages we installed
           . /opt/ros/$ROS_DISTRO/setup.sh
           colcon build --symlink-install
         

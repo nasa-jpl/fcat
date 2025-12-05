@@ -8,8 +8,6 @@
 #     any semantic version tags within the repository. It searches the PR
 #     description text for "bump minor" or "bump major" or will just increment
 #     the patch number if those are not present
-# NOTE: External Actions (checkout, upload-artifact) have been replaced with
-# native shell commands to comply with JPL Enterprise security policies.
 # ==============================================================================
 name: ROS2 Build and Release Tagging
 
@@ -26,9 +24,9 @@ permissions:
 # You may also need to modify "runs-on" under jobs:build based on if
 # you are using JPL internal GitHub or public GitHub
 env:
-  # Define the ROS distribution that module will be built on. Note you
-  # also need to set the ROS version under jobs:build:container, as
-  # apparently that one field cannot accept environment variables
+  # Define the ROS distribution that module will be built on. Note, if you change
+  # this, you will also need to set the ROS version under jobs:build:container,
+  # as apparently that field cannot accept environment variables
   ROS_DISTRO: jazzy
 
   # Define the commands that need to be run to establish all the dependencies
@@ -43,47 +41,45 @@ env:
 
 jobs:
   # ============================================================================
-  # Job 1: Build ROS 2 Workspace. Runs on every push to any branch
+  # Job 1: Build ROS 2 Workspace (Jazzy)
+  # Runs on every push to any branch (default behavior based on 'on: push')
   # ============================================================================
   build:
     name: Build ROS2 Packages
-    #runs-on: [linux, x64] # for JPL GitHub self-hosted runner
-    #runs-on: jpl-linux-x64 # for JPL GitHub institutional runner
-    runs-on: ubuntu-latest # for public GitHub runner
-    container: ros:jazzy-ros-base
-    with:
-      cache: 'pip'
+    #runs-on: linux # uncomment for JPL GitHub self-hosted linux runner
+    #runs-on: jpl-linux-x64 # uncomment for JPL GitHub institutional runner
+    runs-on: ubuntu-latest # uncomment for public GitHub runner
+    container: ros:jazzy-ros-base # update this as needed
     
     steps:
-      # 1. Manual Checkout (Required for self-hosted environment)
-      # Replicate 'actions/checkout' functionality
-      - name: Manual Checkout (Replacing actions/checkout)
-        run: |
-          mkdir -p /workspace/src
-          cd /workspace/src
-          REPO_URL="${{ github.server_url }}/${{ github.repository }}.git"
-          git clone "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@${REPO_URL#*//}" ${{ github.repository }}
-          cd ${{ github.repository }}
-          git checkout ${{ github.sha }}
+      - name: Checkout repository
+        # 1. Use github action to check out this repository
+        uses: actions/checkout@v4
+        with:
+          path: src/${{ github.event.repository.name }}
 
-      - name: Resolve Supplied Dependencies
-        # 2. Resolve external dependencies given in environment variable
+      - name: Set up Python
+        # 2. Use github action to install python properly
+        uses: actions/setup-python@v5
+          #with: # optionally pick the exact python version
+          #  python-version: '3.10'
+
+      - name: Install Supplied Dependencies
+        # 3. Run the commands placed in the environment variable
         run: |
-          cd /workspace/src
+          cd src
           eval "$DEPENDENCY_INSTALL_COMMANDS"
 
       - name: Resolve ROS Dependencies
-        # 3. Resolve external dependencies using rosdep
+        # 4. Resolve dependencies using rosdep
         run: |
-          cd /workspace
           rosdep init || true # Initialize rosdep (idempotent)
           rosdep update
           rosdep install --from-paths . --ignore-src -r -y
-          
+
       - name: Build Workspace
-        # 4. Build the ROS 2 workspace using colcon
+        # 5. Build the ROS 2 workspace using colcon
         run: |
-          cd /workspace
           . /opt/ros/$ROS_DISTRO/setup.sh
           colcon build --symlink-install
         
@@ -101,21 +97,8 @@ jobs:
     if: github.ref == 'refs/heads/main'
     
     steps:
-      - name: Manual Checkout and Fetch Tags (Replacing actions/checkout)
-        run: |
-          # Manually clone the repository with full history (equivalent to fetch-depth: 0)
-          # We use the GITHUB_TOKEN directly in the URL for authentication
-          REPO_URL="${{ github.server_url }}/${{ github.repository }}.git"
-          
-          # Clone the repository
-          cd /tmp
-          git clone "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@${REPO_URL#*//}"  ${{ github.repository }}
-          cd  ${{ github.repository }}
-          
-          # Fetch all tags explicitly
-          git fetch --tags
-          
-          echo "Manual checkout complete. Full history and tags available."
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
       - name: Determine Version Bump Type
         id: version_check
@@ -126,8 +109,13 @@ jobs:
           apk add jq curl
           
           echo "--- Starting Semantic Version Check ---"
-          cd /tmp/${{ github.repository }}
-          
+
+          # Fetch tags as the actions/checkout doesn't work properly
+          git config --global --add safe.directory "*"
+          # clear all local tags
+          git tag -d $(git tag -l)
+          git fetch --tags
+
           # 1. Find the Pull Request number from the merge commit message
           COMMIT_MESSAGE=$(git log -1 --pretty=%B)
           echo "commit message: $COMMIT_MESSAGE"
@@ -174,7 +162,6 @@ jobs:
       - name: Calculate and Push New Tag
         run: |
           echo "--- Calculating New Version ---"
-          cd /tmp/${{ github.repository }}
           
           # Read the BUMP_TYPE from the previous step's output
           BUMP_TYPE="${{ steps.version_check.outputs.BUMP_TYPE }}"

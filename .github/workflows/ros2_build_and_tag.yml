@@ -34,7 +34,6 @@ env:
   # other git packages via https if needed. Note you will need to install python
   # packages using pipx (already installed) due to container permissions
   DEPENDENCY_INSTALL_COMMANDS: |
-    apt-get update
     apt-get install -y libyaml-cpp-dev libreadline-dev doxygen
     apt-get install -y python3-yaml python3-graphviz python3-ipython
     pipx install cogapp
@@ -70,6 +69,7 @@ jobs:
         # 3. Run the commands placed in the environment variable
         run: |
           cd src
+          apt-get update
           apt-get install -y python3-pip pipx
           pipx ensurepath # for any python packages we installed
           eval "$DEPENDENCY_INSTALL_COMMANDS"

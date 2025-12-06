@@ -8,6 +8,9 @@
 #     any semantic version tags within the repository. It searches the PR
 #     description text for "bump minor" or "bump major" or will just increment
 #     the patch number if those are not present
+# Note: search for the two instances of "runs-on" below and uncomment the correct
+# line based on which instance of GitHub you as using. Workflows do not (yet)
+# support parameterizing this field.
 # ==============================================================================
 name: ROS2 Build and Release Tagging
 
@@ -93,7 +96,9 @@ jobs:
   # ============================================================================
   create_git_tag:
     name: Auto Semantic Tagging
-    runs-on: [linux, x64]
+    #runs-on: linux # uncomment for JPL GitHub self-hosted linux runner
+    #runs-on: jpl-linux-x64 # uncomment for JPL GitHub institutional runner
+    runs-on: ubuntu-latest # uncomment for public GitHub runner
     container: alpine/git:latest
     needs: build
     # CRITICAL: This conditional ensures the job only runs when pushing to 'main'

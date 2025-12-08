@@ -6,7 +6,7 @@
 #     repository it lives in, install supplied dependencies, then build
 # - On every pull request to main: automatically check for and increment
 #     any semantic version tags within the repository. It searches the PR
-#     description text for "bump minor" or "bump major" or will just increment
+#     description text for "bump:minor" or "bump:major" or will just increment
 #     the patch number if those are not present
 # Note: search for the two instances of "runs-on" below and uncomment the correct
 # line based on which instance of GitHub you as using. Workflows do not (yet)
@@ -160,9 +160,9 @@ jobs:
           fi
           
           # 2. Determine bump type (case-insensitive check)
-          if echo "$BUMP_SOURCE" | grep -iq "bump major"; then
+          if echo "$BUMP_SOURCE" | grep -iq "bump:major"; then
             BUMP_TYPE="major"
-          elif echo "$BUMP_SOURCE" | grep -iq "bump minor"; then
+          elif echo "$BUMP_SOURCE" | grep -iq "bump:minor"; then
             BUMP_TYPE="minor"
           fi
           

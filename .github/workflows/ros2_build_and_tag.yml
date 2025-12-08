@@ -38,15 +38,19 @@ env:
   # be installed via apt in modern versions of debian,
   # e.g. apt install -y python3-xyz
   DEPENDENCY_INSTALL_COMMANDS: |
-    apt-get install -y libyaml-cpp-dev libreadline-dev doxygen
-    apt-get install -y python3-yaml python3-graphviz python3-ipython
+    apt-get install -y libyaml-cpp-dev
+    apt-get install -y libreadline-dev
+    apt-get install -y doxygen
+    apt-get install -y python3-yaml
+    apt-get install -y python3-graphviz
+    apt-get install -y python3-ipython
     dpkg -i fcat/.github/python3-cogapp_3.3.0-3_all.deb
     cp fcat/.github/cog /usr/local/bin/
     git clone --depth 1 --branch v0.2.0 https://github.com/nasa-jpl/fcat_msgs.git
 
 jobs:
   # ============================================================================
-  # Job 1: Build ROS 2 Workspace (Jazzy)
+  # Job 1: Build ROS 2 Workspace
   # Runs on every push to any branch (default behavior based on 'on: push')
   # ============================================================================
   build:
@@ -111,8 +115,7 @@ jobs:
       - name: Determine Version Bump Type
         id: version_check
         run: |
-          # The logic requires the 'jq' tool to parse JSON responses from the GitHub API.
-          # Since the runner is ubuntu-latest, we install it here.
+          # The logic requires the 'jq' tool to parse JSON responses from the GitHub API
           apk update
           apk add jq curl
           

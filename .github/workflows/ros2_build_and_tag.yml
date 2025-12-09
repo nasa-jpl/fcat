@@ -1,0 +1,218 @@
+# ==============================================================================
+# GitHub Actions Workflow for ROS 2 Test Build and Automated Semantic Tagging
+# ------------------------------------------------------------------------------
+# This GitHub Workflow file will:
+# - On every push to every branch: start up a docker conatiner, clone in the
+#     repository it lives in, install supplied dependencies, then build
+# - On every pull request to main: automatically check for and increment
+#     any semantic version tags within the repository. It searches the PR
+#     description text for "bump:minor" or "bump:major" or will just increment
+#     the patch number if those are not present
+# Note: search for the two instances of "runs-on" below and uncomment the correct
+# line based on which instance of GitHub you as using. Workflows do not (yet)
+# support parameterizing this field.
+# ==============================================================================
+name: ROS2 Build and Release Tagging
+
+on:
+  push:
+    branches:
+      - '**' # Run on push to ANY branch for CI feedback
+      
+# Ensure we clone with sufficient depth to retrieve tags for versioning
+permissions:
+  contents: write
+
+# Environment variables, modify these for your module's needs
+# You may also need to modify "runs-on" under jobs:build based on if
+# you are using JPL internal GitHub or public GitHub
+env:
+  # Define the ROS distribution that module will be built on. Note, if you change
+  # this, you will also need to set the ROS version under jobs:build:container,
+  # as apparently that field cannot accept environment variables
+  ROS_DISTRO: jazzy
+
+  # Define the commands that need to be run to establish all the dependencies
+  # for your package. This will be run in the src directory so you can clone
+  # other git packages via https if needed. Note python packages are meant to
+  # be installed via apt in modern versions of debian,
+  # e.g. apt install -y python3-xyz
+  DEPENDENCY_INSTALL_COMMANDS: |
+    apt-get install -y libyaml-cpp-dev
+    apt-get install -y libreadline-dev
+    apt-get install -y doxygen
+    apt-get install -y python3-yaml
+    apt-get install -y python3-graphviz
+    apt-get install -y python3-ipython
+    dpkg -i fcat/.github/python3-cogapp_3.3.0-3_all.deb
+    cp fcat/.github/cog /usr/local/bin/
+    git clone --depth 1 --branch v0.2.0 https://github.com/nasa-jpl/fcat_msgs.git
+
+jobs:
+  # ============================================================================
+  # Job 1: Build ROS 2 Workspace
+  # Runs on every push to any branch (default behavior based on 'on: push')
+  # ============================================================================
+  build:
+    name: Build ROS2 Packages
+    #runs-on: linux # uncomment for JPL GitHub self-hosted linux runner
+    #runs-on: jpl-linux-x64 # uncomment for JPL GitHub institutional runner
+    runs-on: ubuntu-latest # uncomment for public GitHub runner
+    container: ros:jazzy-ros-base # update this as needed
+    
+    steps:
+      - name: Checkout repository
+        # 1. Use github action to check out this repository
+        uses: actions/checkout@v4
+        with:
+          path: src/${{ github.event.repository.name }}
+
+      - name: Set up Python
+        # 2. Use github action to install python properly
+        uses: actions/setup-python@v5
+          #with: # optionally pick the exact python version
+          #  python-version: '3.10'
+
+      - name: Install Supplied Dependencies
+        # 3. Run the commands placed in the environment variable
+        run: |
+          cd src
+          apt-get update
+          eval "$DEPENDENCY_INSTALL_COMMANDS"
+
+      - name: Resolve ROS Dependencies
+        # 4. Resolve dependencies using rosdep
+        run: |
+          rosdep init || true # Initialize rosdep (idempotent)
+          rosdep update
+          rosdep install --from-paths . --ignore-src -r -y
+
+      - name: Build Workspace
+        # 5. Build the ROS 2 workspace using colcon
+        run: |
+          . /opt/ros/$ROS_DISTRO/setup.sh
+          colcon build --symlink-install
+        
+  # ============================================================================
+  # Job 2: Create Semantic Git Tag
+  # Runs only if the build job succeeded AND the push target is the 'main',
+  # which (if main is protected) means it will only be on pull requests.
+  # ============================================================================
+  create_git_tag:
+    name: Auto Semantic Tagging
+    #runs-on: linux # uncomment for JPL GitHub self-hosted linux runner
+    #runs-on: jpl-linux-x64 # uncomment for JPL GitHub institutional runner
+    runs-on: ubuntu-latest # uncomment for public GitHub runner
+    container: alpine/git:latest
+    needs: build
+    # CRITICAL: This conditional ensures the job only runs when pushing to 'main'
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Determine Version Bump Type
+        id: version_check
+        run: |
+          # The logic requires the 'jq' tool to parse JSON responses from the GitHub API
+          apk update
+          apk add jq curl
+          
+          echo "--- Starting Semantic Version Check ---"
+
+          # Fetch tags as the actions/checkout doesn't work properly
+          git config --global --add safe.directory "*"
+          # clear all local tags
+          git tag -d $(git tag -l)
+          git fetch --tags
+
+          # 1. Find the Pull Request number from the merge commit message
+          COMMIT_MESSAGE=$(git log -1 --pretty=%B)
+          echo "commit message: $COMMIT_MESSAGE"
+          
+          # Regex to extract the PR number (e.g., "123")
+          PR_ID=$(echo "$COMMIT_MESSAGE" | grep -o -E '#[0-9]+' | head -n 1 | tr -d '#')
+          echo "PR ID: $PR_ID"
+          
+          BUMP_SOURCE=""
+          BUMP_TYPE="patch"
+          
+          if [ -n "$PR_ID" ]; then
+            echo "Found Pull Request ID: $PR_ID. Fetching PR description via GitHub API."
+            
+            # API call to get PR details using the GITHUB_TOKEN for authentication
+            PR_DESCRIPTION=$(curl --header "authorization: Bearer ${{ github.token }}" \
+              --header "Accept: application/vnd.github.v3+json" \
+              --silent \
+              "${{ github.api_url }}/repos/${{ github.repository }}/pulls/${PR_ID}" | jq -r '.body // empty')
+              
+            if [ -z "$PR_DESCRIPTION" ] || [ "$PR_DESCRIPTION" = "null" ]; then
+              echo "PR Description was empty. Falling back to Commit Message."
+              BUMP_SOURCE="$COMMIT_MESSAGE"
+            else
+              echo "Using PR Description for bump check."
+              BUMP_SOURCE="$PR_DESCRIPTION"
+            fi
+          else
+            echo "Could not find Pull Request ID in commit message. Falling back to using Commit Message."
+            BUMP_SOURCE="$COMMIT_MESSAGE"
+          fi
+          
+          # 2. Determine bump type (case-insensitive check)
+          if echo "$BUMP_SOURCE" | grep -iq "bump:major"; then
+            BUMP_TYPE="major"
+          elif echo "$BUMP_SOURCE" | grep -iq "bump:minor"; then
+            BUMP_TYPE="minor"
+          fi
+          
+          echo "Determined BUMP_TYPE=${BUMP_TYPE}"
+          # Export the result to be used in the next step
+          echo "BUMP_TYPE=${BUMP_TYPE}" >> $GITHUB_OUTPUT
+
+      - name: Calculate and Push New Tag
+        run: |
+          echo "--- Calculating New Version ---"
+          
+          # Read the BUMP_TYPE from the previous step's output
+          BUMP_TYPE="${{ steps.version_check.outputs.BUMP_TYPE }}"
+          
+          # Find the latest semantic tag
+          LATEST_TAG=$(git tag --sort=-version:refname | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | head -n 1)
+
+          if [ -z "$LATEST_TAG" ]; then
+              NEW_TAG="v0.0.1"
+              echo "No existing semantic tag found. Starting with $NEW_TAG."
+          else
+              echo "Latest existing tag found: $LATEST_TAG"
+              
+              # Extract version components
+              VERSION_NUM="${LATEST_TAG#?}"
+              MAJOR=$(echo $VERSION_NUM | cut -d '.' -f 1)
+              MINOR=$(echo $VERSION_NUM | cut -d '.' -f 2)
+              PATCH=$(echo $VERSION_NUM | cut -d '.' -f 3)
+              
+              # Apply the determined bump logic
+              if [ "$BUMP_TYPE" == "major" ]; then
+                MAJOR=$((MAJOR + 1))
+                MINOR=0
+                PATCH=0
+                echo "Performing Major bump."
+              elif [ "$BUMP_TYPE" == "minor" ]; then
+                MINOR=$((MINOR + 1))
+                PATCH=0
+                echo "Performing Minor bump."
+              else
+                PATCH=$((PATCH + 1))
+                echo "Performing Patch bump."
+              fi
+              
+              NEW_TAG="v${MAJOR}.${MINOR}.${PATCH}"
+              echo "New calculated tag: $NEW_TAG"
+          fi
+          
+          # Create and push the new tag
+          git tag $NEW_TAG
+          git push origin $NEW_TAG
+          
+          echo "Successfully pushed tag $NEW_TAG."

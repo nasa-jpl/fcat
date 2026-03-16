@@ -11,6 +11,7 @@
 #include <sys/mman.h>
 
 #include <chrono>
+#include <cstdio>
 #include <limits>
 
 using namespace std::chrono_literals;
@@ -22,7 +23,6 @@ Fcat::~Fcat() { fcat_manager_.Shutdown(); }
 
 Fcat::Fcat(const rclcpp::NodeOptions& options)
     : casah_node::BaseInterface("fcat", "fcat", options),
-      casah_node::FaultInterface("fcat", "fcat", options),
       service_qos_(rclcpp::QoSInitialization::from_rmw(rmw_qos_profile_services_default), rmw_qos_profile_services_default)
 {
   process_loop_callback_group_ =
@@ -1609,7 +1609,7 @@ void Fcat::SetCpuAffinity() {
 
 void Fcat::Process()
 {
-  CFW_TRACE("Handling Process() loop");
+  fprintf(stderr, "Handling Process() loop\n");
   auto now = this->get_clock()->now();
 
   bool report_cycle_slips = this->get_parameter("report_cycle_slips").as_bool();
@@ -1774,7 +1774,7 @@ void Fcat::PublishAsyncSdoResponse()
     msg.data = jsd_sdo_data_to_string(sdo_resp.response.data_type,
                                       sdo_resp.response.data);
 
-    CFW_TRACE("Publishing new AsyncSdoResponse");
+    fprintf(stderr, "Publishing new AsyncSdoResponse\n");
 
     async_sdo_response_pub_->publish(msg);
   }

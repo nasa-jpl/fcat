@@ -4,6 +4,8 @@
 
 #include "fastcat/jsd/actuator.h"
 
+#include <cstdio>
+
 void Fcat::ResetCmdCb(const std::shared_ptr<std_msgs::msg::Empty> msg)
 {
   reset_in_progress_ = true;
@@ -118,7 +120,7 @@ void Fcat::ActuatorCSPCmdCb(
 void Fcat::ActuatorCSPCmdsCb(
   const std::shared_ptr<fcat_msgs::msg::ActuatorCspCmds> msg)
 {
-  CFW_TRACE("Processing ActuatorCSPCmdsCb");
+  fprintf(stderr, "Processing ActuatorCSPCmdsCb\n");
   double t = this->now().seconds();
   for (auto csp_cmd : msg->commands) {
     CallActuatorCSP(csp_cmd, t);
@@ -164,7 +166,7 @@ void Fcat::ActuatorCSVCmdCb(
 void Fcat::ActuatorCSVCmdsCb(
   const std::shared_ptr<fcat_msgs::msg::ActuatorCsvCmds> msg)
 {
-  CFW_TRACE("Processing ActuatorCSVCmdsCb");
+  fprintf(stderr, "Processing ActuatorCSVCmdsCb\n");
   for (auto csv_cmd : msg->commands) {
     CallActuatorCSV(csv_cmd);
   }
@@ -209,7 +211,7 @@ void Fcat::ActuatorCSTCmdCb(
 void Fcat::ActuatorCSTCmdsCb(
   const std::shared_ptr<fcat_msgs::msg::ActuatorCstCmds> msg)
 {
-  CFW_TRACE("Processing ActuatorCSTCmdsCb");
+  fprintf(stderr, "Processing ActuatorCSTCmdsCb\n");
   for (auto cst_cmd : msg->commands) {
     CallActuatorCST(cst_cmd);
   }

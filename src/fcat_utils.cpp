@@ -2,6 +2,8 @@
 
 #include "jsd/jsd_print.h"
 
+#include <cstdio>
+
 fcat_msgs::msg::ActuatorState ActuatorStateToMsg(
   std::shared_ptr<const fastcat::DeviceState> state)
 {
@@ -545,14 +547,16 @@ bool HexOrDecStrToNum(std::string& str, uint16_t& number)
   unsigned long int ulnum = strtoul(str.c_str(), &end, 0);
 
   if (*end == '\0') {
-    CFW_TRACE(
+    fprintf(
+      stderr,
       "HexOrDecStrToNum successfully parsed string (%s) to (%lu or 0x%x)",
       str.c_str(), ulnum, ulnum);
+    fprintf(stderr, "\n");
     number = static_cast<uint16_t>(ulnum);
     success = true;
 
   } else {
-    CFW_TRACE("HexOrDecStrToNum could not parse string (%s)", str.c_str());
+    fprintf(stderr, "HexOrDecStrToNum could not parse string (%s)\n", str.c_str());
   }
 
   return success;
@@ -581,7 +585,8 @@ bool TlcStrToNum(std::string& str, uint16_t& number)
     return false;
   }
 
-  CFW_TRACE("Converted TLC string: (%s) to U16: (0x%X)", str.c_str(), number);
+  fprintf(stderr, "Converted TLC string: (%s) to U16: (0x%X)\n",
+          str.c_str(), number);
   return true;
 }
 

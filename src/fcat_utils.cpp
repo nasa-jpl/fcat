@@ -565,23 +565,26 @@ bool HexOrDecStrToNum(std::string& str, uint16_t& number)
 bool TlcStrToNum(std::string& str, uint16_t& number)
 {
   if (str.size() != 2) {
-    CFW_WARN("TLC string: (%s) must be 2 chars. size: (%zu)", str.c_str(),
-             str.size());
+    fprintf(stderr, "TLC string: (%s) must be 2 chars. size: (%zu)\n",
+            str.c_str(), str.size());
     return false;
   }
 
   if ((str[0] < 'A') || (str[0] > 'Z') || (str[1] < 'A') || (str[1] > 'Z')) {
-    CFW_WARN("TLC string: (%s) must be upper chars [A-Z]", str.c_str());
+    fprintf(stderr, "TLC string: (%s) must be upper chars [A-Z]\n",
+            str.c_str());
     return false;
   }
 
   number = 0x3000 + (26 * (str[0] - 65)) + (str[1] - 65);
 
   if (number < 0x3000 || number > 0x3FFF) {
-    CFW_WARN(
+    fprintf(
+      stderr,
       "TLC conversion is out of range: %s -> 0x%X not in "
       "range (0x3000,0x3FFF)",
       str.c_str(), number);
+    fprintf(stderr, "\n");
     return false;
   }
 
@@ -653,7 +656,7 @@ jsd_sdo_data_t jsd_sdo_data_from_string(jsd_sdo_data_type_t& type,
       data.as_u64 = static_cast<uint64_t>(atoll(str.c_str()));
       break;
     default:
-      CFW_WARN("SDO data type: %d", static_cast<int>(type));
+      fprintf(stderr, "SDO data type: %d\n", static_cast<int>(type));
   }
   return data;
 }
@@ -670,7 +673,7 @@ std::string jsd_sdo_request_type_to_string(jsd_sdo_req_type_t req_type)
       break;
 
     default:
-      CFW_WARN("Invalid request type: %d", static_cast<int>(req_type));
+      fprintf(stderr, "Invalid request type: %d\n", static_cast<int>(req_type));
   }
   return "INVALID";
 }
@@ -706,7 +709,7 @@ std::string jsd_sdo_data_type_to_string(jsd_sdo_data_type_t data_type)
       return "U64";
       break;
     default:
-      CFW_WARN("Invalid data type: %d", static_cast<int>(data_type));
+      fprintf(stderr, "Invalid data type: %d\n", static_cast<int>(data_type));
   }
   return "UNSPECIFIED";
 }
@@ -743,7 +746,7 @@ std::string jsd_sdo_data_to_string(jsd_sdo_data_type_t data_type,
       return std::to_string(data.as_u64);
       break;
     default:
-      CFW_WARN("Bad data type");
+      fprintf(stderr, "Bad data type\n");
   }
   return "invalid result";
 }

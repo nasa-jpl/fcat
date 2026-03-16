@@ -10,6 +10,7 @@
 #include "casah_node/utils.hpp"
 
 #include <chrono>
+#include <cstdio>
 using namespace std::chrono_literals;
 using std::placeholders::_1;
 using std::placeholders::_2;
@@ -476,10 +477,12 @@ bool FcatSrvs::WaitForSdoResponse(std::string& message, uint16_t app_id)
 
       // Check the app id, discard and keep waiting if it does not match
       if (app_id != async_sdo_response_msg_.app_id) {
-        CFW_DEBUG(
+        fprintf(
+          stderr,
           "SDO Response received but actual app_id:(%u) does not match "
           "expected app_id:(%u). Continuing to wait...",
           async_sdo_response_msg_.app_id, app_id);
+        fprintf(stderr, "\n");
         continue;
       }
 

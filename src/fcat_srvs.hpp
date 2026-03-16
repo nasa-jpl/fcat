@@ -3,7 +3,6 @@
 
 #include <sys/time.h>
 #include <queue>
-#include "casah_node/evr_interface.hpp"
 #include "rclcpp/rclcpp.hpp"
 
 // Service messages
@@ -36,7 +35,7 @@
 #include "fcat_msgs/msg/module_state.hpp"
 #include "fcat_msgs/msg/pid_states.hpp"
 
-class FcatServices : public casah_node::EvrInterface
+class FcatSrvs : public rclcpp::Node
 {
  private:
   typedef enum {
@@ -45,7 +44,7 @@ class FcatServices : public casah_node::EvrInterface
   } FcatSrvState;
 
  public:
-  FcatServices(const rclcpp::NodeOptions& options = rclcpp::NodeOptions());
+  FcatSrvs(const rclcpp::NodeOptions& options = rclcpp::NodeOptions());
 
  private:
   static const unsigned int publisher_queue_size_ = 5;

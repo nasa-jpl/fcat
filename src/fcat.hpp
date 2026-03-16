@@ -1,7 +1,6 @@
 #ifndef FCAT__FCAT_HPP_
 #define FCAT__FCAT_HPP_
 
-#include "casah_node/evr_interface.hpp"
 #include "casah_node/fault_interface.hpp"
 
 #include "rclcpp/rclcpp.hpp"
@@ -96,7 +95,7 @@
 
 using WrenchPublisher = rclcpp::Publisher<geometry_msgs::msg::WrenchStamped>;
 
-class Fcat : public casah_node::FaultInterface, public casah_node::EvrInterface
+class Fcat : public casah_node::FaultInterface
 {
  public:
   ~Fcat();

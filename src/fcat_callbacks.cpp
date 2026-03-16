@@ -61,7 +61,7 @@ void Fcat::CallActuatorCSP(const fcat_msgs::msg::ActuatorCspCmd& msg, double t)
 {
   if(!cs_subscription_cb_realtime_preempt_initialized_) {
     if(enable_realtime_preempt_) {
-      EVR_ACTIVITY_HI(
+      RCLCPP_INFO(this->get_logger(),
         "Setting realtime priority for subscription callback thread to %d", 
         scheduler_priority_ - 1);
       SetRealtimePreempt(scheduler_priority_ - 1); 
@@ -97,7 +97,7 @@ void Fcat::CallActuatorCSP(const fcat_msgs::msg::ActuatorCspCmd& msg, double t)
       std::isnan(msg.position_offset) ||
       std::isnan(msg.velocity_offset) ||
       std::isnan(msg.torque_offset_amps)) {
-    EVR_WARNING_HI(
+    RCLCPP_WARN(this->get_logger(),
         "A NaN value was found in a CSP setpoint; "
         "The CSP setpoint was ignored"
     );
@@ -130,7 +130,7 @@ void Fcat::CallActuatorCSV(
 {
   if(!cs_subscription_cb_realtime_preempt_initialized_) {
     if(enable_realtime_preempt_) {
-       EVR_ACTIVITY_HI(
+       RCLCPP_INFO(this->get_logger(),
         "Setting realtime priority for subscription callback thread to %d", 
         scheduler_priority_ - 1);
       SetRealtimePreempt(scheduler_priority_ - 1); 
@@ -175,7 +175,7 @@ void Fcat::CallActuatorCST(
 {
   if(!cs_subscription_cb_realtime_preempt_initialized_) {
     if(enable_realtime_preempt_) {
-      EVR_ACTIVITY_HI(
+      RCLCPP_INFO(this->get_logger(),
         "Setting realtime priority for subscription callback thread to %d", 
         scheduler_priority_ - 1);
       SetRealtimePreempt(scheduler_priority_ - 1); 
@@ -605,7 +605,7 @@ void Fcat::ResetSrvCb(
   const std::shared_ptr<std_srvs::srv::Trigger::Request> request,
   std::shared_ptr<std_srvs::srv::Trigger::Response> response)
 {
-  EVR_ACTIVITY_LO("Handling Reset Command");
+  RCLCPP_INFO(this->get_logger(), "Handling Reset Command");
   fcat_manager_.ExecuteAllDeviceResets();
   FaultInterface::ResetSrvCb(request, response);
 }
@@ -614,7 +614,7 @@ void Fcat::FaultSrvCb(
   const std::shared_ptr<std_srvs::srv::Trigger::Request> request,
   std::shared_ptr<std_srvs::srv::Trigger::Response> response)
 {
-  EVR_ACTIVITY_LO("Handling Fault Command");
+  RCLCPP_INFO(this->get_logger(), "Handling Fault Command");
   fcat_manager_.ExecuteAllDeviceFaults();
   FaultInterface::FaultSrvCb(request, response);
 }
@@ -623,7 +623,7 @@ void Fcat::ActuatorHaltSrvCb(
   const std::shared_ptr<fcat_msgs::srv::ActuatorHaltService::Request> request,
   std::shared_ptr<fcat_msgs::srv::ActuatorHaltService::Response> response)
 {
-  EVR_ACTIVITY_LO("Handling Actuator Halt Command");
+  RCLCPP_INFO(this->get_logger(), "Handling Actuator Halt Command");
   fastcat::DeviceCmd cmd;
   cmd.name = request->name;
   cmd.type = fastcat::ACTUATOR_HALT_CMD;
@@ -642,7 +642,7 @@ void Fcat::ActuatorSetGainSchedulingIndexSrvCb(
     fcat_msgs::srv::ActuatorSetGainSchedulingIndexService::Response>
     response)
 {
-  EVR_ACTIVITY_LO("Handling Actuator Set Gain Scheduling Index Command");
+  RCLCPP_INFO(this->get_logger(), "Handling Actuator Set Gain Scheduling Index Command");
   fastcat::DeviceCmd cmd;
   cmd.name = request->name;
   cmd.type = fastcat::ACTUATOR_SET_GAIN_SCHEDULING_INDEX_CMD;
@@ -661,7 +661,7 @@ void Fcat::ActuatorSetMaxCurrentSrvCb(
   std::shared_ptr<fcat_msgs::srv::ActuatorSetMaxCurrentService::Response>
     response)
 {
-  EVR_ACTIVITY_LO("Handling Actuator Set Max Current Command");
+  RCLCPP_INFO(this->get_logger(), "Handling Actuator Set Max Current Command");
   fastcat::DeviceCmd cmd;
   cmd.name = request->name;
   cmd.type = fastcat::ACTUATOR_SET_MAX_CURRENT_CMD;
@@ -680,7 +680,7 @@ void Fcat::ActuatorSetDigitalOutputSrvCb(
   std::shared_ptr<fcat_msgs::srv::ActuatorSetDigitalOutputService::Response>
     response)
 {
-  EVR_ACTIVITY_LO("Handling Actuator Set Digital Output Command");
+  RCLCPP_INFO(this->get_logger(), "Handling Actuator Set Digital Output Command");
   fastcat::DeviceCmd cmd;
   cmd.name = request->name;
   cmd.type = fastcat::ACTUATOR_SET_DIGITAL_OUTPUT_CMD;
@@ -701,7 +701,7 @@ void Fcat::ActuatorSetProfDisengagingTimeoutSrvCb(
     fcat_msgs::srv::ActuatorSetProfDisengagingTimeoutService::Response>
     response)
 {
-  EVR_ACTIVITY_LO("Handling Actuator Set Profile Disengaging Timeout Command");
+  RCLCPP_INFO(this->get_logger(), "Handling Actuator Set Profile Disengaging Timeout Command");
   fastcat::DeviceCmd cmd;
   cmd.name = request->name;
   cmd.type = fastcat::ACTUATOR_SET_PROF_DISENGAGING_TIMEOUT_CMD;
@@ -720,7 +720,7 @@ void Fcat::ActuatorSetOutputPositionSrvCb(
   std::shared_ptr<fcat_msgs::srv::ActuatorSetOutputPositionService::Response>
     response)
 {
-  EVR_ACTIVITY_LO("Handling Actuator Set Output Position Command");
+  RCLCPP_INFO(this->get_logger(), "Handling Actuator Set Output Position Command");
   fastcat::DeviceCmd cmd;
   cmd.name = request->name;
   cmd.type = fastcat::ACTUATOR_SET_OUTPUT_POSITION_CMD;
@@ -736,7 +736,7 @@ void Fcat::ActuatorCalibrateSrvCb(
     request,
   std::shared_ptr<fcat_msgs::srv::ActuatorCalibrateService::Response> response)
 {
-  EVR_ACTIVITY_LO("Handling Actuator Calibrate Command");
+  RCLCPP_INFO(this->get_logger(), "Handling Actuator Calibrate Command");
   fastcat::DeviceCmd cmd;
   cmd.name = request->name;
   cmd.type = fastcat::ACTUATOR_CALIBRATE_CMD;
@@ -754,7 +754,7 @@ void Fcat::ActuatorProfPosSrvCb(
     request,
   std::shared_ptr<fcat_msgs::srv::ActuatorProfPosService::Response> response)
 {
-  EVR_ACTIVITY_LO("Handling Actuator Set Prof Pos Command");
+  RCLCPP_INFO(this->get_logger(), "Handling Actuator Set Prof Pos Command");
   fastcat::DeviceCmd cmd;
   cmd.name = request->name;
   cmd.type = fastcat::ACTUATOR_PROF_POS_CMD;
@@ -773,7 +773,7 @@ void Fcat::ActuatorProfVelSrvCb(
     request,
   std::shared_ptr<fcat_msgs::srv::ActuatorProfVelService::Response> response)
 {
-  EVR_ACTIVITY_LO("Handling Actuator Set Prof Vel Command");
+  RCLCPP_INFO(this->get_logger(), "Handling Actuator Set Prof Vel Command");
   fastcat::DeviceCmd cmd;
   cmd.name = request->name;
   cmd.type = fastcat::ACTUATOR_PROF_VEL_CMD;
@@ -791,7 +791,7 @@ void Fcat::ActuatorProfTorqueSrvCb(
     request,
   std::shared_ptr<fcat_msgs::srv::ActuatorProfTorqueService::Response> response)
 {
-  EVR_ACTIVITY_LO("Handling Actuator Set Prof Torque Command");
+  RCLCPP_INFO(this->get_logger(), "Handling Actuator Set Prof Torque Command");
   fastcat::DeviceCmd cmd;
   cmd.name = request->name;
   cmd.type = fastcat::ACTUATOR_PROF_TORQUE_CMD;
@@ -808,7 +808,7 @@ void Fcat::CommanderEnableSrvCb(
     request,
   std::shared_ptr<fcat_msgs::srv::CommanderEnableService::Response> response)
 {
-  EVR_ACTIVITY_LO("Handling Commander Enable Command");
+  RCLCPP_INFO(this->get_logger(), "Handling Commander Enable Command");
   fastcat::DeviceCmd cmd;
   cmd.name = request->name;
   cmd.type = fastcat::COMMANDER_ENABLE_CMD;
@@ -826,7 +826,7 @@ void Fcat::CommanderDisableSrvCb(
     request,
   std::shared_ptr<fcat_msgs::srv::CommanderDisableService::Response> response)
 {
-  EVR_ACTIVITY_LO("Handling Commander Disable Command");
+  RCLCPP_INFO(this->get_logger(), "Handling Commander Disable Command");
   fastcat::DeviceCmd cmd;
   cmd.name = request->name;
   cmd.type = fastcat::COMMANDER_DISABLE_CMD;
@@ -844,7 +844,7 @@ void Fcat::El2124WriteAllChannelsSrvCb(
   std::shared_ptr<fcat_msgs::srv::El2124WriteAllChannelsService::Response>
     response)
 {
-  EVR_ACTIVITY_LO("Handling EL2124 Write All Channels Command");
+  RCLCPP_INFO(this->get_logger(), "Handling EL2124 Write All Channels Command");
   fastcat::DeviceCmd cmd;
 
   cmd.name = request->name;
@@ -866,7 +866,7 @@ void Fcat::El2124WriteChannelSrvCb(
     request,
   std::shared_ptr<fcat_msgs::srv::El2124WriteChannelService::Response> response)
 {
-  EVR_ACTIVITY_LO("Handling EL2124 Write Channel Command");
+  RCLCPP_INFO(this->get_logger(), "Handling EL2124 Write Channel Command");
   fastcat::DeviceCmd cmd;
 
   cmd.name = request->name;
@@ -887,7 +887,7 @@ void Fcat::El2809WriteAllChannelsSrvCb(
   std::shared_ptr<fcat_msgs::srv::El2809WriteAllChannelsService::Response>
     response)
 {
-  EVR_ACTIVITY_LO("Handling EL2809 Write All Channels Command");
+  RCLCPP_INFO(this->get_logger(), "Handling EL2809 Write All Channels Command");
   fastcat::DeviceCmd cmd;
 
   cmd.name = request->name;
@@ -921,7 +921,7 @@ void Fcat::El2809WriteChannelSrvCb(
     request,
   std::shared_ptr<fcat_msgs::srv::El2809WriteChannelService::Response> response)
 {
-  EVR_ACTIVITY_LO("Handling EL2809 Write Channel Command");
+  RCLCPP_INFO(this->get_logger(), "Handling EL2809 Write Channel Command");
   fastcat::DeviceCmd cmd;
 
   cmd.name = request->name;
@@ -943,7 +943,7 @@ void Fcat::El2798WriteAllChannelsSrvCb(
     std::shared_ptr<fcat_msgs::srv::El2798WriteAllChannelsService::Response>
         response)
 {
-  EVR_ACTIVITY_LO("Handling EL2798 Write All Channels Command");
+  RCLCPP_INFO(this->get_logger(), "Handling EL2798 Write All Channels Command");
   fastcat::DeviceCmd cmd;
 
   cmd.name = request->name;
@@ -971,7 +971,7 @@ void Fcat::El2828WriteAllChannelsSrvCb(
     std::shared_ptr<fcat_msgs::srv::El2828WriteAllChannelsService::Response>
         response)
 {
-  EVR_ACTIVITY_LO("Handling EL2828 Write All Channels Command");
+  RCLCPP_INFO(this->get_logger(), "Handling EL2828 Write All Channels Command");
   fastcat::DeviceCmd cmd;
 
   cmd.name = request->name;
@@ -998,7 +998,7 @@ void Fcat::El2798WriteChannelSrvCb(
     std::shared_ptr<fcat_msgs::srv::El2798WriteChannelService::Response>
         response)
 {
-  EVR_ACTIVITY_LO("Handling EL2798 Write Channel Command");
+  RCLCPP_INFO(this->get_logger(), "Handling EL2798 Write Channel Command");
   fastcat::DeviceCmd cmd;
 
   cmd.name                             = request->name;
@@ -1019,7 +1019,7 @@ void Fcat::El2828WriteChannelSrvCb(
     std::shared_ptr<fcat_msgs::srv::El2828WriteChannelService::Response>
         response)
 {
-  EVR_ACTIVITY_LO("Handling EL2828 Write Channel Command");
+  RCLCPP_INFO(this->get_logger(), "Handling EL2828 Write Channel Command");
   fastcat::DeviceCmd cmd;
 
   cmd.name                             = request->name;
@@ -1040,7 +1040,7 @@ void Fcat::El4102WriteAllChannelsSrvCb(
   std::shared_ptr<fcat_msgs::srv::El4102WriteAllChannelsService::Response>
     response)
 {
-  EVR_ACTIVITY_LO("Handling EL4102 Write All Channels Command");
+  RCLCPP_INFO(this->get_logger(), "Handling EL4102 Write All Channels Command");
   fastcat::DeviceCmd cmd;
 
   cmd.name = request->name;
@@ -1062,7 +1062,7 @@ void Fcat::El4102WriteChannelSrvCb(
     request,
   std::shared_ptr<fcat_msgs::srv::El4102WriteChannelService::Response> response)
 {
-  EVR_ACTIVITY_LO("Handling EL4102 Write Channel Command");
+  RCLCPP_INFO(this->get_logger(), "Handling EL4102 Write Channel Command");
   fastcat::DeviceCmd cmd;
 
   cmd.name = request->name;
@@ -1081,7 +1081,7 @@ void Fcat::FaulterEnableSrvCb(
   const std::shared_ptr<fcat_msgs::srv::FaulterEnableService::Request> request,
   std::shared_ptr<fcat_msgs::srv::FaulterEnableService::Response> response)
 {
-  EVR_ACTIVITY_LO("Handling Faulter Enable Command");
+  RCLCPP_INFO(this->get_logger(), "Handling Faulter Enable Command");
   fastcat::DeviceCmd cmd;
 
   cmd.name = request->name;
@@ -1099,7 +1099,7 @@ void Fcat::FtsTareSrvCb(
   const std::shared_ptr<fcat_msgs::srv::DeviceTriggerService::Request> request,
   std::shared_ptr<fcat_msgs::srv::DeviceTriggerService::Response> response)
 {
-  EVR_ACTIVITY_LO("Handling FTS Tare Command");
+  RCLCPP_INFO(this->get_logger(), "Handling FTS Tare Command");
   fastcat::DeviceCmd cmd;
   cmd.name = request->name;
   cmd.type = fastcat::FTS_TARE_CMD;
@@ -1115,7 +1115,7 @@ void Fcat::PidActivateSrvCb(
   const std::shared_ptr<fcat_msgs::srv::PidActivateService::Request> request,
   std::shared_ptr<fcat_msgs::srv::PidActivateService::Response> response)
 {
-  EVR_ACTIVITY_LO("Handling PID Activate Command");
+  RCLCPP_INFO(this->get_logger(), "Handling PID Activate Command");
   fastcat::DeviceCmd cmd;
   cmd.type = fastcat::PID_ACTIVATE_CMD;
   cmd.pid_activate_cmd.setpoint = request->setpoint;

@@ -1,4 +1,5 @@
 #include "fcat/fcat_services.hpp"
+#include "rclcpp/rclcpp.hpp"
 #include "fastcat/jsd/actuator.h"
 #include "fcat/fcat_utils.hpp"
 #include "jsd/jsd_print.h"
@@ -12,7 +13,6 @@ using std::placeholders::_2;
 
 FcatSrvs::FcatSrvs(const rclcpp::NodeOptions& options)
     : casah_node::BaseInterface("fcat_services", "fcat", options),
-      casah_node::EvrInterface("fcat_services", "fcat", options),
       services_qos_(rclcpp::QoSInitialization::from_rmw(rmw_qos_profile_services_default), rmw_qos_profile_services_default),
       module_state_last_recv_time_(0),
       act_states_last_recv_time_(0),
@@ -479,14 +479,14 @@ bool FcatSrvs::ActuatorCmdPrechecks(std::string name, std::string& message)
   if ((this->now().seconds() - module_state_last_recv_time_) >
       liveliness_duration_sec_) {
     message = "stale fcat module state topic, fcat is not running";
-    EVR_WARNING_LO("bad command: %s", message.c_str());
+    RCLCPP_WARN(this->get_logger(), "bad command: %s", message.c_str());
     return false;
   }
 
   // 2) Check fcat module is not faulted
   if (fcat_module_state_msg_.faulted) {
     message = "fcat is faulted, reset fcat first";
-    EVR_WARNING_LO("bad command: %s", message.c_str());
+    RCLCPP_WARN(this->get_logger(), "bad command: %s", message.c_str());
     return false;
   }
 
@@ -496,14 +496,14 @@ bool FcatSrvs::ActuatorCmdPrechecks(std::string name, std::string& message)
     message =
       "stale fcat actuator states topic, check fastcat YAML has any "
       "actuators";
-    EVR_WARNING_LO("bad command: %s", message.c_str());
+    RCLCPP_WARN(this->get_logger(), "bad command: %s", message.c_str());
     return false;
   }
 
   // 4) Check Actuator name is on the bus
   if (act_state_map_.find(name) == act_state_map_.end()) {
     message = "actuator name not found, check device name";
-    EVR_WARNING_LO("bad command: %s", message.c_str());
+    RCLCPP_WARN(this->get_logger(), "bad command: %s", message.c_str());
     return false;
   }
   return true;
@@ -515,14 +515,14 @@ bool FcatSrvs::PidCmdPrechecks(std::string name, std::string& message)
   if ((this->now().seconds() - module_state_last_recv_time_) >
       liveliness_duration_sec_) {
     message = "stale fcat module state topic, fcat is not running";
-    EVR_WARNING_LO("bad command: %s", message.c_str());
+    RCLCPP_WARN(this->get_logger(), "bad command: %s", message.c_str());
     return false;
   }
 
   // 2) Check fcat module is not faulted
   if (fcat_module_state_msg_.faulted) {
     message = "fcat is faulted, reset fcat first";
-    EVR_WARNING_LO("bad command: %s", message.c_str());
+    RCLCPP_WARN(this->get_logger(), "bad command: %s", message.c_str());
     return false;
   }
 
@@ -531,14 +531,14 @@ bool FcatSrvs::PidCmdPrechecks(std::string name, std::string& message)
       liveliness_duration_sec_) {
     message =
       "stale fcat pid states topic, check fastcat YAML has any pid devices";
-    EVR_WARNING_LO("bad command: %s", message.c_str());
+    RCLCPP_WARN(this->get_logger(), "bad command: %s", message.c_str());
     return false;
   }
 
   // 4) Check Pid name is on the bus
   if (pid_state_map_.find(name) == pid_state_map_.end()) {
     message = "pid name not found, check device name";
-    EVR_WARNING_LO("bad command: %s", message.c_str());
+    RCLCPP_WARN(this->get_logger(), "bad command: %s", message.c_str());
     return false;
   }
   return true;
@@ -548,20 +548,20 @@ bool FcatSrvs::CheckCommonFaultActive(std::string& error_message)
 {
   if (!rclcpp::ok()) {
     error_message = "fcat_srvs node shutdown";
-    EVR_FATAL("Failure: %s", error_message.c_str());
+    RCLCPP_FATAL(this->get_logger(), "Failure: %s", error_message.c_str());
     return true;
   }
 
   if ((this->now().seconds() - module_state_last_recv_time_) >
       liveliness_duration_sec_) {
     error_message = "stale fcat module state topic, fcat has stopped ";
-    EVR_WARNING_HI("Failure: %s", error_message.c_str());
+    RCLCPP_WARN(this->get_logger(), "Failure: %s", error_message.c_str());
     return true;
   }
 
   if (fcat_module_state_msg_.faulted) {
     error_message = "fcat is encountered a fault";
-    EVR_WARNING_LO("%s", error_message.c_str());
+    RCLCPP_WARN(this->get_logger(), "%s", error_message.c_str());
     return false;
   }
 
@@ -594,7 +594,7 @@ bool FcatSrvs::RunActuatorMonitorLoop(std::string& error_message,
 
     if (sms == fastcat::ACTUATOR_SMS_FAULTED) {
       error_message = std::string("Actuator unexpectedly faulted");
-      EVR_WARNING_LO("Failure: %s", error_message.c_str());
+      RCLCPP_WARN(this->get_logger(), "Failure: %s", error_message.c_str());
       return false;
     }
 
@@ -608,7 +608,7 @@ bool FcatSrvs::RunActuatorMonitorLoop(std::string& error_message,
         if (sms == fastcat::ACTUATOR_SMS_HALTED ||
             sms == fastcat::ACTUATOR_SMS_HOLDING) {
           if (idle_rti_count >= idle_persist_rti) {
-            EVR_ACTIVITY_LO(
+            RCLCPP_INFO(this->get_logger(),
               "Max number of RTIs (%ld) elapsed with no Actuator SMS change, "
               "interpreting this result as a success",
               idle_persist_rti);
@@ -630,7 +630,7 @@ bool FcatSrvs::RunActuatorMonitorLoop(std::string& error_message,
         break;
 
       default:
-        EVR_WARNING_HI("bad srv state, aborting command");
+        RCLCPP_WARN(this->get_logger(), "bad srv state, aborting command");
         return false;
     }
   }
@@ -676,7 +676,7 @@ bool FcatSrvs::WaitForSdoResponse(std::string& message, uint16_t app_id)
                 async_sdo_response_msg_.data_type.c_str(),
                 async_sdo_response_msg_.app_id);
         message = print_str;
-        EVR_WARNING_LO("%s", print_str);
+        RCLCPP_WARN(this->get_logger(), "%s", print_str);
       } else {
         sprintf(print_str,
                 "SDO Response Success {Name:(%s) Index:(0x%x)"
@@ -688,7 +688,7 @@ bool FcatSrvs::WaitForSdoResponse(std::string& message, uint16_t app_id)
                 async_sdo_response_msg_.data_type.c_str(),
                 async_sdo_response_msg_.app_id);
         message = print_str;
-        EVR_ACTIVITY_HI("%s", print_str);
+        RCLCPP_INFO(this->get_logger(), "%s", print_str);
       }
       return success;
     }
@@ -702,7 +702,7 @@ bool FcatSrvs::WaitForSdoResponse(std::string& message, uint16_t app_id)
           "Parameter 'sdo_wait_duration_sec' is set to (%lf)",
           app_id, sdo_wait_duration_sec);
   message = print_str;
-  EVR_WARNING_LO("%s", print_str);
+  RCLCPP_WARN(this->get_logger(), "%s", print_str);
   return false;
 }
 
@@ -715,7 +715,7 @@ void FcatSrvs::ActuatorProfPosSrvCb(
     request,
   std::shared_ptr<fcat_msgs::srv::ActuatorProfPosService::Response> response)
 {
-  EVR_ACTIVITY_LO("Handling Actuator Prof Pos Command");
+  RCLCPP_INFO(this->get_logger(), "Handling Actuator Prof Pos Command");
   response->success = false;
 
   if (!ActuatorCmdPrechecks(request->name, response->message)) {
@@ -738,13 +738,13 @@ void FcatSrvs::ActuatorProfPosSrvCb(
     goal_pos += act_state_map_[request->name].actual_position;
   }
 
-  EVR_ACTIVITY_LO("actuator:%s Profile Position command from: %lf to goal: %lf",
+  RCLCPP_INFO(this->get_logger(), "actuator:%s Profile Position command from: %lf to goal: %lf",
                   request->name.c_str(),
                   act_state_map_[request->name].actual_position, goal_pos);
 
   response->success = RunActuatorMonitorLoop(response->message, request->name);
   if (response->success) {
-    EVR_ACTIVITY_HI("Completed ACTUATOR_PROF_POS for: %s",
+    RCLCPP_INFO(this->get_logger(), "Completed ACTUATOR_PROF_POS for: %s",
                     request->name.c_str());
     response->message = "";  // not strictly needed
   }
@@ -755,7 +755,7 @@ void FcatSrvs::ActuatorProfVelSrvCb(
     request,
   std::shared_ptr<fcat_msgs::srv::ActuatorProfVelService::Response> response)
 {
-  EVR_ACTIVITY_LO("Handling Actuator Prof Vel Command");
+  RCLCPP_INFO(this->get_logger(), "Handling Actuator Prof Vel Command");
   response->success = false;
 
   if (!ActuatorCmdPrechecks(request->name, response->message)) {
@@ -764,7 +764,7 @@ void FcatSrvs::ActuatorProfVelSrvCb(
 
   double tol = this->get_parameter("tolerance").as_double();
   if (fabs(request->max_duration) < tol) {
-    EVR_WARNING_HI(
+    RCLCPP_WARN(this->get_logger(),
       "Max Duration (%E) < tolerance (%E) indicating this runs forever. "
       "In this case, use the topic (non-blocking) interface instead of the "
       "service (blocking) interface",
@@ -782,12 +782,12 @@ void FcatSrvs::ActuatorProfVelSrvCb(
 
   act_prof_vel_pub_->publish(cmd_msg);
 
-  EVR_ACTIVITY_LO("actuator:%s to goal velocity value: %lf",
+  RCLCPP_INFO(this->get_logger(), "actuator:%s to goal velocity value: %lf",
                   request->name.c_str(), request->target_velocity);
 
   response->success = RunActuatorMonitorLoop(response->message, request->name);
   if (response->success) {
-    EVR_ACTIVITY_HI("Completed ACTUATOR_PROF_VEL for: %s",
+    RCLCPP_INFO(this->get_logger(), "Completed ACTUATOR_PROF_VEL for: %s",
                     request->name.c_str());
     response->message = "";
   }
@@ -798,14 +798,14 @@ void FcatSrvs::ActuatorProfTorqueSrvCb(
     request,
   std::shared_ptr<fcat_msgs::srv::ActuatorProfTorqueService::Response> response)
 {
-  EVR_ACTIVITY_HI("Handling Actuator Prof Torque Command");
+  RCLCPP_INFO(this->get_logger(), "Handling Actuator Prof Torque Command");
   response->success = false;
 
   if (!ActuatorCmdPrechecks(request->name, response->message)) {
     return;
   }
 
-  EVR_DIAGNOSTIC(
+  RCLCPP_DEBUG(this->get_logger(),
     "actuator_prof_torque: issuing topic cmd and watching for completion");
 
   // Publish topic to start the service
@@ -817,12 +817,12 @@ void FcatSrvs::ActuatorProfTorqueSrvCb(
 
   act_prof_torque_pub_->publish(cmd_msg);
 
-  EVR_ACTIVITY_LO("fcat_srv actuator:%s to goal current value: %lf",
+  RCLCPP_INFO(this->get_logger(), "fcat_srv actuator:%s to goal current value: %lf",
                   request->name.c_str(), request->target_torque_amps);
 
   response->success = RunActuatorMonitorLoop(response->message, request->name);
   if (response->success) {
-    EVR_ACTIVITY_HI("Completed ACTUATOR_PROF_TORQUE for: %s",
+    RCLCPP_INFO(this->get_logger(), "Completed ACTUATOR_PROF_TORQUE for: %s",
                     request->name.c_str());
     response->message = "";
   }
@@ -833,7 +833,7 @@ void FcatSrvs::ActuatorCalibrateSrvCb(
     request,
   std::shared_ptr<fcat_msgs::srv::ActuatorCalibrateService::Response> response)
 {
-  EVR_ACTIVITY_HI("Handling Actuator Calibrate Command");
+  RCLCPP_INFO(this->get_logger(), "Handling Actuator Calibrate Command");
   response->success = false;
 
   if (!ActuatorCmdPrechecks(request->name, response->message)) {
@@ -852,7 +852,7 @@ void FcatSrvs::ActuatorCalibrateSrvCb(
 
   response->success = RunActuatorMonitorLoop(response->message, request->name);
   if (response->success) {
-    EVR_ACTIVITY_HI("Completed ACTUATOR_CALIBRATE for: %s",
+    RCLCPP_INFO(this->get_logger(), "Completed ACTUATOR_CALIBRATE for: %s",
                     request->name.c_str());
     response->message = "";
   }
@@ -866,7 +866,7 @@ void FcatSrvs::ActuatorSetGainSchedulingModeSrvCb(
     fcat_msgs::srv::ActuatorSetGainSchedulingModeService::Response>
     response)
 {
-  EVR_ACTIVITY_HI("Handling Actuator Set Gain Scheduling Mode Command");
+  RCLCPP_INFO(this->get_logger(), "Handling Actuator Set Gain Scheduling Mode Command");
   response->success = false;
 
   auto tlc_req = std::make_shared<fcat_msgs::srv::TlcWriteService::Request>();
@@ -890,7 +890,7 @@ void FcatSrvs::ActuatorSetUnitModeSrvCb(
   std::shared_ptr<fcat_msgs::srv::ActuatorSetUnitModeService::Response>
     response)
 {
-  EVR_ACTIVITY_HI("Handling Actuator Set Unit Mode Command");
+  RCLCPP_INFO(this->get_logger(), "Handling Actuator Set Unit Mode Command");
   response->success = false;
 
   auto tlc_req = std::make_shared<fcat_msgs::srv::TlcWriteService::Request>();
@@ -912,14 +912,14 @@ void FcatSrvs::PidActivateSrvCb(
   const std::shared_ptr<fcat_msgs::srv::PidActivateService::Request> request,
   std::shared_ptr<fcat_msgs::srv::PidActivateService::Response> response)
 {
-  EVR_ACTIVITY_HI("Handling Pid Activate Command");
+  RCLCPP_INFO(this->get_logger(), "Handling Pid Activate Command");
   response->success = false;
 
   if (!PidCmdPrechecks(request->name, response->message)) {
     return;
   }
 
-  EVR_DIAGNOSTIC("pid_activate: issuing topic cmd and watching for completion");
+  RCLCPP_DEBUG(this->get_logger(), "pid_activate: issuing topic cmd and watching for completion");
 
   // Publish topic to start the service
   auto cmd_msg = fcat_msgs::msg::PidActivateCmd();
@@ -957,7 +957,7 @@ void FcatSrvs::PidActivateSrvCb(
     rate_->sleep();
   }
 
-  EVR_ACTIVITY_HI("Completed PID_ACTIVATE for: %s", request->name.c_str());
+  RCLCPP_INFO(this->get_logger(), "Completed PID_ACTIVATE for: %s", request->name.c_str());
   response->message = "";
   response->success = true;
 }
@@ -966,7 +966,7 @@ void FcatSrvs::AsyncSdoWriteSrvCb(
   const std::shared_ptr<fcat_msgs::srv::AsyncSdoWriteService::Request> request,
   std::shared_ptr<fcat_msgs::srv::AsyncSdoWriteService::Response> response)
 {
-  EVR_ACTIVITY_HI("Handling SDO Write command");
+  RCLCPP_INFO(this->get_logger(), "Handling SDO Write command");
   char print_str[512];
   response->message = "";
 
@@ -977,7 +977,7 @@ void FcatSrvs::AsyncSdoWriteSrvCb(
             request->sdo_index.c_str());
 
     response->message = print_str;
-    EVR_WARNING_LO("%s", print_str);
+    RCLCPP_WARN(this->get_logger(), "%s", print_str);
 
     return;
   }
@@ -989,7 +989,7 @@ void FcatSrvs::AsyncSdoWriteSrvCb(
             "{'I8', 'I16', 'I32', 'I64', 'F32', 'U8', 'U16', 'U32', 'U64'}",
             request->data_type.c_str());
     response->message = print_str;
-    EVR_WARNING_LO("%s", print_str);
+    RCLCPP_WARN(this->get_logger(), "%s", print_str);
     return;
   }
 
@@ -1005,7 +1005,7 @@ void FcatSrvs::AsyncSdoWriteSrvCb(
 
   async_sdo_write_pub_->publish(msg);
 
-  EVR_ACTIVITY_LO(
+  RCLCPP_INFO(this->get_logger(),
     "Async SDO Write issued {Name:(%s) Index:(0x%x)"
     " Subindex:(%u) Data:(%s) DataType:(%s) AppId:(%u)}",
     msg.name.c_str(), msg.sdo_index, msg.sdo_subindex, msg.data.c_str(),
@@ -1019,7 +1019,7 @@ void FcatSrvs::AsyncSdoReadSrvCb(
   const std::shared_ptr<fcat_msgs::srv::AsyncSdoReadService::Request> request,
   std::shared_ptr<fcat_msgs::srv::AsyncSdoReadService::Response> response)
 {
-  EVR_ACTIVITY_HI("Handling SDO Read command");
+  RCLCPP_INFO(this->get_logger(), "Handling SDO Read command");
   char print_str[512];
   response->message = "";
 
@@ -1030,7 +1030,7 @@ void FcatSrvs::AsyncSdoReadSrvCb(
             request->sdo_index.c_str());
 
     response->message = print_str;
-    EVR_WARNING_LO("%s", print_str);
+    RCLCPP_WARN(this->get_logger(), "%s", print_str);
     return;
   }
 
@@ -1042,7 +1042,7 @@ void FcatSrvs::AsyncSdoReadSrvCb(
             request->data_type.c_str());
 
     response->message = print_str;
-    EVR_WARNING_LO("%s", print_str);
+    RCLCPP_WARN(this->get_logger(), "%s", print_str);
     return;
   }
 
@@ -1057,7 +1057,7 @@ void FcatSrvs::AsyncSdoReadSrvCb(
 
   async_sdo_read_pub_->publish(msg);
 
-  EVR_ACTIVITY_LO(
+  RCLCPP_INFO(this->get_logger(),
     "Async SDO Read issued {Name:(%s) Index:(0x%x)"
     " Subindex:(%u) DataType:(%s) AppId:(%u)}",
     msg.name.c_str(), msg.sdo_index, msg.sdo_subindex, msg.data_type.c_str(),
@@ -1071,7 +1071,7 @@ void FcatSrvs::TlcWriteSrvCb(
   const std::shared_ptr<fcat_msgs::srv::TlcWriteService::Request> request,
   std::shared_ptr<fcat_msgs::srv::TlcWriteService::Response> response)
 {
-  EVR_ACTIVITY_HI("Handling Two-Letter Command (TLC) Write command");
+  RCLCPP_INFO(this->get_logger(), "Handling Two-Letter Command (TLC) Write command");
   char print_str[512];
   response->message = "";
 
@@ -1082,7 +1082,7 @@ void FcatSrvs::TlcWriteSrvCb(
             request->tlc.c_str());
 
     response->message = print_str;
-    EVR_WARNING_LO("%s", print_str);
+    RCLCPP_WARN(this->get_logger(), "%s", print_str);
     return;
   }
 
@@ -1093,7 +1093,7 @@ void FcatSrvs::TlcWriteSrvCb(
             "{'I8', 'I16', 'I32', 'I64', 'F32', 'U8', 'U16', 'U32', 'U64'}",
             request->data_type.c_str());
     response->message = print_str;
-    EVR_WARNING_LO("%s", print_str);
+    RCLCPP_WARN(this->get_logger(), "%s", print_str);
 
     return;
   }
@@ -1110,7 +1110,7 @@ void FcatSrvs::TlcWriteSrvCb(
 
   async_sdo_write_pub_->publish(msg);
 
-  EVR_ACTIVITY_LO(
+  RCLCPP_INFO(this->get_logger(),
     "Async SDO Write issued {Name:(%s) TLC:(%s) Index:(0x%x)"
     " Subindex:(%u) Data:(%s) DataType:(%s) AppId:(%u)}",
     msg.name.c_str(), request->tlc.c_str(), msg.sdo_index, msg.sdo_subindex,
@@ -1124,7 +1124,7 @@ void FcatSrvs::TlcReadSrvCb(
   const std::shared_ptr<fcat_msgs::srv::TlcReadService::Request> request,
   std::shared_ptr<fcat_msgs::srv::TlcReadService::Response> response)
 {
-  EVR_ACTIVITY_HI("Handling Two-Letter Command (TLC) Read command");
+  RCLCPP_INFO(this->get_logger(), "Handling Two-Letter Command (TLC) Read command");
   char print_str[512];
   response->message = "";
 
@@ -1135,7 +1135,7 @@ void FcatSrvs::TlcReadSrvCb(
             request->tlc.c_str());
 
     response->message = print_str;
-    EVR_WARNING_LO("%s", print_str);
+    RCLCPP_WARN(this->get_logger(), "%s", print_str);
     return;
   }
 
@@ -1147,7 +1147,7 @@ void FcatSrvs::TlcReadSrvCb(
             request->data_type.c_str());
 
     response->message = print_str;
-    EVR_WARNING_LO("%s", print_str);
+    RCLCPP_WARN(this->get_logger(), "%s", print_str);
     return;
   }
 
@@ -1162,7 +1162,7 @@ void FcatSrvs::TlcReadSrvCb(
 
   async_sdo_read_pub_->publish(msg);
 
-  EVR_ACTIVITY_LO(
+  RCLCPP_INFO(this->get_logger(),
     "Async SDO Read issued {Name:(%s) TLC:(%s) Index:(0x%x)"
     " Subindex:(%u) DataType:(%s) AppId:(%u)}",
     msg.name.c_str(), request->tlc.c_str(), msg.sdo_index, msg.sdo_subindex,

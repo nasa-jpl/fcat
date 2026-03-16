@@ -19,7 +19,6 @@ Fcat::~Fcat() { fcat_manager_.Shutdown(); }
 Fcat::Fcat(const rclcpp::NodeOptions& options)
     : casah_node::BaseInterface("fcat", "fcat", options),
       casah_node::FaultInterface("fcat", "fcat", options),
-      casah_node::EvrInterface("fcat", "fcat", options),
       service_qos_(rclcpp::QoSInitialization::from_rmw(rmw_qos_profile_services_default), rmw_qos_profile_services_default)
 {
   process_loop_callback_group_ =
@@ -33,7 +32,7 @@ Fcat::Fcat(const rclcpp::NodeOptions& options)
     "",  // must be passed, cannot generally reason about this file path
     "Location of the the fastcat topology YAML file");
 
-  EVR_ACTIVITY_LO("loading Yaml from %s", fastcat_config_path.c_str());
+  RCLCPP_INFO(this->get_logger(), "loading Yaml from %s", fastcat_config_path.c_str());
   YAML::Node node = YAML::LoadFile(fastcat_config_path);
 
   if (!fcat_manager_.ConfigFromYaml(node)) {
@@ -141,7 +140,7 @@ Fcat::Fcat(const rclcpp::NodeOptions& options)
 
   DeclareRuntimeParameterBool(
     "report_cycle_slips", true,
-    "If true, fcat emits EVR messages to report timer "
+    "If true, fcat emits logs to report timer "
     "slips");
 
   PopulateDeviceStateFields();
@@ -156,7 +155,7 @@ Fcat::Fcat(const rclcpp::NodeOptions& options)
 
   // pull the Timer Rate from the Fastcat YAML
   InitializeTimerRate(fcat_manager_.GetTargetLoopRate());
-  EVR_ACTIVITY_LO("Starting Wall Timer at %lf hz",
+  RCLCPP_INFO(this->get_logger(), "Starting Wall Timer at %lf hz",
                   fcat_manager_.GetTargetLoopRate());
 
   loop_period_sec_ = 1.0 / fcat_manager_.GetTargetLoopRate();
@@ -172,7 +171,7 @@ void Fcat::SetRealtimePreempt(int scheduler_priority) {
   struct sched_param param;
   param.sched_priority = scheduler_priority;
   if(sched_setscheduler(0, SCHED_FIFO, &param) == -1) {
-    EVR_WARNING_HI(
+    RCLCPP_WARN(this->get_logger(),
       "Unable to set realtime FIFO scheduler with priority of "
       "%d; the realtime kernel must be installed to use this feature",
       scheduler_priority
@@ -182,7 +181,7 @@ void Fcat::SetRealtimePreempt(int scheduler_priority) {
   
   // Lock memory
   if(mlockall(MCL_CURRENT | MCL_FUTURE) == -1) {
-    EVR_WARNING_HI("Unable to lock memory; 'mlockall' failed");
+    RCLCPP_WARN(this->get_logger(), "Unable to lock memory; 'mlockall' failed");
   }
   
   // Pre-fault our stack
@@ -195,7 +194,7 @@ void Fcat::StartProcessTimer()
 {
   rclcpp::Parameter rate_param;
   if (!this->get_parameter("target_loop_rate_hz", rate_param)) {
-    EVR_FATAL(
+    RCLCPP_FATAL(this->get_logger(),
       "Developer Warning: must call InitializeTimerRate(...) before "
       "starting timer");
     rclcpp::shutdown();
@@ -385,14 +384,14 @@ void Fcat::PopulateDeviceStateFields()
 
   for (auto it = device_state_ptrs_.begin(); it != device_state_ptrs_.end();
        ++it) {
-    EVR_ACTIVITY_LO("Populating device_name_state_map_[%s]",
+    RCLCPP_INFO(this->get_logger(), "Populating device_name_state_map_[%s]",
                     (*it)->name.c_str());
 
     device_name_state_map_[(*it)->name] = *it;
 
     device_type_vec_map_[(*it)->type].push_back(*it);
 
-    EVR_ACTIVITY_LO("counts[%d] = %ld", (*it)->type,
+    RCLCPP_INFO(this->get_logger(), "counts[%d] = %ld", (*it)->type,
                     device_type_vec_map_[(*it)->type].size());
   }
 }
@@ -406,7 +405,7 @@ bool Fcat::ActuatorExistsOnBus(const std::string& name)
     return true;
   }
   // handle other future Actuator device types here
-  EVR_WARNING_HI("%s", error_message.c_str());
+  RCLCPP_WARN(this->get_logger(), "%s", error_message.c_str());
   return false;
 }
 
@@ -447,7 +446,7 @@ bool Fcat::DeviceExistsOnBus(const std::string& name,
   std::string error_message;
   bool success = DeviceExistsOnBus(name, type, error_message);
   if (not success) {
-    EVR_WARNING_HI("%s", error_message.c_str());
+    RCLCPP_WARN(this->get_logger(), "%s", error_message.c_str());
   }
   return success;
 }
@@ -462,7 +461,7 @@ bool Fcat::TypeExistsOnBus(fastcat::DeviceStateType type)
 
 void Fcat::InitializePublishersAndMessages()
 {
-  EVR_ACTIVITY_LO("Fcat::InitializePublishers()");
+  RCLCPP_INFO(this->get_logger(), "Fcat::InitializePublishers()");
 
   rclcpp::QoS qos_profile(publisher_queue_size_);
   qos_profile.best_effort();
@@ -480,7 +479,7 @@ void Fcat::InitializePublishersAndMessages()
     gold_vec_state_ptrs.size() + platinum_vec_state_ptrs.size();
 
   if (num_actuators > 0) {
-    EVR_ACTIVITY_LO("Creating actuator pub");
+    RCLCPP_INFO(this->get_logger(), "Creating actuator pub");
     actuator_pub_ = this->create_publisher<fcat_msgs::msg::ActuatorStates>(
       "state/actuators", qos_profile);
 
@@ -488,7 +487,7 @@ void Fcat::InitializePublishersAndMessages()
     actuator_states_msg_.states.resize(num_actuators);
 
     if (enable_js_pub_) {
-      EVR_ACTIVITY_LO("Creating joint_states pub");
+      RCLCPP_INFO(this->get_logger(), "Creating joint_states pub");
 
       // This is the only topic that broadcasts in the global
       // namespace. This prevents needing to remap `fcat/state/joint_states`
@@ -502,7 +501,7 @@ void Fcat::InitializePublishersAndMessages()
   // Egd
   auto vec_state_ptrs = device_type_vec_map_[fastcat::EGD_STATE];
   if (vec_state_ptrs.size() > 0) {
-    EVR_ACTIVITY_LO("Creating Egd pub");
+    RCLCPP_INFO(this->get_logger(), "Creating Egd pub");
     egd_pub_ = this->create_publisher<fcat_msgs::msg::EgdStates>(
       "state/egds", qos_profile);
 
@@ -513,7 +512,7 @@ void Fcat::InitializePublishersAndMessages()
   // El1008
   vec_state_ptrs = device_type_vec_map_[fastcat::EL1008_STATE];
   if (vec_state_ptrs.size() > 0) {
-    EVR_ACTIVITY_LO("Creating El1008 pub");
+    RCLCPP_INFO(this->get_logger(), "Creating El1008 pub");
     el1008_pub_ = this->create_publisher<fcat_msgs::msg::El1008States>(
       "state/el1008s", qos_profile);
 
@@ -524,7 +523,7 @@ void Fcat::InitializePublishersAndMessages()
   // El2124
   vec_state_ptrs = device_type_vec_map_[fastcat::EL2124_STATE];
   if (vec_state_ptrs.size() > 0) {
-    EVR_ACTIVITY_LO("Creating El2124 pub");
+    RCLCPP_INFO(this->get_logger(), "Creating El2124 pub");
     el2124_pub_ = this->create_publisher<fcat_msgs::msg::El2124States>(
       "state/el2124s", qos_profile);
 
@@ -535,7 +534,7 @@ void Fcat::InitializePublishersAndMessages()
   // El2809
   vec_state_ptrs = device_type_vec_map_[fastcat::EL2809_STATE];
   if (vec_state_ptrs.size() > 0) {
-    EVR_ACTIVITY_LO("Creating El2809 pub");
+    RCLCPP_INFO(this->get_logger(), "Creating El2809 pub");
     el2809_pub_ = this->create_publisher<fcat_msgs::msg::El2809States>(
       "state/el2809s", qos_profile);
 
@@ -546,7 +545,7 @@ void Fcat::InitializePublishersAndMessages()
   // El2798
   vec_state_ptrs = device_type_vec_map_[fastcat::EL2798_STATE];
   if (vec_state_ptrs.size() > 0) {
-    EVR_ACTIVITY_LO("Creating El2798 pub");
+    RCLCPP_INFO(this->get_logger(), "Creating El2798 pub");
     el2798_pub_ = this->create_publisher<fcat_msgs::msg::El2798States>(
         "state/el2798s", qos_profile);
 
@@ -557,7 +556,7 @@ void Fcat::InitializePublishersAndMessages()
   // El2828
   vec_state_ptrs = device_type_vec_map_[fastcat::EL2828_STATE];
   if (vec_state_ptrs.size() > 0) {
-    EVR_ACTIVITY_LO("Creating El2828 pub");
+    RCLCPP_INFO(this->get_logger(), "Creating El2828 pub");
     el2828_pub_ = this->create_publisher<fcat_msgs::msg::El2828States>(
         "state/el2828s", qos_profile);
 
@@ -568,7 +567,7 @@ void Fcat::InitializePublishersAndMessages()
   // El3104
   vec_state_ptrs = device_type_vec_map_[fastcat::EL3104_STATE];
   if (vec_state_ptrs.size() > 0) {
-    EVR_ACTIVITY_LO("Creating El3104 pub");
+    RCLCPP_INFO(this->get_logger(), "Creating El3104 pub");
     el3104_pub_ = this->create_publisher<fcat_msgs::msg::El3104States>(
       "state/el3104s", qos_profile);
 
@@ -579,7 +578,7 @@ void Fcat::InitializePublishersAndMessages()
   // El3162
   vec_state_ptrs = device_type_vec_map_[fastcat::EL3162_STATE];
   if (vec_state_ptrs.size() > 0) {
-    EVR_ACTIVITY_LO("Creating El3162 pub");
+    RCLCPP_INFO(this->get_logger(), "Creating El3162 pub");
     el3162_pub_ = this->create_publisher<fcat_msgs::msg::El3162States>(
       "state/el3162s", qos_profile);
 
@@ -590,7 +589,7 @@ void Fcat::InitializePublishersAndMessages()
   // El3202
   vec_state_ptrs = device_type_vec_map_[fastcat::EL3202_STATE];
   if (vec_state_ptrs.size() > 0) {
-    EVR_ACTIVITY_LO("Creating El3202 pub");
+    RCLCPP_INFO(this->get_logger(), "Creating El3202 pub");
     el3202_pub_ = this->create_publisher<fcat_msgs::msg::El3202States>(
       "state/el3202s", qos_profile);
 
@@ -601,7 +600,7 @@ void Fcat::InitializePublishersAndMessages()
   // El3208
   vec_state_ptrs = device_type_vec_map_[fastcat::EL3208_STATE];
   if (vec_state_ptrs.size() > 0) {
-    EVR_ACTIVITY_LO("Creating El3208 pub");
+    RCLCPP_INFO(this->get_logger(), "Creating El3208 pub");
     el3208_pub_ = this->create_publisher<fcat_msgs::msg::El3208States>(
       "state/el3208s", qos_profile);
 
@@ -612,7 +611,7 @@ void Fcat::InitializePublishersAndMessages()
   // El3314
   vec_state_ptrs = device_type_vec_map_[fastcat::EL3314_STATE];
   if (vec_state_ptrs.size() > 0) {
-    EVR_ACTIVITY_LO("Creating El3314 pub");
+    RCLCPP_INFO(this->get_logger(), "Creating El3314 pub");
     el3314_pub_ = this->create_publisher<fcat_msgs::msg::El3314States>(
       "state/el3314s", qos_profile);
 
@@ -623,7 +622,7 @@ void Fcat::InitializePublishersAndMessages()
   // El3318
   vec_state_ptrs = device_type_vec_map_[fastcat::EL3318_STATE];
   if (vec_state_ptrs.size() > 0) {
-    EVR_ACTIVITY_LO("Creating El3318 pub");
+    RCLCPP_INFO(this->get_logger(), "Creating El3318 pub");
     el3318_pub_ = this->create_publisher<fcat_msgs::msg::El3318States>(
       "state/el3318s", qos_profile);
 
@@ -634,7 +633,7 @@ void Fcat::InitializePublishersAndMessages()
   // El3602
   vec_state_ptrs = device_type_vec_map_[fastcat::EL3602_STATE];
   if (vec_state_ptrs.size() > 0) {
-    EVR_ACTIVITY_LO("Creating El3602 pub");
+    RCLCPP_INFO(this->get_logger(), "Creating El3602 pub");
     el3602_pub_ = this->create_publisher<fcat_msgs::msg::El3602States>(
       "state/el3602s", qos_profile);
 
@@ -645,7 +644,7 @@ void Fcat::InitializePublishersAndMessages()
   // El4102
   vec_state_ptrs = device_type_vec_map_[fastcat::EL4102_STATE];
   if (vec_state_ptrs.size() > 0) {
-    EVR_ACTIVITY_LO("Creating El4102 pub");
+    RCLCPP_INFO(this->get_logger(), "Creating El4102 pub");
     el4102_pub_ = this->create_publisher<fcat_msgs::msg::El4102States>(
       "state/el4102s", qos_profile);
 
@@ -656,7 +655,7 @@ void Fcat::InitializePublishersAndMessages()
   // El5042
   vec_state_ptrs = device_type_vec_map_[fastcat::EL5042_STATE];
   if (vec_state_ptrs.size() > 0) {
-    EVR_ACTIVITY_LO("Creating El5042 pub");
+    RCLCPP_INFO(this->get_logger(), "Creating El5042 pub");
     el5042_pub_ = this->create_publisher<fcat_msgs::msg::El5042States>(
         "state/el5042s", qos_profile);
 
@@ -667,7 +666,7 @@ void Fcat::InitializePublishersAndMessages()
   // ILD1900
   vec_state_ptrs = device_type_vec_map_[fastcat::ILD1900_STATE];
   if (vec_state_ptrs.size() > 0) {
-    EVR_ACTIVITY_LO("Creating Ild1900 pub");
+    RCLCPP_INFO(this->get_logger(), "Creating Ild1900 pub");
     ild1900_pub_ = this->create_publisher<fcat_msgs::msg::Ild1900States>(
       "state/ild1900s", qos_profile);
 
@@ -678,7 +677,7 @@ void Fcat::InitializePublishersAndMessages()
   // Commander
   vec_state_ptrs = device_type_vec_map_[fastcat::COMMANDER_STATE];
   if (vec_state_ptrs.size() > 0) {
-    EVR_ACTIVITY_LO("Creating Commander pub");
+    RCLCPP_INFO(this->get_logger(), "Creating Commander pub");
     commander_pub_ = this->create_publisher<fcat_msgs::msg::CommanderStates>(
       "state/commanders", qos_profile);
 
@@ -689,7 +688,7 @@ void Fcat::InitializePublishersAndMessages()
   // Conditional
   vec_state_ptrs = device_type_vec_map_[fastcat::CONDITIONAL_STATE];
   if (vec_state_ptrs.size() > 0) {
-    EVR_ACTIVITY_LO("Creating Conditional pub");
+    RCLCPP_INFO(this->get_logger(), "Creating Conditional pub");
     conditional_pub_ =
       this->create_publisher<fcat_msgs::msg::ConditionalStates>(
         "state/conditionals", qos_profile);
@@ -701,7 +700,7 @@ void Fcat::InitializePublishersAndMessages()
   // Faulter
   vec_state_ptrs = device_type_vec_map_[fastcat::FAULTER_STATE];
   if (vec_state_ptrs.size() > 0) {
-    EVR_ACTIVITY_LO("Creating Faulter pub");
+    RCLCPP_INFO(this->get_logger(), "Creating Faulter pub");
     faulter_pub_ = this->create_publisher<fcat_msgs::msg::FaulterStates>(
       "state/faulters", qos_profile);
 
@@ -712,7 +711,7 @@ void Fcat::InitializePublishersAndMessages()
   // Filter
   vec_state_ptrs = device_type_vec_map_[fastcat::FILTER_STATE];
   if (vec_state_ptrs.size() > 0) {
-    EVR_ACTIVITY_LO("Creating Filter pub");
+    RCLCPP_INFO(this->get_logger(), "Creating Filter pub");
     filter_pub_ = this->create_publisher<fcat_msgs::msg::FilterStates>(
       "state/filter", qos_profile);
 
@@ -723,7 +722,7 @@ void Fcat::InitializePublishersAndMessages()
   // Function
   vec_state_ptrs = device_type_vec_map_[fastcat::FUNCTION_STATE];
   if (vec_state_ptrs.size() > 0) {
-    EVR_ACTIVITY_LO("Creating Function pub");
+    RCLCPP_INFO(this->get_logger(), "Creating Function pub");
     function_pub_ = this->create_publisher<fcat_msgs::msg::FunctionStates>(
       "state/functions", qos_profile);
 
@@ -734,7 +733,7 @@ void Fcat::InitializePublishersAndMessages()
   // Pid
   vec_state_ptrs = device_type_vec_map_[fastcat::PID_STATE];
   if (vec_state_ptrs.size() > 0) {
-    EVR_ACTIVITY_LO("Creating Pid pub");
+    RCLCPP_INFO(this->get_logger(), "Creating Pid pub");
     pid_pub_ = this->create_publisher<fcat_msgs::msg::PidStates>(
       "state/pids", qos_profile);
 
@@ -745,7 +744,7 @@ void Fcat::InitializePublishersAndMessages()
   // Saturation
   vec_state_ptrs = device_type_vec_map_[fastcat::SATURATION_STATE];
   if (vec_state_ptrs.size() > 0) {
-    EVR_ACTIVITY_LO("Creating Saturation pub");
+    RCLCPP_INFO(this->get_logger(), "Creating Saturation pub");
     saturation_pub_ = this->create_publisher<fcat_msgs::msg::SaturationStates>(
       "state/saturations", qos_profile);
 
@@ -756,7 +755,7 @@ void Fcat::InitializePublishersAndMessages()
   // Schmitt Trigger
   vec_state_ptrs = device_type_vec_map_[fastcat::SCHMITT_TRIGGER_STATE];
   if (vec_state_ptrs.size() > 0) {
-    EVR_ACTIVITY_LO("Creating Schmitt Trigger pub");
+    RCLCPP_INFO(this->get_logger(), "Creating Schmitt Trigger pub");
     schmitt_trigger_pub_ =
       this->create_publisher<fcat_msgs::msg::SchmittTriggerStates>(
         "state/schmitt_triggers", qos_profile);
@@ -768,7 +767,7 @@ void Fcat::InitializePublishersAndMessages()
   // Signal Generator
   vec_state_ptrs = device_type_vec_map_[fastcat::SIGNAL_GENERATOR_STATE];
   if (vec_state_ptrs.size() > 0) {
-    EVR_ACTIVITY_LO("Creating Signal Generator pub");
+    RCLCPP_INFO(this->get_logger(), "Creating Signal Generator pub");
     signal_generator_pub_ =
       this->create_publisher<fcat_msgs::msg::SignalGeneratorStates>(
         "state/signal_generators", qos_profile);
@@ -780,7 +779,7 @@ void Fcat::InitializePublishersAndMessages()
   // Linear Interpolation
   vec_state_ptrs = device_type_vec_map_[fastcat::LINEAR_INTERPOLATION_STATE];
   if (vec_state_ptrs.size() > 0) {
-    EVR_ACTIVITY_LO("Creating LinearInterpolation pub");
+    RCLCPP_INFO(this->get_logger(), "Creating LinearInterpolation pub");
     linear_interpolation_pub_ =
       this->create_publisher<fcat_msgs::msg::LinearInterpolationStates>(
         "state/linear_interpolators", qos_profile);
@@ -793,7 +792,7 @@ void Fcat::InitializePublishersAndMessages()
   vec_state_ptrs =
     device_type_vec_map_[fastcat::THREE_NODE_THERMAL_MODEL_STATE];
   if (vec_state_ptrs.size() > 0) {
-    EVR_ACTIVITY_LO("Creating ThreeNodeThermalModel pub");
+    RCLCPP_INFO(this->get_logger(), "Creating ThreeNodeThermalModel pub");
     three_node_thermal_model_pub_ =
       this->create_publisher<fcat_msgs::msg::ThreeNodeThermalModelStates>(
         "state/three_node_thermal_models", qos_profile);
@@ -806,7 +805,7 @@ void Fcat::InitializePublishersAndMessages()
   vec_state_ptrs = device_type_vec_map_[fastcat::FTS_STATE];
 
   if (vec_state_ptrs.size() > 0) {
-    EVR_ACTIVITY_LO("Creating FTS pub");
+    RCLCPP_INFO(this->get_logger(), "Creating FTS pub");
 
     fts_pub_ = this->create_publisher<fcat_msgs::msg::FtsStates>(
       "state/fts", qos_profile);
@@ -826,7 +825,7 @@ void Fcat::InitializePublishersAndMessages()
           this->create_publisher<geometry_msgs::msg::WrenchStamped>(
             "fts/" + device + "/tared_wrench", qos_profile);
 
-        EVR_ACTIVITY_LO("Creating ROS WrenchStamped Topics for %s",
+        RCLCPP_INFO(this->get_logger(), "Creating ROS WrenchStamped Topics for %s",
                         device.c_str());
       }
     }
@@ -1634,9 +1633,9 @@ void Fcat::SetCpuAffinity() {
 #ifdef _GNU_SOURCE
     if (gettid() != getpid()) {
       int cpus_available = get_nprocs_conf();
-      EVR_ACTIVITY_LO("This system has %d CPUs configured", cpus_available);
+      RCLCPP_INFO(this->get_logger(), "This system has %d CPUs configured", cpus_available);
       if (process_loop_cpu_id_ >= cpus_available) {
-        EVR_FATAL(
+        RCLCPP_FATAL(this->get_logger(),
           "User requested to pin Process() function to CPU ID %d, but "
           "only %d CPUs are available on this machine",
           process_loop_cpu_id_, cpus_available);
@@ -1646,22 +1645,22 @@ void Fcat::SetCpuAffinity() {
         CPU_ZERO(&affinity);
         CPU_SET(process_loop_cpu_id_, &affinity);
 
-        EVR_ACTIVITY_LO("Setting CPU affinity for thread ID: %d", gettid());
+        RCLCPP_INFO(this->get_logger(), "Setting CPU affinity for thread ID: %d", gettid());
         int result = sched_setaffinity(gettid(), sizeof(cpu_set_t), &affinity);
         if (result != 0) {
-          EVR_WARNING_HI(
+          RCLCPP_WARN(this->get_logger(),
             "Could not set process affinity to CPU %d for thread ID: %d, "
             "sched_setaffinity returned result: %d",
             process_loop_cpu_id_, gettid(), result);
         } else {
-          EVR_ACTIVITY_LO("Set CPU affinity to CPU %d for thread ID: %d",
+          RCLCPP_INFO(this->get_logger(), "Set CPU affinity to CPU %d for thread ID: %d",
                          process_loop_cpu_id_, gettid());
         }
         process_loop_thread_id_ = gettid();
       }
     }
 #else
-  EVR_WARNING_HI(
+  RCLCPP_WARN(this->get_logger(),
     "GNU extensions are not available on this machine/compiler; the Process() "
     "loop "
     "cannot be moved to CPU %d",
@@ -1680,7 +1679,7 @@ void Fcat::Process()
       cpu_affinity_initialized_) {
     double dt = now.seconds() - publish_time_stamp_.seconds();
     if (dt > 2.0 * loop_period_sec_) {
-      EVR_WARNING_LO(
+      RCLCPP_WARN(this->get_logger(),
         "Cycle slip detected; seconds since last Process() call: "
         "%f",
         dt);
@@ -1706,9 +1705,9 @@ void Fcat::Process()
       cpu_affinity_initialized_ = true;
     } else if (gettid() != getpid()) {
       int cpus_available = get_nprocs_conf();
-      EVR_ACTIVITY_LO("This system has %d CPUs configured", cpus_available);
+      RCLCPP_INFO(this->get_logger(), "This system has %d CPUs configured", cpus_available);
       if (process_loop_cpu_id_ >= cpus_available) {
-        EVR_FATAL(
+        RCLCPP_FATAL(this->get_logger(),
           "User requested to pin Process() function to CPU ID %d, but "
           "only %d CPUs are available on this machine",
           process_loop_cpu_id_, cpus_available);
@@ -1718,15 +1717,15 @@ void Fcat::Process()
         CPU_ZERO(&affinity);
         CPU_SET(process_loop_cpu_id_, &affinity);
 
-        EVR_ACTIVITY_LO("Process loop started in thread ID: %d", gettid());
+        RCLCPP_INFO(this->get_logger(), "Process loop started in thread ID: %d", gettid());
         int result = sched_setaffinity(gettid(), sizeof(cpu_set_t), &affinity);
         if (result != 0) {
-          EVR_WARNING_HI(
+          RCLCPP_WARN(this->get_logger(),
             "Could not set process affinity to CPU %d for thread ID: %d, "
             "sched_setaffinity returned result: %d",
             process_loop_cpu_id_, gettid(), result);
         } else {
-          EVR_ACTIVITY_LO("Set CPU affinity to CPU %d for thread ID: %d",
+          RCLCPP_INFO(this->get_logger(), "Set CPU affinity to CPU %d for thread ID: %d",
                          process_loop_cpu_id_, gettid());
         }
         process_loop_thread_id_ = gettid();
@@ -1735,7 +1734,7 @@ void Fcat::Process()
     }
   }
 #else
-  EVR_WARNING_HI(
+  RCLCPP_WARN(this->get_logger(),
     "GNU extensions are not available on this machine/compiler; the Process() "
     "loop cannot be moved to CPU %d",
     process_loop_thread_id_);
@@ -1744,7 +1743,7 @@ void Fcat::Process()
 
   if(!process_loop_realtime_preempt_initialized_) {
     if(enable_realtime_preempt_) {
-      EVR_ACTIVITY_HI("Setting realtime priority for process loop to %d", scheduler_priority_);
+      RCLCPP_INFO(this->get_logger(), "Setting realtime priority for process loop to %d", scheduler_priority_);
       SetRealtimePreempt(scheduler_priority_);
     }
     process_loop_realtime_preempt_initialized_ = true;
@@ -1792,13 +1791,13 @@ void Fcat::Process()
 
 void Fcat::PublishFcatModuleState()
 {
-  // Check for fault status and emit EVRs
+  // Check for fault status and emit logs
   bool is_faulted = fcat_manager_.IsFaulted();
   if (!module_state_msg_.faulted && is_faulted) {
     Fault();
-    EVR_WARNING_LO("Fastcat bus fault detected");
+    RCLCPP_WARN(this->get_logger(), "Fastcat bus fault detected");
   } else if (module_state_msg_.faulted && !is_faulted) {
-    EVR_ACTIVITY_HI("Fastcat bus fault cleared");
+    RCLCPP_INFO(this->get_logger(), "Fastcat bus fault cleared");
   }
 
   module_state_msg_.faulted = is_faulted;

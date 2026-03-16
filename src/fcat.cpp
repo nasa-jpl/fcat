@@ -1,5 +1,8 @@
 #include "fcat/fcat.hpp"
 #include "rclcpp/rclcpp.hpp"
+#include "rcl_interfaces/msg/floating_point_range.hpp"
+#include "rcl_interfaces/msg/integer_range.hpp"
+#include "rcl_interfaces/msg/parameter_descriptor.hpp"
 
 #include <sched.h>
 #include <sys/sysinfo.h>
@@ -8,6 +11,7 @@
 #include <sys/mman.h>
 
 #include <chrono>
+#include <limits>
 
 using namespace std::chrono_literals;
 using std::placeholders::_1;
@@ -27,10 +31,16 @@ Fcat::Fcat(const rclcpp::NodeOptions& options)
   topic_callback_group_ =
     this->create_callback_group(rclcpp::CallbackGroupType::MutuallyExclusive);
 
-  std::string fastcat_config_path = DeclareInitParameterString(
-    "fastcat_config_path",
-    "",  // must be passed, cannot generally reason about this file path
-    "Location of the the fastcat topology YAML file");
+  std::string fastcat_config_path;
+  {
+    rcl_interfaces::msg::ParameterDescriptor descriptor;
+    descriptor.description = "Location of the the fastcat topology YAML file";
+    descriptor.read_only = true;
+    fastcat_config_path = this->declare_parameter<std::string>(
+      "fastcat_config_path",
+      "",  // must be passed, cannot generally reason about this file path
+      descriptor);
+  }
 
   RCLCPP_INFO(this->get_logger(), "loading Yaml from %s", fastcat_config_path.c_str());
   YAML::Node node = YAML::LoadFile(fastcat_config_path);
@@ -48,100 +58,176 @@ Fcat::Fcat(const rclcpp::NodeOptions& options)
   fcat_manager_.GetDeviceNamesByType(platinum_actuator_names,
                                      fastcat::PLATINUM_ACTUATOR_STATE);
 
-  DeclareInitParameterInt("fastcat_actuator_count",
-                          static_cast<int>(gold_actuator_names.size() +
-                                           platinum_actuator_names.size()),
-                          "Total number of fastcat actuators", 0, -1, true);
+  {
+    rcl_interfaces::msg::ParameterDescriptor descriptor;
+    descriptor.description = "Total number of fastcat actuators";
+    descriptor.read_only = true;
+    rcl_interfaces::msg::IntegerRange range;
+    range.from_value = 0;
+    range.to_value = std::numeric_limits<int64_t>::max();
+    range.step = 1;
+    descriptor.integer_range.push_back(range);
+    this->declare_parameter<int64_t>(
+      "fastcat_actuator_count",
+      static_cast<int64_t>(
+        gold_actuator_names.size() + platinum_actuator_names.size()),
+      descriptor, true);
+  }
 
   int i = 0;
   InitializeActuatorParams(gold_actuator_names, i);
   InitializeActuatorParams(platinum_actuator_names, i);
 
   use_sim_time_ = this->get_parameter("use_sim_time").as_bool();
-  enable_js_pub_ = DeclareInitParameterBool(
-    "create_joint_state_pub", true,
-    "If true, FCAT creates and publishes the \"/joint_states\" topic");
+  {
+    rcl_interfaces::msg::ParameterDescriptor descriptor;
+    descriptor.description =
+      "If true, FCAT creates and publishes the \"/joint_states\" topic";
+    descriptor.read_only = true;
+    enable_js_pub_ = this->declare_parameter<bool>(
+      "create_joint_state_pub", true, descriptor);
+  }
 
-  enable_ros_wrench_pub_ = DeclareInitParameterBool(
-    "create_ros_wrench_pub", true,
-    "If true, FCAT creates and publishes individual topics for FTS devices");
+  {
+    rcl_interfaces::msg::ParameterDescriptor descriptor;
+    descriptor.description =
+      "If true, FCAT creates and publishes individual topics for FTS devices";
+    descriptor.read_only = true;
+    enable_ros_wrench_pub_ = this->declare_parameter<bool>(
+      "create_ros_wrench_pub", true, descriptor);
+  }
 
-  process_loop_cpu_id_ = DeclareInitParameterInt(
-    "process_loop_cpu_id", 0,
-    "Set the CPU ID for the main Process() thread; this settings should be "
-    "used in conjunction with setting the kernel parameter 'isolcpus=0', so "
-    "that the Process() thread is the only process running on CPU0; set to -1 "
-    "to disable CPU pinning; it is expected that most applications will use "
-    "either 0 or -1, but there may be exceptional cases where it is necessary "
-    "to pin to a different CPU core; fcat will throw a fatal error if you "
-    "attempt "
-    "to pin to a CPU core value greater than the number of cores available "
-    "(default: 0)",
-    -1, 128);
+  {
+    rcl_interfaces::msg::ParameterDescriptor descriptor;
+    descriptor.description =
+      "Set the CPU ID for the main Process() thread; this settings should be "
+      "used in conjunction with setting the kernel parameter 'isolcpus=0', so "
+      "that the Process() thread is the only process running on CPU0; set to -1 "
+      "to disable CPU pinning; it is expected that most applications will use "
+      "either 0 or -1, but there may be exceptional cases where it is necessary "
+      "to pin to a different CPU core; fcat will throw a fatal error if you "
+      "attempt "
+      "to pin to a CPU core value greater than the number of cores available "
+      "(default: 0)";
+    descriptor.read_only = true;
+    rcl_interfaces::msg::IntegerRange range;
+    range.from_value = -1;
+    range.to_value = 128;
+    range.step = 1;
+    descriptor.integer_range.push_back(range);
+    process_loop_cpu_id_ = static_cast<int>(this->declare_parameter<int64_t>(
+      "process_loop_cpu_id", 0, descriptor));
+  }
 
-  enable_realtime_preempt_ = DeclareInitParameterBool(
-    "enable_realtime_preempt", enable_realtime_preempt_,
-    "If true, FCAT's ethercat thread will use the FIFO scheduler, allowing it to "
-    "preempt the kernel. This setting requires the realtime kernel");
+  {
+    rcl_interfaces::msg::ParameterDescriptor descriptor;
+    descriptor.description =
+      "If true, FCAT's ethercat thread will use the FIFO scheduler, allowing "
+      "it to preempt the kernel. This setting requires the realtime kernel";
+    descriptor.read_only = true;
+    enable_realtime_preempt_ = this->declare_parameter<bool>(
+      "enable_realtime_preempt", enable_realtime_preempt_, descriptor);
+  }
 
-  scheduler_priority_ = DeclareInitParameterInt(
-    "scheduler_priority", scheduler_priority_,
-    "Set real-time scheduler priority level, only used if 'enable_realtime_preempt' "
-    "parameter is set to 'true', which requires the realtime kernel. Note that this "
-    "value is used to set the 'rt_priority' real-time priority setting which is "
-    "different from a processes 'niceness' setting. 'rt_priority' ranges from 1 to 99 "
-    "with 99 being the highest priority (default: 49), ", 1, 99);
+  {
+    rcl_interfaces::msg::ParameterDescriptor descriptor;
+    descriptor.description =
+      "Set real-time scheduler priority level, only used if "
+      "'enable_realtime_preempt' "
+      "parameter is set to 'true', which requires the realtime kernel. Note "
+      "that this value is used to set the 'rt_priority' real-time priority "
+      "setting which is different from a processes 'niceness' setting. "
+      "'rt_priority' ranges from 1 to 99 with 99 being the highest priority "
+      "(default: 49), ";
+    descriptor.read_only = true;
+    rcl_interfaces::msg::IntegerRange range;
+    range.from_value = 1;
+    range.to_value = 99;
+    range.step = 1;
+    descriptor.integer_range.push_back(range);
+    scheduler_priority_ = static_cast<int>(this->declare_parameter<int64_t>(
+      "scheduler_priority", scheduler_priority_, descriptor));
+  }
 
-  fault_on_cycle_slip_ = DeclareInitParameterBool(
-    "fault_on_cycle_slip", fault_on_cycle_slip_,
-    "Fault the ethercat bus if large cycle slips detected (default: true)");
+  {
+    rcl_interfaces::msg::ParameterDescriptor descriptor;
+    descriptor.description =
+      "Fault the ethercat bus if large cycle slips detected (default: true)";
+    descriptor.read_only = true;
+    fault_on_cycle_slip_ = this->declare_parameter<bool>(
+      "fault_on_cycle_slip", fault_on_cycle_slip_, descriptor);
+  }
 
-  cycle_slip_fault_magnitude_ = DeclareInitParameterDouble(
-    "cycle_slip_fault_magnitude", cycle_slip_fault_magnitude_,
-    "Fault if cycle slip is greater than a multiple of the the nominal process loop "
-    "period (default: 3.0)");
+  {
+    rcl_interfaces::msg::ParameterDescriptor descriptor;
+    descriptor.description =
+      "Fault if cycle slip is greater than a multiple of the the nominal "
+      "process loop period (default: 3.0)";
+    descriptor.read_only = true;
+    cycle_slip_fault_magnitude_ = this->declare_parameter<double>(
+      "cycle_slip_fault_magnitude", cycle_slip_fault_magnitude_, descriptor);
+  }
 
-  DeclareRuntimeParameterInt("csp_explicit_interpolation_cycles_delay", 3,
-                             "Delays the onset of a motion profile in explicit "
-                             "interpolation mode by a "
-                             "number of cycles of the calling module; if set "
-                             "to 3, then fcat will wait until "
-                             "4 messages csp messages accumulate in the buffer "
-                             "before initiating motion "
-                             "profile.",
-                             0, 10);
+  {
+    rcl_interfaces::msg::ParameterDescriptor descriptor;
+    descriptor.description =
+      "Delays the onset of a motion profile in explicit interpolation mode "
+      "by a number of cycles of the calling module; if set to 3, then fcat "
+      "will wait until 4 messages csp messages accumulate in the buffer "
+      "before initiating motion profile.";
+    rcl_interfaces::msg::IntegerRange range;
+    range.from_value = 0;
+    range.to_value = 10;
+    range.step = 1;
+    descriptor.integer_range.push_back(range);
+    this->declare_parameter<int64_t>(
+      "csp_explicit_interpolation_cycles_delay", 3, descriptor);
+  }
 
-  DeclareRuntimeParameterInt(
-    "csp_interpolation_cycles_stale", 10,
-    "When fastcat is in CSP interpolation mode, module will "
-    "transition to HOLDING state when it has not received a "
-    "new CSP setpoint within the number of internal loop "
-    "cycles configured by this parameter",
-    4, 40);
+  {
+    rcl_interfaces::msg::ParameterDescriptor descriptor;
+    descriptor.description =
+      "When fastcat is in CSP interpolation mode, module will transition to "
+      "HOLDING state when it has not received a new CSP setpoint within the "
+      "number of internal loop cycles configured by this parameter";
+    rcl_interfaces::msg::IntegerRange range;
+    range.from_value = 4;
+    range.to_value = 40;
+    range.step = 1;
+    descriptor.integer_range.push_back(range);
+    this->declare_parameter<int64_t>(
+      "csp_interpolation_cycles_stale", 10, descriptor);
+  }
 
-  DeclareRuntimeParameterString(
-    "csp_explicit_interpolation_algorithm", "cubic",
-    "Specify the algorithm used for explicit interpolation; "
-    "one of ['cubic', 'linear']: cubic interpolation is a third order "
-    "interpolation "
-    "of position and velocity with c2 continuity between csp set points; "
-    "linear interpolation linearly interpolates both position and "
-    "velocity between csp setpoints");
+  {
+    rcl_interfaces::msg::ParameterDescriptor descriptor;
+    descriptor.description =
+      "Specify the algorithm used for explicit interpolation; one of "
+      "['cubic', 'linear']: cubic interpolation is a third order "
+      "interpolation of position and velocity with c2 continuity between csp "
+      "set points; linear interpolation linearly interpolates both position "
+      "and velocity between csp setpoints";
+    this->declare_parameter<std::string>(
+      "csp_explicit_interpolation_algorithm", "cubic", descriptor);
+  }
 
-  DeclareRuntimeParameterString("csp_explicit_interpolation_timestamp_source",
-                                "csp_message",
-                                "Specify the source for the timestamp used for "
-                                "csp interpolation in explicit mode; "
-                                "If set to 'csp_message', fastcat uses the "
-                                "request_time from the csp message, "
-                                "if set to 'clock', fastcat uses the current "
-                                "clock on receipt of the message; "
-                                "['csp_message', 'clock']");
+  {
+    rcl_interfaces::msg::ParameterDescriptor descriptor;
+    descriptor.description =
+      "Specify the source for the timestamp used for csp interpolation in "
+      "explicit mode; If set to 'csp_message', fastcat uses the request_time "
+      "from the csp message, if set to 'clock', fastcat uses the current "
+      "clock on receipt of the message; ['csp_message', 'clock']";
+    this->declare_parameter<std::string>(
+      "csp_explicit_interpolation_timestamp_source", "csp_message",
+      descriptor);
+  }
 
-  DeclareRuntimeParameterBool(
-    "report_cycle_slips", true,
-    "If true, fcat emits logs to report timer "
-    "slips");
+  {
+    rcl_interfaces::msg::ParameterDescriptor descriptor;
+    descriptor.description = "If true, fcat emits logs to report timer slips";
+    this->declare_parameter<bool>("report_cycle_slips", true, descriptor);
+  }
 
   PopulateDeviceStateFields();
 
@@ -265,115 +351,361 @@ void Fcat::InitializeActuatorParams(
       std::string parameter_prefix =
         "fastcat_actuator_" + std::to_string(++i) + "_";
       std::string description_prefix = "Actuator " + std::to_string(i) + " ";
-      DeclareInitParameterString(parameter_prefix + "name", actuator_name,
-                                 description_prefix + "name", true);
-      DeclareInitParameterString(parameter_prefix + "actuator_type",
-                                 actuator_params.actuator_type_str,
-                                 description_prefix + "actuator type", true);
-      DeclareInitParameterDouble(
-        parameter_prefix + "gear_ratio", actuator_params.gear_ratio,
-        description_prefix + "gear ratio", 0.0, -1.0, true);
-      DeclareInitParameterDouble(
-        parameter_prefix + "counts_per_rev", actuator_params.counts_per_rev,
-        description_prefix + "counts per revolution", 0.0, -1.0, true);
-      DeclareInitParameterDouble(parameter_prefix + "max_speed_eu_per_sec",
-                                 actuator_params.max_speed_eu_per_sec,
-                                 description_prefix + "max speed [eu/sec]", 0.0,
-                                 -1.0, true);
-      DeclareInitParameterDouble(
-        parameter_prefix + "max_accel_eu_per_sec2",
-        actuator_params.max_accel_eu_per_sec2,
-        description_prefix + "max acceleration [eu/sec^2]", 0.0, -1.0, true);
-      DeclareInitParameterDouble(parameter_prefix + "over_speed_multiplier",
-                                 actuator_params.over_speed_multiplier,
-                                 description_prefix + "over speed multiplier",
-                                 0.0, -1.0, true);
-      DeclareInitParameterDouble(
-        parameter_prefix + "vel_tracking_error_eu_per_sec",
-        actuator_params.vel_tracking_error_eu_per_sec,
-        description_prefix + "velocity tracking error [eu/sec]", 0.0, -1.0,
-        true);
-      DeclareInitParameterDouble(
-        parameter_prefix + "pos_tracking_error_eu",
-        actuator_params.pos_tracking_error_eu,
-        description_prefix + "position tracking error [eu]", 0.0, -1.0, true);
-      DeclareInitParameterDouble(
-        parameter_prefix + "peak_current_limit_amps",
-        actuator_params.peak_current_limit_amps,
-        description_prefix + "peak current limit [amps]", 0.0, -1.0, true);
-      DeclareInitParameterDouble(parameter_prefix + "peak_current_time_sec",
-                                 actuator_params.peak_current_time_sec,
-                                 description_prefix + "peak current time [sec]",
-                                 0.0, -1.0, true);
-      DeclareInitParameterDouble(
-        parameter_prefix + "continuous_current_limit_amps",
-        actuator_params.continuous_current_limit_amps,
-        description_prefix + "continuous current limit [amps]", 0.0, -1.0,
-        true);
-      DeclareInitParameterDouble(parameter_prefix + "torque_slope_amps_per_sec",
-                                 actuator_params.torque_slope_amps_per_sec,
-                                 description_prefix + "torque slope [amps/sec]",
-                                 0.0, -1.0, true);
-      DeclareInitParameterDouble(
-        parameter_prefix + "low_pos_cal_limit_eu",
-        actuator_params.low_pos_cal_limit_eu,
-        description_prefix + "low position calibration limit [eu]", 0.0, -1.0,
-        true);
-      DeclareInitParameterDouble(
-        parameter_prefix + "low_pos_cmd_limit_eu",
-        actuator_params.low_pos_cmd_limit_eu,
-        description_prefix + "low position command limit [eu]", 0.0, -1.0,
-        true);
-      DeclareInitParameterDouble(
-        parameter_prefix + "high_pos_cal_limit_eu",
-        actuator_params.high_pos_cal_limit_eu,
-        description_prefix + "high position calibration limit [eu]", 0.0, -1.0,
-        true);
-      DeclareInitParameterDouble(
-        parameter_prefix + "high_pos_cmd_limit_eu",
-        actuator_params.high_pos_cmd_limit_eu,
-        description_prefix + "high position command limit [eu]", 0.0, -1.0,
-        true);
-      DeclareInitParameterDouble(parameter_prefix + "holding_duration_sec",
-                                 actuator_params.holding_duration_sec,
-                                 description_prefix + "holding duration [sec]",
-                                 0.0, -1.0, true);
-      DeclareInitParameterDouble(
-        parameter_prefix + "elmo_brake_engage_msec",
-        actuator_params.elmo_brake_engage_msec,
-        description_prefix + "brake engage time [msec]", 0.0, -1.0, true);
-      DeclareInitParameterDouble(
-        parameter_prefix + "elmo_brake_disengage_msec",
-        actuator_params.elmo_brake_disengage_msec,
-        description_prefix + "brake disengage time [msec]", 0.0, -1.0, true);
-      DeclareInitParameterDouble(
-        parameter_prefix + "elmo_crc", actuator_params.elmo_crc,
-        description_prefix + "crc value", 0.0, -1.0, true);
-      DeclareInitParameterDouble(
-        parameter_prefix + "elmo_drive_max_cur_limit_amps",
-        actuator_params.elmo_drive_max_cur_limit_amps,
-        description_prefix + "drive max current limit [amps]", 0.0, -1.0, true);
-      DeclareInitParameterDouble(
-        parameter_prefix + "smooth_factor", actuator_params.smooth_factor,
-        description_prefix + "smoothing factor", 0.0, -1.0, true);
-      DeclareInitParameterDouble(
-        parameter_prefix + "torque_constant", actuator_params.torque_constant,
-        description_prefix + "torque constant", 0.0, -1.0, true);
-      DeclareInitParameterDouble(parameter_prefix + "winding_resistance",
-                                 actuator_params.winding_resistance,
-                                 description_prefix + "winding resistance", 0.0,
-                                 -1.0, true);
-      DeclareInitParameterDouble(
-        parameter_prefix + "brake_power", actuator_params.brake_power,
-        description_prefix + "brake power", 0.0, -1.0, true);
-      DeclareInitParameterDouble(
-        parameter_prefix + "motor_encoder_gear_ratio",
-        actuator_params.motor_encoder_gear_ratio,
-        description_prefix + "motor encoder gear ratio", 0.0, -1.0, true);
-      DeclareInitParameterBool(parameter_prefix + "has_absolute_encoder",
-                               actuator_params.actuator_absolute_encoder,
-                               description_prefix + "has absolute encoder",
-                               true);
+      {
+        rcl_interfaces::msg::ParameterDescriptor descriptor;
+        descriptor.description = description_prefix + "name";
+        descriptor.read_only = true;
+        this->declare_parameter<std::string>(
+          parameter_prefix + "name", actuator_name, descriptor, true);
+      }
+      {
+        rcl_interfaces::msg::ParameterDescriptor descriptor;
+        descriptor.description = description_prefix + "actuator type";
+        descriptor.read_only = true;
+        this->declare_parameter<std::string>(parameter_prefix + "actuator_type",
+                                             actuator_params.actuator_type_str,
+                                             descriptor, true);
+      }
+      {
+        rcl_interfaces::msg::ParameterDescriptor descriptor;
+        descriptor.description = description_prefix + "gear ratio";
+        descriptor.read_only = true;
+        rcl_interfaces::msg::FloatingPointRange range;
+        range.from_value = 0.0;
+        range.to_value = std::numeric_limits<double>::max();
+        range.step = 0.0;
+        descriptor.floating_point_range.push_back(range);
+        this->declare_parameter<double>(
+          parameter_prefix + "gear_ratio", actuator_params.gear_ratio,
+          descriptor, true);
+      }
+      {
+        rcl_interfaces::msg::ParameterDescriptor descriptor;
+        descriptor.description = description_prefix + "counts per revolution";
+        descriptor.read_only = true;
+        rcl_interfaces::msg::FloatingPointRange range;
+        range.from_value = 0.0;
+        range.to_value = std::numeric_limits<double>::max();
+        range.step = 0.0;
+        descriptor.floating_point_range.push_back(range);
+        this->declare_parameter<double>(
+          parameter_prefix + "counts_per_rev", actuator_params.counts_per_rev,
+          descriptor, true);
+      }
+      {
+        rcl_interfaces::msg::ParameterDescriptor descriptor;
+        descriptor.description = description_prefix + "max speed [eu/sec]";
+        descriptor.read_only = true;
+        rcl_interfaces::msg::FloatingPointRange range;
+        range.from_value = 0.0;
+        range.to_value = std::numeric_limits<double>::max();
+        range.step = 0.0;
+        descriptor.floating_point_range.push_back(range);
+        this->declare_parameter<double>(
+          parameter_prefix + "max_speed_eu_per_sec",
+          actuator_params.max_speed_eu_per_sec, descriptor, true);
+      }
+      {
+        rcl_interfaces::msg::ParameterDescriptor descriptor;
+        descriptor.description = description_prefix + "max acceleration [eu/sec^2]";
+        descriptor.read_only = true;
+        rcl_interfaces::msg::FloatingPointRange range;
+        range.from_value = 0.0;
+        range.to_value = std::numeric_limits<double>::max();
+        range.step = 0.0;
+        descriptor.floating_point_range.push_back(range);
+        this->declare_parameter<double>(
+          parameter_prefix + "max_accel_eu_per_sec2",
+          actuator_params.max_accel_eu_per_sec2, descriptor, true);
+      }
+      {
+        rcl_interfaces::msg::ParameterDescriptor descriptor;
+        descriptor.description = description_prefix + "over speed multiplier";
+        descriptor.read_only = true;
+        rcl_interfaces::msg::FloatingPointRange range;
+        range.from_value = 0.0;
+        range.to_value = std::numeric_limits<double>::max();
+        range.step = 0.0;
+        descriptor.floating_point_range.push_back(range);
+        this->declare_parameter<double>(
+          parameter_prefix + "over_speed_multiplier",
+          actuator_params.over_speed_multiplier, descriptor, true);
+      }
+      {
+        rcl_interfaces::msg::ParameterDescriptor descriptor;
+        descriptor.description =
+          description_prefix + "velocity tracking error [eu/sec]";
+        descriptor.read_only = true;
+        rcl_interfaces::msg::FloatingPointRange range;
+        range.from_value = 0.0;
+        range.to_value = std::numeric_limits<double>::max();
+        range.step = 0.0;
+        descriptor.floating_point_range.push_back(range);
+        this->declare_parameter<double>(
+          parameter_prefix + "vel_tracking_error_eu_per_sec",
+          actuator_params.vel_tracking_error_eu_per_sec, descriptor, true);
+      }
+      {
+        rcl_interfaces::msg::ParameterDescriptor descriptor;
+        descriptor.description = description_prefix + "position tracking error [eu]";
+        descriptor.read_only = true;
+        rcl_interfaces::msg::FloatingPointRange range;
+        range.from_value = 0.0;
+        range.to_value = std::numeric_limits<double>::max();
+        range.step = 0.0;
+        descriptor.floating_point_range.push_back(range);
+        this->declare_parameter<double>(
+          parameter_prefix + "pos_tracking_error_eu",
+          actuator_params.pos_tracking_error_eu, descriptor, true);
+      }
+      {
+        rcl_interfaces::msg::ParameterDescriptor descriptor;
+        descriptor.description = description_prefix + "peak current limit [amps]";
+        descriptor.read_only = true;
+        rcl_interfaces::msg::FloatingPointRange range;
+        range.from_value = 0.0;
+        range.to_value = std::numeric_limits<double>::max();
+        range.step = 0.0;
+        descriptor.floating_point_range.push_back(range);
+        this->declare_parameter<double>(
+          parameter_prefix + "peak_current_limit_amps",
+          actuator_params.peak_current_limit_amps, descriptor, true);
+      }
+      {
+        rcl_interfaces::msg::ParameterDescriptor descriptor;
+        descriptor.description = description_prefix + "peak current time [sec]";
+        descriptor.read_only = true;
+        rcl_interfaces::msg::FloatingPointRange range;
+        range.from_value = 0.0;
+        range.to_value = std::numeric_limits<double>::max();
+        range.step = 0.0;
+        descriptor.floating_point_range.push_back(range);
+        this->declare_parameter<double>(
+          parameter_prefix + "peak_current_time_sec",
+          actuator_params.peak_current_time_sec, descriptor, true);
+      }
+      {
+        rcl_interfaces::msg::ParameterDescriptor descriptor;
+        descriptor.description =
+          description_prefix + "continuous current limit [amps]";
+        descriptor.read_only = true;
+        rcl_interfaces::msg::FloatingPointRange range;
+        range.from_value = 0.0;
+        range.to_value = std::numeric_limits<double>::max();
+        range.step = 0.0;
+        descriptor.floating_point_range.push_back(range);
+        this->declare_parameter<double>(
+          parameter_prefix + "continuous_current_limit_amps",
+          actuator_params.continuous_current_limit_amps, descriptor, true);
+      }
+      {
+        rcl_interfaces::msg::ParameterDescriptor descriptor;
+        descriptor.description = description_prefix + "torque slope [amps/sec]";
+        descriptor.read_only = true;
+        rcl_interfaces::msg::FloatingPointRange range;
+        range.from_value = 0.0;
+        range.to_value = std::numeric_limits<double>::max();
+        range.step = 0.0;
+        descriptor.floating_point_range.push_back(range);
+        this->declare_parameter<double>(
+          parameter_prefix + "torque_slope_amps_per_sec",
+          actuator_params.torque_slope_amps_per_sec, descriptor, true);
+      }
+      {
+        rcl_interfaces::msg::ParameterDescriptor descriptor;
+        descriptor.description =
+          description_prefix + "low position calibration limit [eu]";
+        descriptor.read_only = true;
+        rcl_interfaces::msg::FloatingPointRange range;
+        range.from_value = 0.0;
+        range.to_value = std::numeric_limits<double>::max();
+        range.step = 0.0;
+        descriptor.floating_point_range.push_back(range);
+        this->declare_parameter<double>(
+          parameter_prefix + "low_pos_cal_limit_eu",
+          actuator_params.low_pos_cal_limit_eu, descriptor, true);
+      }
+      {
+        rcl_interfaces::msg::ParameterDescriptor descriptor;
+        descriptor.description =
+          description_prefix + "low position command limit [eu]";
+        descriptor.read_only = true;
+        rcl_interfaces::msg::FloatingPointRange range;
+        range.from_value = 0.0;
+        range.to_value = std::numeric_limits<double>::max();
+        range.step = 0.0;
+        descriptor.floating_point_range.push_back(range);
+        this->declare_parameter<double>(
+          parameter_prefix + "low_pos_cmd_limit_eu",
+          actuator_params.low_pos_cmd_limit_eu, descriptor, true);
+      }
+      {
+        rcl_interfaces::msg::ParameterDescriptor descriptor;
+        descriptor.description =
+          description_prefix + "high position calibration limit [eu]";
+        descriptor.read_only = true;
+        rcl_interfaces::msg::FloatingPointRange range;
+        range.from_value = 0.0;
+        range.to_value = std::numeric_limits<double>::max();
+        range.step = 0.0;
+        descriptor.floating_point_range.push_back(range);
+        this->declare_parameter<double>(
+          parameter_prefix + "high_pos_cal_limit_eu",
+          actuator_params.high_pos_cal_limit_eu, descriptor, true);
+      }
+      {
+        rcl_interfaces::msg::ParameterDescriptor descriptor;
+        descriptor.description =
+          description_prefix + "high position command limit [eu]";
+        descriptor.read_only = true;
+        rcl_interfaces::msg::FloatingPointRange range;
+        range.from_value = 0.0;
+        range.to_value = std::numeric_limits<double>::max();
+        range.step = 0.0;
+        descriptor.floating_point_range.push_back(range);
+        this->declare_parameter<double>(
+          parameter_prefix + "high_pos_cmd_limit_eu",
+          actuator_params.high_pos_cmd_limit_eu, descriptor, true);
+      }
+      {
+        rcl_interfaces::msg::ParameterDescriptor descriptor;
+        descriptor.description = description_prefix + "holding duration [sec]";
+        descriptor.read_only = true;
+        rcl_interfaces::msg::FloatingPointRange range;
+        range.from_value = 0.0;
+        range.to_value = std::numeric_limits<double>::max();
+        range.step = 0.0;
+        descriptor.floating_point_range.push_back(range);
+        this->declare_parameter<double>(
+          parameter_prefix + "holding_duration_sec",
+          actuator_params.holding_duration_sec, descriptor, true);
+      }
+      {
+        rcl_interfaces::msg::ParameterDescriptor descriptor;
+        descriptor.description = description_prefix + "brake engage time [msec]";
+        descriptor.read_only = true;
+        rcl_interfaces::msg::FloatingPointRange range;
+        range.from_value = 0.0;
+        range.to_value = std::numeric_limits<double>::max();
+        range.step = 0.0;
+        descriptor.floating_point_range.push_back(range);
+        this->declare_parameter<double>(
+          parameter_prefix + "elmo_brake_engage_msec",
+          actuator_params.elmo_brake_engage_msec, descriptor, true);
+      }
+      {
+        rcl_interfaces::msg::ParameterDescriptor descriptor;
+        descriptor.description = description_prefix + "brake disengage time [msec]";
+        descriptor.read_only = true;
+        rcl_interfaces::msg::FloatingPointRange range;
+        range.from_value = 0.0;
+        range.to_value = std::numeric_limits<double>::max();
+        range.step = 0.0;
+        descriptor.floating_point_range.push_back(range);
+        this->declare_parameter<double>(
+          parameter_prefix + "elmo_brake_disengage_msec",
+          actuator_params.elmo_brake_disengage_msec, descriptor, true);
+      }
+      {
+        rcl_interfaces::msg::ParameterDescriptor descriptor;
+        descriptor.description = description_prefix + "crc value";
+        descriptor.read_only = true;
+        rcl_interfaces::msg::FloatingPointRange range;
+        range.from_value = 0.0;
+        range.to_value = std::numeric_limits<double>::max();
+        range.step = 0.0;
+        descriptor.floating_point_range.push_back(range);
+        this->declare_parameter<double>(
+          parameter_prefix + "elmo_crc", actuator_params.elmo_crc,
+          descriptor, true);
+      }
+      {
+        rcl_interfaces::msg::ParameterDescriptor descriptor;
+        descriptor.description =
+          description_prefix + "drive max current limit [amps]";
+        descriptor.read_only = true;
+        rcl_interfaces::msg::FloatingPointRange range;
+        range.from_value = 0.0;
+        range.to_value = std::numeric_limits<double>::max();
+        range.step = 0.0;
+        descriptor.floating_point_range.push_back(range);
+        this->declare_parameter<double>(
+          parameter_prefix + "elmo_drive_max_cur_limit_amps",
+          actuator_params.elmo_drive_max_cur_limit_amps, descriptor, true);
+      }
+      {
+        rcl_interfaces::msg::ParameterDescriptor descriptor;
+        descriptor.description = description_prefix + "smoothing factor";
+        descriptor.read_only = true;
+        rcl_interfaces::msg::FloatingPointRange range;
+        range.from_value = 0.0;
+        range.to_value = std::numeric_limits<double>::max();
+        range.step = 0.0;
+        descriptor.floating_point_range.push_back(range);
+        this->declare_parameter<double>(
+          parameter_prefix + "smooth_factor", actuator_params.smooth_factor,
+          descriptor, true);
+      }
+      {
+        rcl_interfaces::msg::ParameterDescriptor descriptor;
+        descriptor.description = description_prefix + "torque constant";
+        descriptor.read_only = true;
+        rcl_interfaces::msg::FloatingPointRange range;
+        range.from_value = 0.0;
+        range.to_value = std::numeric_limits<double>::max();
+        range.step = 0.0;
+        descriptor.floating_point_range.push_back(range);
+        this->declare_parameter<double>(
+          parameter_prefix + "torque_constant",
+          actuator_params.torque_constant, descriptor, true);
+      }
+      {
+        rcl_interfaces::msg::ParameterDescriptor descriptor;
+        descriptor.description = description_prefix + "winding resistance";
+        descriptor.read_only = true;
+        rcl_interfaces::msg::FloatingPointRange range;
+        range.from_value = 0.0;
+        range.to_value = std::numeric_limits<double>::max();
+        range.step = 0.0;
+        descriptor.floating_point_range.push_back(range);
+        this->declare_parameter<double>(
+          parameter_prefix + "winding_resistance",
+          actuator_params.winding_resistance, descriptor, true);
+      }
+      {
+        rcl_interfaces::msg::ParameterDescriptor descriptor;
+        descriptor.description = description_prefix + "brake power";
+        descriptor.read_only = true;
+        rcl_interfaces::msg::FloatingPointRange range;
+        range.from_value = 0.0;
+        range.to_value = std::numeric_limits<double>::max();
+        range.step = 0.0;
+        descriptor.floating_point_range.push_back(range);
+        this->declare_parameter<double>(
+          parameter_prefix + "brake_power", actuator_params.brake_power,
+          descriptor, true);
+      }
+      {
+        rcl_interfaces::msg::ParameterDescriptor descriptor;
+        descriptor.description = description_prefix + "motor encoder gear ratio";
+        descriptor.read_only = true;
+        rcl_interfaces::msg::FloatingPointRange range;
+        range.from_value = 0.0;
+        range.to_value = std::numeric_limits<double>::max();
+        range.step = 0.0;
+        descriptor.floating_point_range.push_back(range);
+        this->declare_parameter<double>(
+          parameter_prefix + "motor_encoder_gear_ratio",
+          actuator_params.motor_encoder_gear_ratio, descriptor, true);
+      }
+      {
+        rcl_interfaces::msg::ParameterDescriptor descriptor;
+        descriptor.description = description_prefix + "has absolute encoder";
+        descriptor.read_only = true;
+        this->declare_parameter<bool>(
+          parameter_prefix + "has_absolute_encoder",
+          actuator_params.actuator_absolute_encoder, descriptor, true);
+      }
     }
   }
 }

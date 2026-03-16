@@ -1,5 +1,8 @@
 #include "fcat/fcat_services.hpp"
 #include "rclcpp/rclcpp.hpp"
+#include "rcl_interfaces/msg/floating_point_range.hpp"
+#include "rcl_interfaces/msg/integer_range.hpp"
+#include "rcl_interfaces/msg/parameter_descriptor.hpp"
 #include "fastcat/jsd/actuator.h"
 #include "fcat/fcat_utils.hpp"
 #include "jsd/jsd_print.h"
@@ -26,44 +29,88 @@ FcatSrvs::FcatSrvs(const rclcpp::NodeOptions& options)
     this->create_callback_group(rclcpp::CallbackGroupType::MutuallyExclusive);
 
   // Init Parameters
-  pub_sub_ns_ =
-    DeclareInitParameterString("pub_sub_namespace", "/fcat/",
-                               "The namespace of the outgoing publisher and "
-                               "incoming subscription topics");
+  {
+    rcl_interfaces::msg::ParameterDescriptor descriptor;
+    descriptor.description =
+      "The namespace of the outgoing publisher and incoming subscription "
+      "topics";
+    descriptor.read_only = true;
+    pub_sub_ns_ = this->declare_parameter<std::string>(
+      "pub_sub_namespace", "/fcat/", descriptor);
+  }
 
-  sdo_app_id_ = static_cast<uint16_t>(
-    DeclareInitParameterInt("starting_sdo_app_id", 1000,
-                            "Starting value of the SDO tracking app_id. The "
-                            "value is incremented each request",
-                            0, 65535));
+  {
+    rcl_interfaces::msg::ParameterDescriptor descriptor;
+    descriptor.description =
+      "Starting value of the SDO tracking app_id. The value is incremented "
+      "each request";
+    descriptor.read_only = true;
+    rcl_interfaces::msg::IntegerRange range;
+    range.from_value = 0;
+    range.to_value = 65535;
+    range.step = 1;
+    descriptor.integer_range.push_back(range);
+    sdo_app_id_ = static_cast<uint16_t>(this->declare_parameter<int64_t>(
+      "starting_sdo_app_id", 1000, descriptor));
+  }
 
-  max_sdo_queue_size_ = static_cast<size_t>(DeclareInitParameterInt(
-    "max_sdo_queue_size", 32,
-    "Max size of the SDO Response queue. This queue is not checked unless an"
-    " SDO blocking service is active. This prevents the queue from allocating"
-    " too much memory when left running for a long time",
-    1, 10000));
+  {
+    rcl_interfaces::msg::ParameterDescriptor descriptor;
+    descriptor.description =
+      "Max size of the SDO Response queue. This queue is not checked unless "
+      "an SDO blocking service is active. This prevents the queue from "
+      "allocating too much memory when left running for a long time";
+    descriptor.read_only = true;
+    rcl_interfaces::msg::IntegerRange range;
+    range.from_value = 1;
+    range.to_value = 10000;
+    range.step = 1;
+    descriptor.integer_range.push_back(range);
+    max_sdo_queue_size_ = static_cast<size_t>(this->declare_parameter<int64_t>(
+      "max_sdo_queue_size", 32, descriptor));
+  }
 
   // Rutime Parameters
-  DeclareRuntimeParameterInt(
-    "idle_persist_rti", 5,
-    "Number of RTI loops to wait to see if device state changes from idle to "
-    "moving."
-    "If this number of RTIs passes, then the command returns success, "
-    "assumed device "
-    "did not need to change in order or achieve the command.",
-    1, 1000);
+  {
+    rcl_interfaces::msg::ParameterDescriptor descriptor;
+    descriptor.description =
+      "Number of RTI loops to wait to see if device state changes from idle "
+      "to moving.If this number of RTIs passes, then the command returns "
+      "success, assumed device did not need to change in order or achieve "
+      "the command.";
+    rcl_interfaces::msg::IntegerRange range;
+    range.from_value = 1;
+    range.to_value = 1000;
+    range.step = 1;
+    descriptor.integer_range.push_back(range);
+    this->declare_parameter<int64_t>("idle_persist_rti", 5, descriptor);
+  }
 
-  DeclareRuntimeParameterDouble("tolerance", 1.0e-8,
-                                "Tolerance used to check if argument is near "
-                                "zero e.g. fabs(arg) < tolerance",
-                                0, 10);
+  {
+    rcl_interfaces::msg::ParameterDescriptor descriptor;
+    descriptor.description =
+      "Tolerance used to check if argument is near zero e.g. fabs(arg) < "
+      "tolerance";
+    rcl_interfaces::msg::FloatingPointRange range;
+    range.from_value = 0.0;
+    range.to_value = 10.0;
+    range.step = 0.0;
+    descriptor.floating_point_range.push_back(range);
+    this->declare_parameter<double>("tolerance", 1.0e-8, descriptor);
+  }
 
-  DeclareRuntimeParameterDouble(
-    "sdo_wait_duration_sec", 2.0,
-    "Maximum time to wait for an Async SDO response. If this timer expires"
-    " the service will terminate with a failure",
-    0, 60);
+  {
+    rcl_interfaces::msg::ParameterDescriptor descriptor;
+    descriptor.description =
+      "Maximum time to wait for an Async SDO response. If this timer expires"
+      " the service will terminate with a failure";
+    rcl_interfaces::msg::FloatingPointRange range;
+    range.from_value = 0.0;
+    range.to_value = 60.0;
+    range.step = 0.0;
+    descriptor.floating_point_range.push_back(range);
+    this->declare_parameter<double>("sdo_wait_duration_sec", 2.0, descriptor);
+  }
 
   InitSubscribers();
   InitPublishers();

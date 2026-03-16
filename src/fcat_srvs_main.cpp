@@ -4,19 +4,19 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-int main(int argc, char * argv[])
+int main(int argc, char* argv[])
 {
-
   rclcpp::init(argc, argv);
 
   rclcpp::executors::MultiThreadedExecutor executor(
-      rclcpp::ExecutorOptions(), // Default options
-      2 // Number of threads
-      );
+    rclcpp::ExecutorOptions(),  // Default options
+    2                           // Number of threads
+  );
 
-  auto node = std::make_shared<FcatSrvs>();
+  auto node = std::make_shared<FcatServices>();
   executor.add_node(node);
   executor.spin();
   rclcpp::shutdown();
   return 0;
 }
+

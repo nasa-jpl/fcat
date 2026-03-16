@@ -4,364 +4,264 @@
 
 #include "fastcat/jsd/actuator.h"
 
-fcat_msgs::msg::ActuatorState 
-  ActuatorStateToMsg(std::shared_ptr<const fastcat::DeviceState> state)
+void Fcat::ResetCmdCb(const std::shared_ptr<std_msgs::msg::Empty> msg)
 {
-  auto msg = fcat_msgs::msg::ActuatorState();
-
-  msg.actual_position =              state->actuator_state.actual_position;
-  msg.actual_velocity =              state->actuator_state.actual_velocity;
-  msg.actual_current =               state->actuator_state.actual_current;
-  msg.faulted =                      state->actuator_state.faulted;
-  msg.cmd_position =                 state->actuator_state.cmd_position;
-  msg.cmd_velocity =                 state->actuator_state.cmd_velocity;
-  msg.cmd_current =                  state->actuator_state.cmd_current;
-  msg.cmd_max_current =              state->actuator_state.cmd_max_current;
-  msg.egd_state_machine_state =      state->actuator_state.egd_state_machine_state;
-  msg.egd_mode_of_operation =        state->actuator_state.egd_mode_of_operation;
-  msg.sto_engaged =                  state->actuator_state.sto_engaged;
-  msg.hall_state =                   state->actuator_state.hall_state;
-  msg.target_reached =               state->actuator_state.target_reached;
-  msg.motor_on =                     state->actuator_state.motor_on;
-  msg.fault_code =                   state->actuator_state.fault_code;
-  msg.bus_voltage =                  state->actuator_state.bus_voltage;
-  msg.drive_temperature =            state->actuator_state.drive_temperature;
-  msg.egd_actual_position =          state->actuator_state.egd_actual_position;
-  msg.egd_cmd_position =             state->actuator_state.egd_cmd_position;
-  msg.actuator_state_machine_state = state->actuator_state.actuator_state_machine_state;
-
-  return msg;
-}
-
-fcat_msgs::msg::EgdState EgdStateToMsg(
-    std::shared_ptr<const fastcat::DeviceState> state)
-{
-  auto msg = fcat_msgs::msg::EgdState();
-
-  msg.actual_position =            state->egd_state.actual_position;
-  msg.actual_velocity =            state->egd_state.actual_velocity;
-  msg.actual_current =             state->egd_state.actual_current;
-  msg.faulted =                    state->egd_state.faulted;
-  msg.cmd_position =               state->egd_state.cmd_position;
-  msg.cmd_velocity =               state->egd_state.cmd_velocity;
-  msg.cmd_current =                state->egd_state.cmd_current;
-  msg.cmd_max_current =            state->egd_state.cmd_max_current;
-  msg.cmd_ff_position =            state->egd_state.cmd_ff_position;
-  msg.cmd_ff_velocity =            state->egd_state.cmd_ff_velocity;
-  msg.cmd_ff_current =             state->egd_state.cmd_ff_current;
-  msg.actual_state_machine_state = state->egd_state.actual_state_machine_state;
-  msg.actual_mode_of_operation =   state->egd_state.actual_mode_of_operation;
-  msg.async_sdo_in_prog =          state->egd_state.async_sdo_in_prog;
-  msg.sto_engaged =                state->egd_state.sto_engaged;
-  msg.hall_state =                 state->egd_state.hall_state;
-  msg.in_motion =                  state->egd_state.in_motion;
-  msg.warning =                    state->egd_state.warning;
-  msg.target_reached =             state->egd_state.target_reached;
-  msg.motor_on =                   state->egd_state.motor_on;
-  msg.fault_code =                 state->egd_state.fault_code;
-  msg.bus_voltage =                state->egd_state.bus_voltage;
-  msg.analog_input_voltage =       state->egd_state.analog_input_voltage;
-  msg.digital_input_ch1 =          state->egd_state.digital_input_ch1;
-  msg.digital_input_ch2 =          state->egd_state.digital_input_ch2;
-  msg.digital_input_ch3 =          state->egd_state.digital_input_ch3;
-  msg.digital_input_ch4 =          state->egd_state.digital_input_ch4;
-  msg.digital_input_ch5 =          state->egd_state.digital_input_ch5;
-  msg.digital_input_ch6 =          state->egd_state.digital_input_ch6;
-  msg.digital_output_cmd_ch1 =     state->egd_state.digital_output_cmd_ch1;
-  msg.digital_output_cmd_ch2 =     state->egd_state.digital_output_cmd_ch2;
-  msg.digital_output_cmd_ch3 =     state->egd_state.digital_output_cmd_ch3;
-  msg.digital_output_cmd_ch4 =     state->egd_state.digital_output_cmd_ch4;
-  msg.digital_output_cmd_ch5 =     state->egd_state.digital_output_cmd_ch5;
-  msg.digital_output_cmd_ch6 =     state->egd_state.digital_output_cmd_ch6;
-  msg.drive_temperature =          state->egd_state.drive_temperature;
-
-  return msg;
-}
-
-fcat_msgs::msg::El2124State El2124StateToMsg(
-    std::shared_ptr<const fastcat::DeviceState> state)
-{
-  auto msg = fcat_msgs::msg::El2124State();
-
-  msg.level_ch1 = state->el2124_state.level_ch1;
-  msg.level_ch2 = state->el2124_state.level_ch2;
-  msg.level_ch3 = state->el2124_state.level_ch3;
-  msg.level_ch4 = state->el2124_state.level_ch4;
-
-  return msg;
-}
-
-fcat_msgs::msg::El3208State El3208StateToMsg(
-    std::shared_ptr<const fastcat::DeviceState> state)
-{
-  auto msg = fcat_msgs::msg::El3208State();
-
-  msg.output_ch1 =    state->el3208_state.output_ch1;
-  msg.adc_value_ch1 = state->el3208_state.adc_value_ch1;
-  msg.output_ch2 =    state->el3208_state.output_ch2;
-  msg.adc_value_ch2 = state->el3208_state.adc_value_ch2;
-  msg.output_ch3 =    state->el3208_state.output_ch3;
-  msg.adc_value_ch3 = state->el3208_state.adc_value_ch3;
-  msg.output_ch4 =    state->el3208_state.output_ch4;
-  msg.adc_value_ch4 = state->el3208_state.adc_value_ch4;
-  msg.output_ch5 =    state->el3208_state.output_ch5;
-  msg.adc_value_ch5 = state->el3208_state.adc_value_ch5;
-  msg.output_ch6 =    state->el3208_state.output_ch6;
-  msg.adc_value_ch6 = state->el3208_state.adc_value_ch6;
-  msg.output_ch7 =    state->el3208_state.output_ch7;
-  msg.adc_value_ch7 = state->el3208_state.adc_value_ch7;
-  msg.output_ch8 =    state->el3208_state.output_ch8;
-  msg.adc_value_ch8 = state->el3208_state.adc_value_ch8;
-
-  return msg;
-}
-
-fcat_msgs::msg::El3602State El3602StateToMsg(
-    std::shared_ptr<const fastcat::DeviceState> state)
-{
-  auto msg = fcat_msgs::msg::El3602State();
-
-
-  msg.voltage_ch1 =   state->el3602_state.voltage_ch1;
-  msg.adc_value_ch1 = state->el3602_state.adc_value_ch1;
-  msg.voltage_ch2 =   state->el3602_state.voltage_ch2;
-  msg.adc_value_ch2 = state->el3602_state.adc_value_ch2;
-
-  return msg;
-}
-
-fcat_msgs::msg::JedState JedStateToMsg(
-    std::shared_ptr<const fastcat::DeviceState> state)
-{
-  auto msg = fcat_msgs::msg::JedState();
-
-  msg.status = state->jed_state.status;
-  msg.cmd = state->jed_state.cmd;
-  msg.w_raw = state->jed_state.w_raw;
-  msg.x_raw = state->jed_state.x_raw;
-  msg.y_raw = state->jed_state.y_raw;
-  msg.z_raw = state->jed_state.z_raw;
-  msg.w = state->jed_state.w;
-  msg.x = state->jed_state.x;
-  msg.y = state->jed_state.y;
-  msg.z = state->jed_state.z;
-
-  return msg;
-}
-
-fcat_msgs::msg::CommanderState CommanderStateToMsg(
-    std::shared_ptr<const fastcat::DeviceState> state)
-{
-  auto msg = fcat_msgs::msg::CommanderState();
-
-  msg.enable = state->commander_state.enable;
-
-  return msg;
-}
-
-fcat_msgs::msg::ConditionalState ConditionalStateToMsg(
-    std::shared_ptr<const fastcat::DeviceState> state)
-{
-  auto msg = fcat_msgs::msg::ConditionalState();
-
-  msg.output = state->conditional_state.output;
-
-  return msg;
-}
-
-fcat_msgs::msg::FaulterState FaulterStateToMsg(
-    std::shared_ptr<const fastcat::DeviceState> state)
-{
-  auto msg = fcat_msgs::msg::FaulterState();
-
-  msg.enable = state->faulter_state.enable;
-  msg.fault_active = state->faulter_state.fault_active;
-
-  return msg;
-}
-
-fcat_msgs::msg::FilterState FilterStateToMsg(
-    std::shared_ptr<const fastcat::DeviceState> state)
-{
-  auto msg = fcat_msgs::msg::FilterState();
-
-  msg.output = state->filter_state.output;
-
-  return msg;
-}
-
-/* TODO
-auto msg = geometry_msgs::msg::Wrench();
-
-msg.force.x  = state->fts_state.raw_fx;
-msg.force.y  = state->fts_state.raw_fy;
-msg.force.z  = state->fts_state.raw_fz;
-msg.torque.x = state->fts_state.raw_tx;
-msg.torque.y = state->fts_state.raw_ty;
-msg.torque.z = state->fts_state.raw_tz;
-
-fts_raw_pub_[state->name]->publish(msg);
-
-msg.force.x  = state->fts_state.tared_fx;
-msg.force.y  = state->fts_state.tared_fy;
-msg.force.z  = state->fts_state.tared_fz;
-msg.torque.x = state->fts_state.tared_tx;
-msg.torque.y = state->fts_state.tared_ty;
-msg.torque.z = state->fts_state.tared_tz;
-
-fts_tared_pub_[state->name]->publish(msg);
-*/
-
-fcat_msgs::msg::FunctionState FunctionStateToMsg(
-    std::shared_ptr<const fastcat::DeviceState> state)
-{
-  auto msg = fcat_msgs::msg::FunctionState();
-
-  msg.output = state->function_state.output;
-
-  return msg;
-}
-
-fcat_msgs::msg::PidState PidStateToMsg(
-    std::shared_ptr<const fastcat::DeviceState> state)
-{
-  auto msg = fcat_msgs::msg::PidState();
-
-  msg.active = state->pid_state.active;
-  msg.output = state->pid_state.output;
-  msg.kp_term = state->pid_state.kp_term;
-  msg.ki_term = state->pid_state.ki_term;
-  msg.kd_term = state->pid_state.kd_term;
-
-  return msg;
-}
-
-fcat_msgs::msg::SaturationState SaturationStateToMsg(
-    std::shared_ptr<const fastcat::DeviceState> state)
-{
-  auto msg = fcat_msgs::msg::SaturationState();
-
-  msg.output = state->saturation_state.output;
-
-  return msg;
-}
-
-fcat_msgs::msg::SchmittTriggerState SchmittTriggerStateToMsg(
-    std::shared_ptr<const fastcat::DeviceState> state)
-{
-  auto msg = fcat_msgs::msg::SchmittTriggerState();
-
-  msg.output = state->schmitt_trigger_state.output;
-
-  return msg;
-}
-
-fcat_msgs::msg::SignalGeneratorState SignalGeneratorStateToMsg(
-    std::shared_ptr<const fastcat::DeviceState> state)
-{
-  auto msg = fcat_msgs::msg::SignalGeneratorState();
-
-  msg.output = state->signal_generator_state.output;
-
-  return msg;
-}
-
-void Fcat::ResetCb( const std::shared_ptr<std_msgs::msg::Empty> msg)
-{
-  (void)msg;
+  reset_in_progress_ = true;
   fcat_manager_.ExecuteAllDeviceResets();
+  FaultInterface::ResetCmdCb(msg);
+  reset_in_progress_ = false;
 }
 
-void Fcat::FaultCb( const std::shared_ptr<std_msgs::msg::Empty> msg)
+void Fcat::FaultCmdCb(const std::shared_ptr<std_msgs::msg::Empty> msg)
 {
   (void)msg;
-  fcat_manager_.ExecuteAllDeviceFaults();
+  if (!reset_in_progress_) {
+    fcat_manager_.ExecuteAllDeviceFaults();
+    FaultInterface::FaultCmdCb(msg);
+  }
 }
 
-void Fcat::ActuatorCSPCmdCb( const std::shared_ptr<fcat_msgs::msg::ActuatorCspCmd> msg){
+void Fcat::AsyncSdoReadCmdCb(
+  const std::shared_ptr<fcat_msgs::msg::AsyncSdoReadCmd> msg)
+{
   fastcat::DeviceCmd cmd;
   cmd.name = msg->name;
+  cmd.type = fastcat::ASYNC_SDO_READ_CMD;
+  cmd.async_sdo_read_cmd.sdo_index = msg->sdo_index;
+  cmd.async_sdo_read_cmd.sdo_subindex = msg->sdo_subindex;
+  cmd.async_sdo_read_cmd.data_type =
+    jsd_sdo_data_type_from_string(msg->data_type);
+  cmd.async_sdo_read_cmd.app_id = msg->app_id;
+
+  if (device_name_state_map_.end() != device_name_state_map_.find(msg->name)) {
+    QueueCommand(cmd);
+  }
+}
+void Fcat::AsyncSdoWriteCmdCb(
+  const std::shared_ptr<fcat_msgs::msg::AsyncSdoWriteCmd> msg)
+{
+  fastcat::DeviceCmd cmd;
+  cmd.name = msg->name;
+  cmd.type = fastcat::ASYNC_SDO_WRITE_CMD;
+  cmd.async_sdo_write_cmd.sdo_index = msg->sdo_index;
+  cmd.async_sdo_write_cmd.sdo_subindex = msg->sdo_subindex;
+  cmd.async_sdo_write_cmd.data_type =
+    jsd_sdo_data_type_from_string(msg->data_type);
+  cmd.async_sdo_write_cmd.app_id = msg->app_id;
+
+  cmd.async_sdo_write_cmd.data =
+    jsd_sdo_data_from_string(cmd.async_sdo_write_cmd.data_type, msg->data);
+
+  if (device_name_state_map_.end() != device_name_state_map_.find(msg->name)) {
+    QueueCommand(cmd);
+  }
+}
+
+void Fcat::CallActuatorCSP(const fcat_msgs::msg::ActuatorCspCmd& msg, double t)
+{
+  if(!cs_subscription_cb_realtime_preempt_initialized_) {
+    if(enable_realtime_preempt_) {
+      EVR_ACTIVITY_HI(
+        "Setting realtime priority for subscription callback thread to %d", 
+        scheduler_priority_ - 1);
+      SetRealtimePreempt(scheduler_priority_ - 1); 
+    }
+    cs_subscription_cb_realtime_preempt_initialized_ = true; 
+  }
+
+  if (!subscription_cpu_affinity_initialized_) {
+    if (process_loop_cpu_id_ >= 0) {
+      SetCpuAffinity();
+    }
+    subscription_cpu_affinity_initialized_ = true;
+  }
+
+  fastcat::DeviceCmd cmd;
+  cmd.name = msg.name;
   cmd.type = fastcat::ACTUATOR_CSP_CMD;
-  cmd.actuator_csp_cmd.target_position = msg->target_position;
-  cmd.actuator_csp_cmd.position_offset = msg->position_offset;
-  cmd.actuator_csp_cmd.velocity_offset = msg->velocity_offset;
-  cmd.actuator_csp_cmd.torque_offset_amps = msg->torque_offset_amps;
+  cmd.actuator_csp_cmd.request_time = msg.request_time;
+  cmd.actuator_csp_cmd.target_position = msg.target_position;
+  cmd.actuator_csp_cmd.position_offset = msg.position_offset;
+  cmd.actuator_csp_cmd.velocity_offset = msg.velocity_offset;
+  cmd.actuator_csp_cmd.torque_offset_amps = msg.torque_offset_amps;
 
-  if(DeviceExistsOnBus(cmd.name, fastcat::ACTUATOR_STATE)){
-    fcat_manager_.QueueCommand(cmd);
+  // these arguments are not part of the CSP spec, but are used to
+  // inform how to update CSP setpoints if a new setpoint is not received
+  // from the calling module
+  cmd.actuator_csp_cmd.acceleration_offset = msg.acceleration_offset;
+  cmd.actuator_csp_cmd.interpolation_mode = msg.interpolation_mode;
+  cmd.actuator_csp_cmd.receipt_stamp_time = t;
+
+  if (std::isnan(msg.request_time) ||
+      std::isnan(msg.target_position) ||
+      std::isnan(msg.position_offset) ||
+      std::isnan(msg.velocity_offset) ||
+      std::isnan(msg.torque_offset_amps)) {
+    EVR_WARNING_HI(
+        "A NaN value was found in a CSP setpoint; "
+        "The CSP setpoint was ignored"
+    );
+    return;
+  }
+
+  if (ActuatorExistsOnBus(cmd.name)) {
+    QueueCommand(cmd);
   }
 }
 
-void Fcat::ActuatorCSVCmdCb( const std::shared_ptr<fcat_msgs::msg::ActuatorCsvCmd> msg){
+void Fcat::ActuatorCSPCmdCb(
+  const std::shared_ptr<fcat_msgs::msg::ActuatorCspCmd> msg)
+{
+  this->CallActuatorCSP(*msg, this->now().seconds());
+}
+
+void Fcat::ActuatorCSPCmdsCb(
+  const std::shared_ptr<fcat_msgs::msg::ActuatorCspCmds> msg)
+{
+  CFW_TRACE("Processing ActuatorCSPCmdsCb");
+  double t = this->now().seconds();
+  for (auto csp_cmd : msg->commands) {
+    CallActuatorCSP(csp_cmd, t);
+  }
+}
+
+void Fcat::CallActuatorCSV(
+  const fcat_msgs::msg::ActuatorCsvCmd& msg)
+{
+  if(!cs_subscription_cb_realtime_preempt_initialized_) {
+    if(enable_realtime_preempt_) {
+       EVR_ACTIVITY_HI(
+        "Setting realtime priority for subscription callback thread to %d", 
+        scheduler_priority_ - 1);
+      SetRealtimePreempt(scheduler_priority_ - 1); 
+    }
+    cs_subscription_cb_realtime_preempt_initialized_ = true; 
+  }
+  if (!subscription_cpu_affinity_initialized_) {
+    if (process_loop_cpu_id_ >= 0) {
+      SetCpuAffinity();
+    }
+    subscription_cpu_affinity_initialized_ = true;
+  }
+
   fastcat::DeviceCmd cmd;
-  cmd.name = msg->name;
+  cmd.name = msg.name;
   cmd.type = fastcat::ACTUATOR_CSV_CMD;
-  cmd.actuator_csv_cmd.target_velocity = msg->target_velocity;
-  cmd.actuator_csv_cmd.velocity_offset = msg->velocity_offset;
-  cmd.actuator_csv_cmd.torque_offset_amps = msg->torque_offset_amps;
-
-  if(DeviceExistsOnBus(cmd.name, fastcat::ACTUATOR_STATE)){
-    fcat_manager_.QueueCommand(cmd);
+  cmd.actuator_csv_cmd.target_velocity = msg.target_velocity;
+  cmd.actuator_csv_cmd.velocity_offset = msg.velocity_offset;
+  cmd.actuator_csv_cmd.torque_offset_amps = msg.torque_offset_amps;
+  if (ActuatorExistsOnBus(cmd.name)) {
+    QueueCommand(cmd);
   }
 }
 
-void Fcat::ActuatorCSTCmdCb( const std::shared_ptr<fcat_msgs::msg::ActuatorCstCmd> msg){
+void Fcat::ActuatorCSVCmdCb(
+  const std::shared_ptr<fcat_msgs::msg::ActuatorCsvCmd> msg)
+{
+  this->CallActuatorCSV(*msg);
+}
+
+void Fcat::ActuatorCSVCmdsCb(
+  const std::shared_ptr<fcat_msgs::msg::ActuatorCsvCmds> msg)
+{
+  CFW_TRACE("Processing ActuatorCSVCmdsCb");
+  for (auto csv_cmd : msg->commands) {
+    CallActuatorCSV(csv_cmd);
+  }
+}
+
+void Fcat::CallActuatorCST(
+  const fcat_msgs::msg::ActuatorCstCmd& msg)
+{
+  if(!cs_subscription_cb_realtime_preempt_initialized_) {
+    if(enable_realtime_preempt_) {
+      EVR_ACTIVITY_HI(
+        "Setting realtime priority for subscription callback thread to %d", 
+        scheduler_priority_ - 1);
+      SetRealtimePreempt(scheduler_priority_ - 1); 
+    }
+    cs_subscription_cb_realtime_preempt_initialized_ = true; 
+  }
+  if (!subscription_cpu_affinity_initialized_) {
+    if (process_loop_cpu_id_ >= 0) {
+      SetCpuAffinity();
+    }
+    subscription_cpu_affinity_initialized_ = true;
+  }
+
   fastcat::DeviceCmd cmd;
-  cmd.name = msg->name;
+  cmd.name = msg.name;
   cmd.type = fastcat::ACTUATOR_CST_CMD;
-  cmd.actuator_cst_cmd.target_torque_amps = msg->target_torque_amps;
-  cmd.actuator_cst_cmd.torque_offset_amps = msg->torque_offset_amps;
-
-  if(DeviceExistsOnBus(cmd.name, fastcat::ACTUATOR_STATE)){
-    fcat_manager_.QueueCommand(cmd);
+  cmd.actuator_cst_cmd.target_torque_amps = msg.target_torque_amps;
+  cmd.actuator_cst_cmd.torque_offset_amps = msg.torque_offset_amps;
+  if (ActuatorExistsOnBus(cmd.name)) {
+    QueueCommand(cmd);
   }
 }
 
-void Fcat::ActuatorCalibrateCmdCb( 
-    const std::shared_ptr<fcat_msgs::msg::ActuatorCalibrateCmd> msg)
+void Fcat::ActuatorCSTCmdCb(
+  const std::shared_ptr<fcat_msgs::msg::ActuatorCstCmd> msg)
+{
+  CallActuatorCST(*msg);
+}
+
+
+void Fcat::ActuatorCSTCmdsCb(
+  const std::shared_ptr<fcat_msgs::msg::ActuatorCstCmds> msg)
+{
+  CFW_TRACE("Processing ActuatorCSTCmdsCb");
+  for (auto cst_cmd : msg->commands) {
+    CallActuatorCST(cst_cmd);
+  }
+}
+
+void Fcat::ActuatorCalibrateCmdCb(
+  const std::shared_ptr<fcat_msgs::msg::ActuatorCalibrateCmd> msg)
 {
   fastcat::DeviceCmd cmd;
   cmd.name = msg->name;
   cmd.type = fastcat::ACTUATOR_CALIBRATE_CMD;
-  cmd.actuator_calibrate_cmd.velocity    = msg->velocity;
-  cmd.actuator_calibrate_cmd.accel       = msg->accel;
+  cmd.actuator_calibrate_cmd.velocity = msg->velocity;
+  cmd.actuator_calibrate_cmd.accel = msg->accel;
   cmd.actuator_calibrate_cmd.max_current = msg->max_current;
-
-  if(DeviceExistsOnBus(cmd.name, fastcat::ACTUATOR_STATE)){
-    fcat_manager_.QueueCommand(cmd);
+  if (ActuatorExistsOnBus(cmd.name)) {
+    QueueCommand(cmd);
   }
 }
 
-void Fcat::ActuatorProfPosCmdCb( 
-    const std::shared_ptr<fcat_msgs::msg::ActuatorProfPosCmd> msg)
+void Fcat::CallActuatorProfPos(const fcat_msgs::msg::ActuatorProfPosCmd& msg)
 {
   fastcat::DeviceCmd cmd;
-  cmd.name = msg->name;
+  cmd.name = msg.name;
   cmd.type = fastcat::ACTUATOR_PROF_POS_CMD;
-  cmd.actuator_prof_pos_cmd.target_position = msg->target_position;
-  cmd.actuator_prof_pos_cmd.profile_velocity = msg->profile_velocity;
-  cmd.actuator_prof_pos_cmd.profile_accel= msg->profile_accel;
-  cmd.actuator_prof_pos_cmd.relative = msg->relative;
-
-  if(DeviceExistsOnBus(cmd.name, fastcat::ACTUATOR_STATE)){
-    fcat_manager_.QueueCommand(cmd);
+  cmd.actuator_prof_pos_cmd.target_position = msg.target_position;
+  cmd.actuator_prof_pos_cmd.profile_velocity = msg.profile_velocity;
+  cmd.actuator_prof_pos_cmd.profile_accel = msg.profile_accel;
+  cmd.actuator_prof_pos_cmd.relative = msg.relative;
+  if (ActuatorExistsOnBus(cmd.name)) {
+    QueueCommand(cmd);
   }
 }
-void Fcat::ActuatorProfTorqueCmdCb( 
-    const std::shared_ptr<fcat_msgs::msg::ActuatorProfTorqueCmd> msg)
+
+void Fcat::ActuatorProfPosCmdCb(
+  const std::shared_ptr<fcat_msgs::msg::ActuatorProfPosCmd> msg)
+{
+  CallActuatorProfPos(*msg);
+}
+void Fcat::ActuatorProfTorqueCmdCb(
+  const std::shared_ptr<fcat_msgs::msg::ActuatorProfTorqueCmd> msg)
 {
   fastcat::DeviceCmd cmd;
   cmd.name = msg->name;
   cmd.type = fastcat::ACTUATOR_PROF_TORQUE_CMD;
   cmd.actuator_prof_torque_cmd.target_torque_amps = msg->target_torque_amps;
   cmd.actuator_prof_torque_cmd.max_duration = msg->max_duration;
-
-  if(DeviceExistsOnBus(cmd.name, fastcat::ACTUATOR_STATE)){
-    fcat_manager_.QueueCommand(cmd);
+  if (ActuatorExistsOnBus(cmd.name)) {
+    QueueCommand(cmd);
   }
 }
-void Fcat::ActuatorProfVelCmdCb( 
-    const std::shared_ptr<fcat_msgs::msg::ActuatorProfVelCmd> msg)
+void Fcat::ActuatorProfVelCmdCb(
+  const std::shared_ptr<fcat_msgs::msg::ActuatorProfVelCmd> msg)
 {
   fastcat::DeviceCmd cmd;
   cmd.name = msg->name;
@@ -369,53 +269,135 @@ void Fcat::ActuatorProfVelCmdCb(
   cmd.actuator_prof_vel_cmd.target_velocity = msg->target_velocity;
   cmd.actuator_prof_vel_cmd.profile_accel = msg->profile_accel;
   cmd.actuator_prof_vel_cmd.max_duration = msg->max_duration;
-
-  if(DeviceExistsOnBus(cmd.name, fastcat::ACTUATOR_STATE)){
-    fcat_manager_.QueueCommand(cmd);
+  if (ActuatorExistsOnBus(cmd.name)) {
+    QueueCommand(cmd);
   }
 }
 
-void Fcat::ActuatorSetOutputPositionCmdCb( 
-    const std::shared_ptr<fcat_msgs::msg::ActuatorSetOutputPositionCmd> msg)
+void Fcat::ActuatorProfPosCmdsCb(
+  const std::shared_ptr<fcat_msgs::msg::ActuatorProfPosCmds> msg)
 {
+  for (auto prof_pos_cmd : msg->commands) {
+    CallActuatorProfPos(prof_pos_cmd);
+  }
+}
 
+void Fcat::ActuatorSetOutputPositionCmdCb(
+  const std::shared_ptr<fcat_msgs::msg::ActuatorSetOutputPositionCmd> msg)
+{
   fastcat::DeviceCmd cmd;
   cmd.name = msg->name;
   cmd.type = fastcat::ACTUATOR_SET_OUTPUT_POSITION_CMD;
   cmd.actuator_set_output_position_cmd.position = msg->position;
-
-  if(DeviceExistsOnBus(cmd.name, fastcat::ACTUATOR_STATE)){
-    fcat_manager_.QueueCommand(cmd);
+  if (ActuatorExistsOnBus(cmd.name)) {
+    QueueCommand(cmd);
   }
 }
 
-void Fcat::CommanderEnableCmdCb( 
-    const std::shared_ptr<fcat_msgs::msg::CommanderEnableCmd> msg)
+void Fcat::ActuatorSetDigitalOutputCmdCb(
+  const std::shared_ptr<fcat_msgs::msg::ActuatorSetDigitalOutputCmd> msg)
+{
+  fastcat::DeviceCmd cmd;
+  cmd.name = msg->name;
+  cmd.type = fastcat::ACTUATOR_SET_DIGITAL_OUTPUT_CMD;
+  cmd.actuator_set_digital_output_cmd.digital_output_index =
+    msg->digital_output_index;
+  cmd.actuator_set_digital_output_cmd.output_level = msg->output_level;
+  if (ActuatorExistsOnBus(cmd.name)) {
+    QueueCommand(cmd);
+  }
+}
+
+void Fcat::ActuatorSetMaxCurrentCmdCb(
+  const std::shared_ptr<fcat_msgs::msg::ActuatorSetMaxCurrentCmd> msg)
+{
+  fastcat::DeviceCmd cmd;
+  cmd.name = msg->name;
+  cmd.type = fastcat::ACTUATOR_SET_MAX_CURRENT_CMD;
+  cmd.actuator_set_max_current_cmd.current = msg->max_current;
+
+  if (ActuatorExistsOnBus(cmd.name)) {
+    QueueCommand(cmd);
+  }
+}
+
+void Fcat::ActuatorSetUnitModeCmdCb(
+  const std::shared_ptr<fcat_msgs::msg::ActuatorSetUnitModeCmd> msg)
+{
+  fastcat::DeviceCmd cmd;
+  cmd.name = msg->name;
+  cmd.type = fastcat::ACTUATOR_SDO_SET_UNIT_MODE_CMD;
+  cmd.actuator_sdo_set_unit_mode_cmd.mode = msg->mode;
+  cmd.actuator_sdo_set_unit_mode_cmd.app_id = msg->app_id;
+  if (ActuatorExistsOnBus(cmd.name)) {
+    QueueCommand(cmd);
+  }
+}
+
+void Fcat::ActuatorSetProfDisengagingTimeoutCmdCb(
+  const std::shared_ptr<fcat_msgs::msg::ActuatorSetProfDisengagingTimeoutCmd>
+    msg)
+{
+  fastcat::DeviceCmd cmd;
+  cmd.name = msg->name;
+  cmd.type = fastcat::ACTUATOR_SET_PROF_DISENGAGING_TIMEOUT_CMD;
+  cmd.actuator_set_prof_disengaging_timeout_cmd.timeout = msg->timeout;
+  if (ActuatorExistsOnBus(cmd.name)) {
+    QueueCommand(cmd);
+  }
+}
+
+void Fcat::ActuatorHaltCmdCb(
+  const std::shared_ptr<fcat_msgs::msg::ActuatorHaltCmd> msg)
+{
+  fastcat::DeviceCmd cmd;
+  cmd.name = msg->name;
+  cmd.type = fastcat::ACTUATOR_HALT_CMD;
+  if (ActuatorExistsOnBus(cmd.name)) {
+    QueueCommand(cmd);
+  }
+}
+
+void Fcat::ActuatorHaltCmdsCb(
+  const std::shared_ptr<fcat_msgs::msg::ActuatorHaltCmds> msg)
+{
+  for (auto& name : msg->names) {
+    fastcat::DeviceCmd cmd;
+    cmd.name = name;
+    cmd.type = fastcat::ACTUATOR_HALT_CMD;
+    if (ActuatorExistsOnBus(cmd.name)) {
+      QueueCommand(cmd);
+    }
+  }
+}
+
+void Fcat::CommanderEnableCmdCb(
+  const std::shared_ptr<fcat_msgs::msg::CommanderEnableCmd> msg)
 {
   fastcat::DeviceCmd cmd;
   cmd.name = msg->name;
   cmd.type = fastcat::COMMANDER_ENABLE_CMD;
   cmd.commander_enable_cmd.duration = msg->duration;
 
-  if(DeviceExistsOnBus(cmd.name, fastcat::COMMANDER_STATE)){
-    fcat_manager_.QueueCommand(cmd);
+  if (DeviceExistsOnBus(cmd.name, fastcat::COMMANDER_STATE)) {
+    QueueCommand(cmd);
   }
 }
 
-void Fcat::CommanderDisableCmdCb( 
-    const std::shared_ptr<fcat_msgs::msg::CommanderDisableCmd> msg)
+void Fcat::CommanderDisableCmdCb(
+  const std::shared_ptr<fcat_msgs::msg::CommanderDisableCmd> msg)
 {
   fastcat::DeviceCmd cmd;
   cmd.name = msg->name;
   cmd.type = fastcat::COMMANDER_DISABLE_CMD;
 
-  if(DeviceExistsOnBus(cmd.name, fastcat::COMMANDER_STATE)){
-    fcat_manager_.QueueCommand(cmd);
+  if (DeviceExistsOnBus(cmd.name, fastcat::COMMANDER_STATE)) {
+    QueueCommand(cmd);
   }
 }
 
-void Fcat::El2124WriteAllChannelsCmdCb( 
-    const std::shared_ptr<fcat_msgs::msg::El2124WriteAllChannelsCmd> msg)
+void Fcat::El2124WriteAllChannelsCmdCb(
+  const std::shared_ptr<fcat_msgs::msg::El2124WriteAllChannelsCmd> msg)
 {
   fastcat::DeviceCmd cmd;
   cmd.name = msg->name;
@@ -425,12 +407,12 @@ void Fcat::El2124WriteAllChannelsCmdCb(
   cmd.el2124_write_all_channels_cmd.channel_ch3 = msg->channel_ch3;
   cmd.el2124_write_all_channels_cmd.channel_ch4 = msg->channel_ch4;
 
-  if(DeviceExistsOnBus(cmd.name, fastcat::EL2124_STATE)){
-    fcat_manager_.QueueCommand(cmd);
+  if (DeviceExistsOnBus(cmd.name, fastcat::EL2124_STATE)) {
+    QueueCommand(cmd);
   }
 }
-void Fcat::El2124WriteChannelCmdCb( 
-    const std::shared_ptr<fcat_msgs::msg::El2124WriteChannelCmd> msg)
+void Fcat::El2124WriteChannelCmdCb(
+  const std::shared_ptr<fcat_msgs::msg::El2124WriteChannelCmd> msg)
 {
   fastcat::DeviceCmd cmd;
   cmd.name = msg->name;
@@ -438,47 +420,173 @@ void Fcat::El2124WriteChannelCmdCb(
   cmd.el2124_write_channel_cmd.channel = msg->channel;
   cmd.el2124_write_channel_cmd.level = msg->level;
 
-  if(DeviceExistsOnBus(cmd.name, fastcat::EL2124_STATE)){
-    fcat_manager_.QueueCommand(cmd);
+  if (DeviceExistsOnBus(cmd.name, fastcat::EL2124_STATE)) {
+    QueueCommand(cmd);
   }
 }
 
-void Fcat::FaulterEnableCmdCb( const std::shared_ptr<fcat_msgs::msg::FaulterEnableCmd> msg)
+void Fcat::El2809WriteAllChannelsCmdCb(
+  const std::shared_ptr<fcat_msgs::msg::El2809WriteAllChannelsCmd> msg)
+{
+  fastcat::DeviceCmd cmd;
+  cmd.name = msg->name;
+  cmd.type = fastcat::EL2809_WRITE_ALL_CHANNELS_CMD;
+  cmd.el2809_write_all_channels_cmd.channel_ch1 = msg->channel_ch1;
+  cmd.el2809_write_all_channels_cmd.channel_ch2 = msg->channel_ch2;
+  cmd.el2809_write_all_channels_cmd.channel_ch3 = msg->channel_ch3;
+  cmd.el2809_write_all_channels_cmd.channel_ch4 = msg->channel_ch4;
+  cmd.el2809_write_all_channels_cmd.channel_ch5 = msg->channel_ch5;
+  cmd.el2809_write_all_channels_cmd.channel_ch6 = msg->channel_ch6;
+  cmd.el2809_write_all_channels_cmd.channel_ch7 = msg->channel_ch7;
+  cmd.el2809_write_all_channels_cmd.channel_ch8 = msg->channel_ch8;
+  cmd.el2809_write_all_channels_cmd.channel_ch9 = msg->channel_ch9;
+  cmd.el2809_write_all_channels_cmd.channel_ch10 = msg->channel_ch10;
+  cmd.el2809_write_all_channels_cmd.channel_ch11 = msg->channel_ch11;
+  cmd.el2809_write_all_channels_cmd.channel_ch12 = msg->channel_ch12;
+  cmd.el2809_write_all_channels_cmd.channel_ch13 = msg->channel_ch13;
+  cmd.el2809_write_all_channels_cmd.channel_ch14 = msg->channel_ch14;
+  cmd.el2809_write_all_channels_cmd.channel_ch15 = msg->channel_ch15;
+  cmd.el2809_write_all_channels_cmd.channel_ch16 = msg->channel_ch16;
+
+  if (DeviceExistsOnBus(cmd.name, fastcat::EL2809_STATE)) {
+    QueueCommand(cmd);
+  }
+}
+void Fcat::El2809WriteChannelCmdCb(
+  const std::shared_ptr<fcat_msgs::msg::El2809WriteChannelCmd> msg)
+{
+  fastcat::DeviceCmd cmd;
+  cmd.name = msg->name;
+  cmd.type = fastcat::EL2809_WRITE_CHANNEL_CMD;
+  cmd.el2809_write_channel_cmd.channel = msg->channel;
+  cmd.el2809_write_channel_cmd.level = msg->level;
+
+  if (DeviceExistsOnBus(cmd.name, fastcat::EL2809_STATE)) {
+    QueueCommand(cmd);
+  }
+}
+
+void Fcat::El2798WriteAllChannelsCmdCb(
+    const std::shared_ptr<fcat_msgs::msg::El2798WriteAllChannelsCmd> msg)
+{
+  fastcat::DeviceCmd cmd;
+  cmd.name = msg->name;
+  cmd.type = fastcat::EL2798_WRITE_ALL_CHANNELS_CMD;
+  cmd.el2798_write_all_channels_cmd.channel_ch1  = msg->channel_ch1;
+  cmd.el2798_write_all_channels_cmd.channel_ch2  = msg->channel_ch2;
+  cmd.el2798_write_all_channels_cmd.channel_ch3  = msg->channel_ch3;
+  cmd.el2798_write_all_channels_cmd.channel_ch4  = msg->channel_ch4;
+  cmd.el2798_write_all_channels_cmd.channel_ch5  = msg->channel_ch5;
+  cmd.el2798_write_all_channels_cmd.channel_ch6  = msg->channel_ch6;
+  cmd.el2798_write_all_channels_cmd.channel_ch7  = msg->channel_ch7;
+  cmd.el2798_write_all_channels_cmd.channel_ch8  = msg->channel_ch8;
+
+  if (DeviceExistsOnBus(cmd.name, fastcat::EL2798_STATE)) {
+    QueueCommand(cmd);
+  }
+}
+void Fcat::El2798WriteChannelCmdCb(
+    const std::shared_ptr<fcat_msgs::msg::El2798WriteChannelCmd> msg)
+{
+  fastcat::DeviceCmd cmd;
+  cmd.name                             = msg->name;
+  cmd.type                             = fastcat::EL2798_WRITE_CHANNEL_CMD;
+  cmd.el2798_write_channel_cmd.channel = msg->channel;
+  cmd.el2798_write_channel_cmd.level   = msg->level;
+
+  if (DeviceExistsOnBus(cmd.name, fastcat::EL2798_STATE)) {
+    QueueCommand(cmd);
+  }
+}
+
+void Fcat::El2828WriteAllChannelsCmdCb(
+    const std::shared_ptr<fcat_msgs::msg::El2828WriteAllChannelsCmd> msg)
+{
+  fastcat::DeviceCmd cmd;
+  cmd.name = msg->name;
+  cmd.type = fastcat::EL2828_WRITE_ALL_CHANNELS_CMD;
+  cmd.el2828_write_all_channels_cmd.channel_ch1  = msg->channel_ch1;
+  cmd.el2828_write_all_channels_cmd.channel_ch2  = msg->channel_ch2;
+  cmd.el2828_write_all_channels_cmd.channel_ch3  = msg->channel_ch3;
+  cmd.el2828_write_all_channels_cmd.channel_ch4  = msg->channel_ch4;
+  cmd.el2828_write_all_channels_cmd.channel_ch5  = msg->channel_ch5;
+  cmd.el2828_write_all_channels_cmd.channel_ch6  = msg->channel_ch6;
+  cmd.el2828_write_all_channels_cmd.channel_ch7  = msg->channel_ch7;
+  cmd.el2828_write_all_channels_cmd.channel_ch8  = msg->channel_ch8;
+
+  if (DeviceExistsOnBus(cmd.name, fastcat::EL2828_STATE)) {
+    QueueCommand(cmd);
+  }
+}
+void Fcat::El2828WriteChannelCmdCb(
+    const std::shared_ptr<fcat_msgs::msg::El2828WriteChannelCmd> msg)
+{
+  fastcat::DeviceCmd cmd;
+  cmd.name                             = msg->name;
+  cmd.type                             = fastcat::EL2828_WRITE_CHANNEL_CMD;
+  cmd.el2828_write_channel_cmd.channel = msg->channel;
+  cmd.el2828_write_channel_cmd.level   = msg->level;
+
+  if (DeviceExistsOnBus(cmd.name, fastcat::EL2828_STATE)) {
+    QueueCommand(cmd);
+  }
+}
+
+void Fcat::El4102WriteAllChannelsCmdCb(
+  const std::shared_ptr<fcat_msgs::msg::El4102WriteAllChannelsCmd> msg)
+{
+  fastcat::DeviceCmd cmd;
+  cmd.name = msg->name;
+  cmd.type = fastcat::EL4102_WRITE_ALL_CHANNELS_CMD;
+  cmd.el4102_write_all_channels_cmd.voltage_output_ch1 =
+    msg->voltage_output_ch1;
+  cmd.el4102_write_all_channels_cmd.voltage_output_ch2 =
+    msg->voltage_output_ch2;
+
+  if (DeviceExistsOnBus(cmd.name, fastcat::EL4102_STATE)) {
+    QueueCommand(cmd);
+  }
+}
+void Fcat::El4102WriteChannelCmdCb(
+  const std::shared_ptr<fcat_msgs::msg::El4102WriteChannelCmd> msg)
+{
+  fastcat::DeviceCmd cmd;
+  cmd.name = msg->name;
+  cmd.type = fastcat::EL4102_WRITE_CHANNEL_CMD;
+  cmd.el4102_write_channel_cmd.channel = msg->channel;
+  cmd.el4102_write_channel_cmd.voltage_output = msg->voltage_output;
+
+  if (DeviceExistsOnBus(cmd.name, fastcat::EL4102_STATE)) {
+    QueueCommand(cmd);
+  }
+}
+
+void Fcat::FaulterEnableCmdCb(
+  const std::shared_ptr<fcat_msgs::msg::FaulterEnableCmd> msg)
 {
   fastcat::DeviceCmd cmd;
   cmd.name = msg->name;
   cmd.type = fastcat::FAULTER_ENABLE_CMD;
   cmd.faulter_enable_cmd.enable = msg->enable;
 
-  if(DeviceExistsOnBus(cmd.name, fastcat::FAULTER_STATE)){
-    fcat_manager_.QueueCommand(cmd);
+  if (DeviceExistsOnBus(cmd.name, fastcat::FAULTER_STATE)) {
+    QueueCommand(cmd);
   }
 }
 
-void Fcat::FtsTareCmdCb( const std::shared_ptr<fcat_msgs::msg::FtsTareCmd> msg)
+void Fcat::FtsTareCmdCb(const std::shared_ptr<fcat_msgs::msg::FtsTareCmd> msg)
 {
   fastcat::DeviceCmd cmd;
   cmd.name = msg->name;
   cmd.type = fastcat::FTS_TARE_CMD;
 
-  if(DeviceExistsOnBus(cmd.name, fastcat::FTS_STATE)){
-    fcat_manager_.QueueCommand(cmd);
+  if (DeviceExistsOnBus(cmd.name, fastcat::FTS_STATE)) {
+    QueueCommand(cmd);
   }
 }
 
-void Fcat::JedSetCmdValueCmdCb( const std::shared_ptr<fcat_msgs::msg::JedSetCmdValueCmd> msg)
-{
-  fastcat::DeviceCmd cmd;
-  cmd.name = msg->name;
-  cmd.type = fastcat::JED_SET_CMD_VALUE_CMD;
-  cmd.jed_set_cmd_value_cmd.cmd = msg->cmd;
-
-  if(DeviceExistsOnBus(cmd.name, fastcat::JED_STATE)){
-    fcat_manager_.QueueCommand(cmd);
-  }
-}
-
-void Fcat::PidActivateCmdCb( const std::shared_ptr<fcat_msgs::msg::PidActivateCmd> msg)
+void Fcat::PidActivateCmdCb(
+  const std::shared_ptr<fcat_msgs::msg::PidActivateCmd> msg)
 {
   fastcat::DeviceCmd cmd;
   cmd.name = msg->name;
@@ -488,7 +596,536 @@ void Fcat::PidActivateCmdCb( const std::shared_ptr<fcat_msgs::msg::PidActivateCm
   cmd.pid_activate_cmd.persistence_duration = msg->persistence_duration;
   cmd.pid_activate_cmd.max_duration = msg->max_duration;
 
-  if(DeviceExistsOnBus(cmd.name, fastcat::PID_STATE)){
-    fcat_manager_.QueueCommand(cmd);
+  if (DeviceExistsOnBus(cmd.name, fastcat::PID_STATE)) {
+    QueueCommand(cmd);
+  }
+}
+
+void Fcat::ResetSrvCb(
+  const std::shared_ptr<std_srvs::srv::Trigger::Request> request,
+  std::shared_ptr<std_srvs::srv::Trigger::Response> response)
+{
+  EVR_ACTIVITY_LO("Handling Reset Command");
+  fcat_manager_.ExecuteAllDeviceResets();
+  FaultInterface::ResetSrvCb(request, response);
+}
+
+void Fcat::FaultSrvCb(
+  const std::shared_ptr<std_srvs::srv::Trigger::Request> request,
+  std::shared_ptr<std_srvs::srv::Trigger::Response> response)
+{
+  EVR_ACTIVITY_LO("Handling Fault Command");
+  fcat_manager_.ExecuteAllDeviceFaults();
+  FaultInterface::FaultSrvCb(request, response);
+}
+
+void Fcat::ActuatorHaltSrvCb(
+  const std::shared_ptr<fcat_msgs::srv::ActuatorHaltService::Request> request,
+  std::shared_ptr<fcat_msgs::srv::ActuatorHaltService::Response> response)
+{
+  EVR_ACTIVITY_LO("Handling Actuator Halt Command");
+  fastcat::DeviceCmd cmd;
+  cmd.name = request->name;
+  cmd.type = fastcat::ACTUATOR_HALT_CMD;
+
+  response->success = ActuatorExistsOnBus(cmd.name, response->message);
+  if (response->success) {
+    QueueCommand(cmd);
+  }
+}
+
+void Fcat::ActuatorSetGainSchedulingIndexSrvCb(
+  const std::shared_ptr<
+    fcat_msgs::srv::ActuatorSetGainSchedulingIndexService::Request>
+    request,
+  std::shared_ptr<
+    fcat_msgs::srv::ActuatorSetGainSchedulingIndexService::Response>
+    response)
+{
+  EVR_ACTIVITY_LO("Handling Actuator Set Gain Scheduling Index Command");
+  fastcat::DeviceCmd cmd;
+  cmd.name = request->name;
+  cmd.type = fastcat::ACTUATOR_SET_GAIN_SCHEDULING_INDEX_CMD;
+  cmd.actuator_set_gain_scheduling_index_cmd.gain_scheduling_index =
+    request->gain_scheduling_index;
+
+  response->success = ActuatorExistsOnBus(cmd.name, response->message);
+  if (response->success) {
+    QueueCommand(cmd);
+  }
+}
+
+void Fcat::ActuatorSetMaxCurrentSrvCb(
+  const std::shared_ptr<fcat_msgs::srv::ActuatorSetMaxCurrentService::Request>
+    request,
+  std::shared_ptr<fcat_msgs::srv::ActuatorSetMaxCurrentService::Response>
+    response)
+{
+  EVR_ACTIVITY_LO("Handling Actuator Set Max Current Command");
+  fastcat::DeviceCmd cmd;
+  cmd.name = request->name;
+  cmd.type = fastcat::ACTUATOR_SET_MAX_CURRENT_CMD;
+  cmd.actuator_set_max_current_cmd.current = request->max_current;
+
+  response->success = ActuatorExistsOnBus(cmd.name, response->message);
+  if (response->success) {
+    QueueCommand(cmd);
+  }
+}
+
+void Fcat::ActuatorSetDigitalOutputSrvCb(
+  const std::shared_ptr<
+    fcat_msgs::srv::ActuatorSetDigitalOutputService::Request>
+    request,
+  std::shared_ptr<fcat_msgs::srv::ActuatorSetDigitalOutputService::Response>
+    response)
+{
+  EVR_ACTIVITY_LO("Handling Actuator Set Digital Output Command");
+  fastcat::DeviceCmd cmd;
+  cmd.name = request->name;
+  cmd.type = fastcat::ACTUATOR_SET_DIGITAL_OUTPUT_CMD;
+  cmd.actuator_set_digital_output_cmd.digital_output_index =
+    request->digital_output_index;
+  cmd.actuator_set_digital_output_cmd.output_level = request->output_level;
+  response->success = ActuatorExistsOnBus(cmd.name, response->message);
+  if (response->success) {
+    QueueCommand(cmd);
+  }
+}
+
+void Fcat::ActuatorSetProfDisengagingTimeoutSrvCb(
+  const std::shared_ptr<
+    fcat_msgs::srv::ActuatorSetProfDisengagingTimeoutService::Request>
+    request,
+  std::shared_ptr<
+    fcat_msgs::srv::ActuatorSetProfDisengagingTimeoutService::Response>
+    response)
+{
+  EVR_ACTIVITY_LO("Handling Actuator Set Profile Disengaging Timeout Command");
+  fastcat::DeviceCmd cmd;
+  cmd.name = request->name;
+  cmd.type = fastcat::ACTUATOR_SET_PROF_DISENGAGING_TIMEOUT_CMD;
+  cmd.actuator_set_prof_disengaging_timeout_cmd.timeout = request->timeout;
+
+  response->success = ActuatorExistsOnBus(cmd.name, response->message);
+  if (response->success) {
+    QueueCommand(cmd);
+  }
+}
+
+void Fcat::ActuatorSetOutputPositionSrvCb(
+  const std::shared_ptr<
+    fcat_msgs::srv::ActuatorSetOutputPositionService::Request>
+    request,
+  std::shared_ptr<fcat_msgs::srv::ActuatorSetOutputPositionService::Response>
+    response)
+{
+  EVR_ACTIVITY_LO("Handling Actuator Set Output Position Command");
+  fastcat::DeviceCmd cmd;
+  cmd.name = request->name;
+  cmd.type = fastcat::ACTUATOR_SET_OUTPUT_POSITION_CMD;
+  cmd.actuator_set_output_position_cmd.position = request->position;
+  response->success = ActuatorExistsOnBus(cmd.name, response->message);
+  if (response->success) {
+    QueueCommand(cmd);
+  }
+}
+
+void Fcat::ActuatorCalibrateSrvCb(
+  const std::shared_ptr<fcat_msgs::srv::ActuatorCalibrateService::Request>
+    request,
+  std::shared_ptr<fcat_msgs::srv::ActuatorCalibrateService::Response> response)
+{
+  EVR_ACTIVITY_LO("Handling Actuator Calibrate Command");
+  fastcat::DeviceCmd cmd;
+  cmd.name = request->name;
+  cmd.type = fastcat::ACTUATOR_CALIBRATE_CMD;
+  cmd.actuator_calibrate_cmd.velocity = request->velocity;
+  cmd.actuator_calibrate_cmd.accel = request->accel;
+  cmd.actuator_calibrate_cmd.max_current = request->max_current;
+  response->success = ActuatorExistsOnBus(cmd.name, response->message);
+  if (response->success) {
+    QueueCommand(cmd);
+  }
+}
+
+void Fcat::ActuatorProfPosSrvCb(
+  const std::shared_ptr<fcat_msgs::srv::ActuatorProfPosService::Request>
+    request,
+  std::shared_ptr<fcat_msgs::srv::ActuatorProfPosService::Response> response)
+{
+  EVR_ACTIVITY_LO("Handling Actuator Set Prof Pos Command");
+  fastcat::DeviceCmd cmd;
+  cmd.name = request->name;
+  cmd.type = fastcat::ACTUATOR_PROF_POS_CMD;
+  cmd.actuator_prof_pos_cmd.target_position = request->target_position;
+  cmd.actuator_prof_pos_cmd.profile_velocity = request->profile_velocity;
+  cmd.actuator_prof_pos_cmd.profile_accel = request->profile_accel;
+  cmd.actuator_prof_pos_cmd.relative = request->relative;
+  response->success = ActuatorExistsOnBus(cmd.name, response->message);
+  if (response->success) {
+    QueueCommand(cmd);
+  }
+}
+
+void Fcat::ActuatorProfVelSrvCb(
+  const std::shared_ptr<fcat_msgs::srv::ActuatorProfVelService::Request>
+    request,
+  std::shared_ptr<fcat_msgs::srv::ActuatorProfVelService::Response> response)
+{
+  EVR_ACTIVITY_LO("Handling Actuator Set Prof Vel Command");
+  fastcat::DeviceCmd cmd;
+  cmd.name = request->name;
+  cmd.type = fastcat::ACTUATOR_PROF_VEL_CMD;
+  cmd.actuator_prof_vel_cmd.target_velocity = request->target_velocity;
+  cmd.actuator_prof_vel_cmd.profile_accel = request->profile_accel;
+  cmd.actuator_prof_vel_cmd.max_duration = request->max_duration;
+  response->success = ActuatorExistsOnBus(cmd.name, response->message);
+  if (response->success) {
+    QueueCommand(cmd);
+  }
+}
+
+void Fcat::ActuatorProfTorqueSrvCb(
+  const std::shared_ptr<fcat_msgs::srv::ActuatorProfTorqueService::Request>
+    request,
+  std::shared_ptr<fcat_msgs::srv::ActuatorProfTorqueService::Response> response)
+{
+  EVR_ACTIVITY_LO("Handling Actuator Set Prof Torque Command");
+  fastcat::DeviceCmd cmd;
+  cmd.name = request->name;
+  cmd.type = fastcat::ACTUATOR_PROF_TORQUE_CMD;
+  cmd.actuator_prof_torque_cmd.target_torque_amps = request->target_torque_amps;
+  cmd.actuator_prof_torque_cmd.max_duration = request->max_duration;
+  response->success = ActuatorExistsOnBus(cmd.name, response->message);
+  if (response->success) {
+    QueueCommand(cmd);
+  }
+}
+
+void Fcat::CommanderEnableSrvCb(
+  const std::shared_ptr<fcat_msgs::srv::CommanderEnableService::Request>
+    request,
+  std::shared_ptr<fcat_msgs::srv::CommanderEnableService::Response> response)
+{
+  EVR_ACTIVITY_LO("Handling Commander Enable Command");
+  fastcat::DeviceCmd cmd;
+  cmd.name = request->name;
+  cmd.type = fastcat::COMMANDER_ENABLE_CMD;
+  cmd.commander_enable_cmd.duration = request->duration;
+
+  response->success =
+    DeviceExistsOnBus(cmd.name, fastcat::COMMANDER_STATE, response->message);
+  if (response->success) {
+    QueueCommand(cmd);
+  }
+}
+
+void Fcat::CommanderDisableSrvCb(
+  const std::shared_ptr<fcat_msgs::srv::CommanderDisableService::Request>
+    request,
+  std::shared_ptr<fcat_msgs::srv::CommanderDisableService::Response> response)
+{
+  EVR_ACTIVITY_LO("Handling Commander Disable Command");
+  fastcat::DeviceCmd cmd;
+  cmd.name = request->name;
+  cmd.type = fastcat::COMMANDER_DISABLE_CMD;
+
+  response->success =
+    DeviceExistsOnBus(cmd.name, fastcat::COMMANDER_STATE, response->message);
+  if (response->success) {
+    QueueCommand(cmd);
+  }
+}
+
+void Fcat::El2124WriteAllChannelsSrvCb(
+  const std::shared_ptr<fcat_msgs::srv::El2124WriteAllChannelsService::Request>
+    request,
+  std::shared_ptr<fcat_msgs::srv::El2124WriteAllChannelsService::Response>
+    response)
+{
+  EVR_ACTIVITY_LO("Handling EL2124 Write All Channels Command");
+  fastcat::DeviceCmd cmd;
+
+  cmd.name = request->name;
+  cmd.type = fastcat::EL2124_WRITE_ALL_CHANNELS_CMD;
+  cmd.el2124_write_all_channels_cmd.channel_ch1 = request->channel_ch1;
+  cmd.el2124_write_all_channels_cmd.channel_ch2 = request->channel_ch2;
+  cmd.el2124_write_all_channels_cmd.channel_ch3 = request->channel_ch3;
+  cmd.el2124_write_all_channels_cmd.channel_ch4 = request->channel_ch4;
+
+  response->success =
+    DeviceExistsOnBus(cmd.name, fastcat::EL2124_STATE, response->message);
+  if (response->success) {
+    QueueCommand(cmd);
+  }
+}
+
+void Fcat::El2124WriteChannelSrvCb(
+  const std::shared_ptr<fcat_msgs::srv::El2124WriteChannelService::Request>
+    request,
+  std::shared_ptr<fcat_msgs::srv::El2124WriteChannelService::Response> response)
+{
+  EVR_ACTIVITY_LO("Handling EL2124 Write Channel Command");
+  fastcat::DeviceCmd cmd;
+
+  cmd.name = request->name;
+  cmd.type = fastcat::EL2124_WRITE_CHANNEL_CMD;
+  cmd.el2124_write_channel_cmd.channel = request->channel;
+  cmd.el2124_write_channel_cmd.level = request->level;
+
+  response->success =
+    DeviceExistsOnBus(cmd.name, fastcat::EL2124_STATE, response->message);
+  if (response->success) {
+    QueueCommand(cmd);
+  }
+}
+
+void Fcat::El2809WriteAllChannelsSrvCb(
+  const std::shared_ptr<fcat_msgs::srv::El2809WriteAllChannelsService::Request>
+    request,
+  std::shared_ptr<fcat_msgs::srv::El2809WriteAllChannelsService::Response>
+    response)
+{
+  EVR_ACTIVITY_LO("Handling EL2809 Write All Channels Command");
+  fastcat::DeviceCmd cmd;
+
+  cmd.name = request->name;
+  cmd.type = fastcat::EL2809_WRITE_ALL_CHANNELS_CMD;
+  cmd.el2809_write_all_channels_cmd.channel_ch1 = request->channel_ch1;
+  cmd.el2809_write_all_channels_cmd.channel_ch2 = request->channel_ch2;
+  cmd.el2809_write_all_channels_cmd.channel_ch3 = request->channel_ch3;
+  cmd.el2809_write_all_channels_cmd.channel_ch4 = request->channel_ch4;
+  cmd.el2809_write_all_channels_cmd.channel_ch5 = request->channel_ch5;
+  cmd.el2809_write_all_channels_cmd.channel_ch6 = request->channel_ch6;
+  cmd.el2809_write_all_channels_cmd.channel_ch7 = request->channel_ch7;
+  cmd.el2809_write_all_channels_cmd.channel_ch8 = request->channel_ch8;
+  cmd.el2809_write_all_channels_cmd.channel_ch9 = request->channel_ch9;
+  cmd.el2809_write_all_channels_cmd.channel_ch10 = request->channel_ch10;
+  cmd.el2809_write_all_channels_cmd.channel_ch11 = request->channel_ch11;
+  cmd.el2809_write_all_channels_cmd.channel_ch12 = request->channel_ch12;
+  cmd.el2809_write_all_channels_cmd.channel_ch13 = request->channel_ch13;
+  cmd.el2809_write_all_channels_cmd.channel_ch14 = request->channel_ch14;
+  cmd.el2809_write_all_channels_cmd.channel_ch15 = request->channel_ch15;
+  cmd.el2809_write_all_channels_cmd.channel_ch16 = request->channel_ch16;
+
+  response->success =
+    DeviceExistsOnBus(cmd.name, fastcat::EL2809_STATE, response->message);
+  if (response->success) {
+    QueueCommand(cmd);
+  }
+}
+
+void Fcat::El2809WriteChannelSrvCb(
+  const std::shared_ptr<fcat_msgs::srv::El2809WriteChannelService::Request>
+    request,
+  std::shared_ptr<fcat_msgs::srv::El2809WriteChannelService::Response> response)
+{
+  EVR_ACTIVITY_LO("Handling EL2809 Write Channel Command");
+  fastcat::DeviceCmd cmd;
+
+  cmd.name = request->name;
+  cmd.type = fastcat::EL2809_WRITE_CHANNEL_CMD;
+  cmd.el2809_write_channel_cmd.channel = request->channel;
+  cmd.el2809_write_channel_cmd.level = request->level;
+
+  response->success =
+    DeviceExistsOnBus(cmd.name, fastcat::EL2809_STATE, response->message);
+  if (response->success) {
+    QueueCommand(cmd);
+  }
+}
+
+void Fcat::El2798WriteAllChannelsSrvCb(
+    const std::shared_ptr<
+        fcat_msgs::srv::El2798WriteAllChannelsService::Request>
+        request,
+    std::shared_ptr<fcat_msgs::srv::El2798WriteAllChannelsService::Response>
+        response)
+{
+  EVR_ACTIVITY_LO("Handling EL2798 Write All Channels Command");
+  fastcat::DeviceCmd cmd;
+
+  cmd.name = request->name;
+  cmd.type = fastcat::EL2798_WRITE_ALL_CHANNELS_CMD;
+  cmd.el2798_write_all_channels_cmd.channel_ch1  = request->channel_ch1;
+  cmd.el2798_write_all_channels_cmd.channel_ch2  = request->channel_ch2;
+  cmd.el2798_write_all_channels_cmd.channel_ch3  = request->channel_ch3;
+  cmd.el2798_write_all_channels_cmd.channel_ch4  = request->channel_ch4;
+  cmd.el2798_write_all_channels_cmd.channel_ch5  = request->channel_ch5;
+  cmd.el2798_write_all_channels_cmd.channel_ch6  = request->channel_ch6;
+  cmd.el2798_write_all_channels_cmd.channel_ch7  = request->channel_ch7;
+  cmd.el2798_write_all_channels_cmd.channel_ch8  = request->channel_ch8;
+
+  response->success =
+      DeviceExistsOnBus(cmd.name, fastcat::EL2798_STATE, response->message);
+  if (response->success) {
+    QueueCommand(cmd);
+  }
+}
+
+void Fcat::El2828WriteAllChannelsSrvCb(
+    const std::shared_ptr<
+        fcat_msgs::srv::El2828WriteAllChannelsService::Request>
+        request,
+    std::shared_ptr<fcat_msgs::srv::El2828WriteAllChannelsService::Response>
+        response)
+{
+  EVR_ACTIVITY_LO("Handling EL2828 Write All Channels Command");
+  fastcat::DeviceCmd cmd;
+
+  cmd.name = request->name;
+  cmd.type = fastcat::EL2828_WRITE_ALL_CHANNELS_CMD;
+  cmd.el2828_write_all_channels_cmd.channel_ch1  = request->channel_ch1;
+  cmd.el2828_write_all_channels_cmd.channel_ch2  = request->channel_ch2;
+  cmd.el2828_write_all_channels_cmd.channel_ch3  = request->channel_ch3;
+  cmd.el2828_write_all_channels_cmd.channel_ch4  = request->channel_ch4;
+  cmd.el2828_write_all_channels_cmd.channel_ch5  = request->channel_ch5;
+  cmd.el2828_write_all_channels_cmd.channel_ch6  = request->channel_ch6;
+  cmd.el2828_write_all_channels_cmd.channel_ch7  = request->channel_ch7;
+  cmd.el2828_write_all_channels_cmd.channel_ch8  = request->channel_ch8;
+
+  response->success =
+      DeviceExistsOnBus(cmd.name, fastcat::EL2828_STATE, response->message);
+  if (response->success) {
+    QueueCommand(cmd);
+  }
+}
+
+void Fcat::El2798WriteChannelSrvCb(
+    const std::shared_ptr<fcat_msgs::srv::El2798WriteChannelService::Request>
+        request,
+    std::shared_ptr<fcat_msgs::srv::El2798WriteChannelService::Response>
+        response)
+{
+  EVR_ACTIVITY_LO("Handling EL2798 Write Channel Command");
+  fastcat::DeviceCmd cmd;
+
+  cmd.name                             = request->name;
+  cmd.type                             = fastcat::EL2798_WRITE_CHANNEL_CMD;
+  cmd.el2798_write_channel_cmd.channel = request->channel;
+  cmd.el2798_write_channel_cmd.level   = request->level;
+
+  response->success =
+      DeviceExistsOnBus(cmd.name, fastcat::EL2798_STATE, response->message);
+  if (response->success) {
+    QueueCommand(cmd);
+  }
+}
+
+void Fcat::El2828WriteChannelSrvCb(
+    const std::shared_ptr<fcat_msgs::srv::El2828WriteChannelService::Request>
+        request,
+    std::shared_ptr<fcat_msgs::srv::El2828WriteChannelService::Response>
+        response)
+{
+  EVR_ACTIVITY_LO("Handling EL2828 Write Channel Command");
+  fastcat::DeviceCmd cmd;
+
+  cmd.name                             = request->name;
+  cmd.type                             = fastcat::EL2828_WRITE_CHANNEL_CMD;
+  cmd.el2828_write_channel_cmd.channel = request->channel;
+  cmd.el2828_write_channel_cmd.level   = request->level;
+
+  response->success =
+      DeviceExistsOnBus(cmd.name, fastcat::EL2828_STATE, response->message);
+  if (response->success) {
+    QueueCommand(cmd);
+  }
+}
+
+void Fcat::El4102WriteAllChannelsSrvCb(
+  const std::shared_ptr<fcat_msgs::srv::El4102WriteAllChannelsService::Request>
+    request,
+  std::shared_ptr<fcat_msgs::srv::El4102WriteAllChannelsService::Response>
+    response)
+{
+  EVR_ACTIVITY_LO("Handling EL4102 Write All Channels Command");
+  fastcat::DeviceCmd cmd;
+
+  cmd.name = request->name;
+  cmd.type = fastcat::EL4102_WRITE_ALL_CHANNELS_CMD;
+  cmd.el4102_write_all_channels_cmd.voltage_output_ch1 =
+    request->voltage_output_ch1;
+  cmd.el4102_write_all_channels_cmd.voltage_output_ch2 =
+    request->voltage_output_ch2;
+
+  response->success =
+    DeviceExistsOnBus(cmd.name, fastcat::EL4102_STATE, response->message);
+  if (response->success) {
+    QueueCommand(cmd);
+  }
+}
+
+void Fcat::El4102WriteChannelSrvCb(
+  const std::shared_ptr<fcat_msgs::srv::El4102WriteChannelService::Request>
+    request,
+  std::shared_ptr<fcat_msgs::srv::El4102WriteChannelService::Response> response)
+{
+  EVR_ACTIVITY_LO("Handling EL4102 Write Channel Command");
+  fastcat::DeviceCmd cmd;
+
+  cmd.name = request->name;
+  cmd.type = fastcat::EL4102_WRITE_CHANNEL_CMD;
+  cmd.el4102_write_channel_cmd.channel = request->channel;
+  cmd.el4102_write_channel_cmd.voltage_output = request->voltage_output;
+
+  response->success =
+    DeviceExistsOnBus(cmd.name, fastcat::EL4102_STATE, response->message);
+  if (response->success) {
+    QueueCommand(cmd);
+  }
+}
+
+void Fcat::FaulterEnableSrvCb(
+  const std::shared_ptr<fcat_msgs::srv::FaulterEnableService::Request> request,
+  std::shared_ptr<fcat_msgs::srv::FaulterEnableService::Response> response)
+{
+  EVR_ACTIVITY_LO("Handling Faulter Enable Command");
+  fastcat::DeviceCmd cmd;
+
+  cmd.name = request->name;
+  cmd.type = fastcat::FAULTER_ENABLE_CMD;
+  cmd.faulter_enable_cmd.enable = request->enable;
+
+  response->success =
+    DeviceExistsOnBus(cmd.name, fastcat::FAULTER_STATE, response->message);
+  if (response->success) {
+    QueueCommand(cmd);
+  }
+}
+
+void Fcat::FtsTareSrvCb(
+  const std::shared_ptr<fcat_msgs::srv::DeviceTriggerService::Request> request,
+  std::shared_ptr<fcat_msgs::srv::DeviceTriggerService::Response> response)
+{
+  EVR_ACTIVITY_LO("Handling FTS Tare Command");
+  fastcat::DeviceCmd cmd;
+  cmd.name = request->name;
+  cmd.type = fastcat::FTS_TARE_CMD;
+
+  response->success =
+    DeviceExistsOnBus(cmd.name, fastcat::FTS_STATE, response->message);
+  if (response->success) {
+    QueueCommand(cmd);
+  }
+}
+
+void Fcat::PidActivateSrvCb(
+  const std::shared_ptr<fcat_msgs::srv::PidActivateService::Request> request,
+  std::shared_ptr<fcat_msgs::srv::PidActivateService::Response> response)
+{
+  EVR_ACTIVITY_LO("Handling PID Activate Command");
+  fastcat::DeviceCmd cmd;
+  cmd.type = fastcat::PID_ACTIVATE_CMD;
+  cmd.pid_activate_cmd.setpoint = request->setpoint;
+  cmd.pid_activate_cmd.deadband = request->deadband;
+  cmd.pid_activate_cmd.persistence_duration = request->persistence_duration;
+  cmd.pid_activate_cmd.max_duration = request->max_duration;
+
+  response->success =
+    DeviceExistsOnBus(cmd.name, fastcat::PID_STATE, response->message);
+  if (response->success) {
+    QueueCommand(cmd);
   }
 }

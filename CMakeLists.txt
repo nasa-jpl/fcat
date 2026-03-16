@@ -23,7 +23,7 @@ endif()
 include(FetchContent)
 FetchContent_Declare(fastcat
     GIT_REPOSITORY https://github.com/nasa-jpl/fastcat.git
-    GIT_TAG v0.4.8
+    GIT_TAG v0.13.13
     )
 FetchContent_MakeAvailable(fastcat)
 
@@ -54,7 +54,8 @@ add_executable(fcat
     src/fcat_main.cpp
     src/fcat.cpp
     src/fcat_callbacks.cpp
-    )
+    src/fcat_utils.cpp
+)
 
 ament_target_dependencies(fcat 
     rclcpp

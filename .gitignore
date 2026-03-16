@@ -1,0 +1,5 @@
+build
+.clang-format
+*.swp
+*.swb
+*.swo

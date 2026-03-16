@@ -175,6 +175,7 @@ class FcatSrvs : public rclcpp::Node
   std::unique_ptr<rclcpp::Rate> rate_;
   rclcpp::CallbackGroup::SharedPtr cb_group_blocking_;
   rclcpp::CallbackGroup::SharedPtr cb_group_non_blocking_;
+  std::vector<std::any> services_;
   std::vector<std::any> subscriptions_;
 };
 

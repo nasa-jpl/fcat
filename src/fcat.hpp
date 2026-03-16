@@ -514,6 +514,7 @@ class Fcat : public casah_node::FaultInterface
   std::unordered_map<fastcat::DeviceStateType,
                      std::vector<std::shared_ptr<const fastcat::DeviceState>>>
     device_type_vec_map_;
+  std::vector<std::any> services_;
   std::vector<std::any> subscriptions_;
 
   double loop_period_sec_ = 0.0;

@@ -1396,567 +1396,173 @@ void Fcat::InitializeSubscribers()
 void Fcat::InitializeServices()
 {
   // bus reset/fault
-  DeclareServiceCommand<std_srvs::srv::Trigger>(
-    this, "cmd/reset", &Fcat::ResetSrvCb,
-    CommandDescriptor("Issues a reset to all devices on the bus"));
+  services_.push_back(this->create_service<std_srvs::srv::Trigger>(
+    "cmd/reset", std::bind(&Fcat::ResetSrvCb, this, _1, _2), service_qos_));
 
-  DeclareServiceCommand<std_srvs::srv::Trigger>(
-    this, "cmd/fault", &Fcat::FaultSrvCb,
-    CommandDescriptor("Raises a fault to all devices on the bus"));
+  services_.push_back(this->create_service<std_srvs::srv::Trigger>(
+    "cmd/fault", std::bind(&Fcat::FaultSrvCb, this, _1, _2), service_qos_));
 
   // Actuator
   if (TypeExistsOnBus(fastcat::GOLD_ACTUATOR_STATE) ||
       TypeExistsOnBus(fastcat::PLATINUM_ACTUATOR_STATE)) {
-    DeclareServiceCommand<fcat_msgs::srv::ActuatorHaltService>(
-      this, "cmd/actuator_halt", &Fcat::ActuatorHaltSrvCb,
-      CommandDescriptor(
-        "Command to halt a single actuator without raising a fault",
-        {CommandArgumentDescriptor(
-          /*arg name*/ "name",
-          /*description*/ "The Fastcat Device Name")}));
+    services_.push_back(this->create_service<fcat_msgs::srv::ActuatorHaltService>(
+      "cmd/actuator_halt",
+      std::bind(&Fcat::ActuatorHaltSrvCb, this, _1, _2), service_qos_));
 
-    DeclareServiceCommand<
-      fcat_msgs::srv::ActuatorSetGainSchedulingIndexService>(
-      this, "cmd/actuator_set_gain_scheduling_index",
-      &Fcat::ActuatorSetGainSchedulingIndexSrvCb,
-      CommandDescriptor("Updates the Gain Scheduling Index exchanged through "
-                        "PDO. The Gain Scheduling MODE "
-                        "must be set by SDO through the service interface. "
-                        "If the Gain scheduling MODE is set to "
-                        "anything other than manual, this command has no "
-                        "effect on motor control performance.",
-                        {CommandArgumentDescriptor(
-                           /*arg name*/ "name",
-                           /*description*/ "The Fastcat Device Name"),
-                         CommandArgumentDescriptor(
-                           /*arg name*/ "gain_scheduling_index",
-                           /*description*/ "Desired gain table index")}));
+    services_.push_back(
+      this->create_service<fcat_msgs::srv::ActuatorSetGainSchedulingIndexService>(
+        "cmd/actuator_set_gain_scheduling_index",
+        std::bind(&Fcat::ActuatorSetGainSchedulingIndexSrvCb, this, _1, _2),
+        service_qos_));
 
-    DeclareServiceCommand<fcat_msgs::srv::ActuatorSetMaxCurrentService>(
-      this, "cmd/actuator_set_max_current", &Fcat::ActuatorSetMaxCurrentSrvCb,
-      CommandDescriptor(
-        "Updates the actuator peak current exchanged through PDO. "
-        "Typically, the Peak current "
-        "exceeds the Continous current (CL[1]) to allow for short power "
-        "boosts to improve "
-        "performance and help motor overcome transient loads. "
-        "When Peak current is less than the continous current (CL[1]), The "
-        "continous current limit "
-        "has no effect and boosting is disabled.",
-        {CommandArgumentDescriptor(
-           /*arg name*/ "name",
-           /*description*/ "The Fastcat Device Name"),
-         CommandArgumentDescriptor(
-           /*arg name*/ "max_current",
-           /*description*/ "The desired peak current limit (PL[1])",
-           /*units*/ "Amperes")}));
+    services_.push_back(
+      this->create_service<fcat_msgs::srv::ActuatorSetMaxCurrentService>(
+        "cmd/actuator_set_max_current",
+        std::bind(&Fcat::ActuatorSetMaxCurrentSrvCb, this, _1, _2),
+        service_qos_));
 
-    DeclareServiceCommand<fcat_msgs::srv::ActuatorSetOutputPositionService>(
-      this, "cmd/actuator_set_output_position",
-      &Fcat::ActuatorSetOutputPositionSrvCb,
-      CommandDescriptor(
-        "Override to set the actuator to the specified value. When "
-        "possible, use "
-        "ActuatorCalibrate to calibrate position using the hardstops",
-        {CommandArgumentDescriptor(
-           /*arg name*/ "name",
-           /*description*/ "The Fastcat Device Name"),
-         CommandArgumentDescriptor(
-           /*arg name*/ "position",
-           /*description*/
-           "Sets the current drive position to this value",
-           /*units*/ "EU")}));
+    services_.push_back(
+      this->create_service<fcat_msgs::srv::ActuatorSetOutputPositionService>(
+        "cmd/actuator_set_output_position",
+        std::bind(&Fcat::ActuatorSetOutputPositionSrvCb, this, _1, _2),
+        service_qos_));
 
-    DeclareServiceCommand<fcat_msgs::srv::ActuatorSetDigitalOutputService>(
-      this, "cmd/actuator_set_digital_output",
-      &Fcat::ActuatorSetDigitalOutputSrvCb,
-      CommandDescriptor(
-        "Set the Output Level for the actuator (Elmo command OB[N]).",
-        {CommandArgumentDescriptor(
-           /*arg name*/ "name",
-           /*description*/ "The Fastcat Device Name"),
-         CommandArgumentDescriptor(
-           /*arg name*/ "digital_output_index",
-           /*description*/ "The user-chosen output index"),
-         CommandArgumentDescriptor(
-           /*arg name*/ "output_level",
-           /*description*/ "The desired output level 1 or 0")}));
+    services_.push_back(
+      this->create_service<fcat_msgs::srv::ActuatorSetDigitalOutputService>(
+        "cmd/actuator_set_digital_output",
+        std::bind(&Fcat::ActuatorSetDigitalOutputSrvCb, this, _1, _2),
+        service_qos_));
 
-    DeclareServiceCommand<
-      fcat_msgs::srv::ActuatorSetProfDisengagingTimeoutService>(
-      this, "cmd/actuator_set_prof_disengaging_timeout",
-      &Fcat::ActuatorSetProfDisengagingTimeoutSrvCb,
-      CommandDescriptor("Updates the maximum time the actuator driver will "
-                        "wait for a profile command to begin "
-                        "execution before faulting.",
-                        {CommandArgumentDescriptor(
-                           /*arg name*/ "name",
-                           /*description*/ "The Fastcat Device Name"),
-                         CommandArgumentDescriptor(
-                           /*arg name*/ "timeout",
-                           /*description*/ "The desired timeout",
-                           /*units*/ "seconds")}));
+    services_.push_back(
+      this->create_service<
+        fcat_msgs::srv::ActuatorSetProfDisengagingTimeoutService>(
+        "cmd/actuator_set_prof_disengaging_timeout",
+        std::bind(&Fcat::ActuatorSetProfDisengagingTimeoutSrvCb, this, _1, _2),
+        service_qos_));
 
-    DeclareServiceCommand<fcat_msgs::srv::ActuatorProfPosService>(
-      this, "cmd/actuator_prof_pos", &Fcat::ActuatorProfPosSrvCb,
-      CommandDescriptor(
-        "Command a non-blocking Profiled Position motion profile to the "
-        "Actuator",
-        {CommandArgumentDescriptor(
-           /*arg name*/ "name",
-           /*description*/ "The Fastcat Device Name"),
-         CommandArgumentDescriptor(
-           /*arg name*/ "target_position",
-           /*description*/ "Goal Position target of the motion profile",
-           /*Units*/ "EU"),
-         CommandArgumentDescriptor(
-           /*arg name*/ "profile_velocity",
-           /*description*/
-           "The desired cruise rate of the motion profile",
-           /*Units*/ "EU / sec"),
-         CommandArgumentDescriptor(
-           /*arg name*/ "profile_accel",
-           /*description*/
-           "The desired acceleration of the motion profile",
-           /*Units*/ "EU/sec^2"),
-         CommandArgumentDescriptor(
-           /*arg name*/ "relative",
-           /*description*/ "If true, the target_position will computed "
-                           "relative "
-                           "to actual position")}));
+    services_.push_back(this->create_service<fcat_msgs::srv::ActuatorProfPosService>(
+      "cmd/actuator_prof_pos",
+      std::bind(&Fcat::ActuatorProfPosSrvCb, this, _1, _2), service_qos_));
 
-    DeclareServiceCommand<fcat_msgs::srv::ActuatorProfVelService>(
-      this, "cmd/actuator_prof_vel", &Fcat::ActuatorProfVelSrvCb,
-      CommandDescriptor(
-        "Command a non-blocking Profiled Velocity motion profile to the "
-        "Actuator",
-        {CommandArgumentDescriptor(
-           /*arg name*/ "name",
-           /*description*/ "The Fastcat Device Name"),
-         CommandArgumentDescriptor(
-           /*arg name*/ "target_velocity",
-           /*description*/
-           "The desired cruise rate of the motion profile",
-           /*Units*/ "EU/sec"),
-         CommandArgumentDescriptor(
-           /*arg name*/ "profile_accel",
-           /*description*/
-           "The desired acceleration of the motion profile",
-           /*Units*/ "EU/sec^2"),
-         CommandArgumentDescriptor(
-           /*arg name*/ "max_duration",
-           /*description*/
-           "The duration of the command, negative values result "
-           "in indefinite profiles",
-           /*Units*/ "sec")}));
+    services_.push_back(this->create_service<fcat_msgs::srv::ActuatorProfVelService>(
+      "cmd/actuator_prof_vel",
+      std::bind(&Fcat::ActuatorProfVelSrvCb, this, _1, _2), service_qos_));
 
-    DeclareServiceCommand<fcat_msgs::srv::ActuatorProfTorqueService>(
-      this, "cmd/actuator_prof_torque", &Fcat::ActuatorProfTorqueSrvCb,
-      CommandDescriptor(
-        "Command a Profiled Torque motion profile to the Actuator. Here, "
-        "Torque"
-        "is equivalent to Current (frome the DS-402 specification)",
-        {CommandArgumentDescriptor(
-           /*arg name*/ "name",
-           /*description*/ "The Fastcat Device Name"),
-         CommandArgumentDescriptor(
-           /*arg name*/ "target_torque_amps",
-           /*description*/ "The desired effort in current",
-           /*Units*/ "Amps"),
-         CommandArgumentDescriptor(
-           /*arg name*/ "max_duration",
-           /*description*/
-           "The duration of the command, "
-           "negative values result in indefinite profiles",
-           /*Units*/ "sec")}));
+    services_.push_back(
+      this->create_service<fcat_msgs::srv::ActuatorProfTorqueService>(
+        "cmd/actuator_prof_torque",
+        std::bind(&Fcat::ActuatorProfTorqueSrvCb, this, _1, _2),
+        service_qos_));
 
-    DeclareServiceCommand<fcat_msgs::srv::ActuatorCalibrateService>(
-      this, "cmd/actuator_calibrate", &Fcat::ActuatorCalibrateSrvCb,
-      CommandDescriptor(
-        "Command a non-blocking hardstop calibration to the Actuator. "
-        "The actuator will move in "
-        "the signed velocity direction with the specified lowered current "
-        "limit "
-        "to detect the hardstop. From there, the position is set to the "
-        "calibration "
-        "limit defined in the configuration file. Finally, the original "
-        "current is "
-        "restored and the actuator is commanded to the command limit "
-        "defined in the "
-        "configuration file.",
-        {CommandArgumentDescriptor(
-           /*arg name*/ "name",
-           /*description*/ "The Fastcat Device Name"),
-         CommandArgumentDescriptor(
-           /*arg name*/ "velocity",
-           /*description*/
-           "The desired approach velocity for all motions during "
-           "hardstop calibration",
-           /*Units*/ "EU/sec"),
-         CommandArgumentDescriptor(
-           /*arg name*/ "accel",
-           /*description*/
-           "The desired acceleration of the motion profile",
-           /*Units*/ "EU/sec^2"),
-         CommandArgumentDescriptor(
-           /*arg name*/ "max_current",
-           /*description*/
-           "Overrides the Peak current setting but only during "
-           "hardstop contact motion",
-           /*Units*/ "Amps")}));
+    services_.push_back(this->create_service<fcat_msgs::srv::ActuatorCalibrateService>(
+      "cmd/actuator_calibrate",
+      std::bind(&Fcat::ActuatorCalibrateSrvCb, this, _1, _2), service_qos_));
 
   }  // end Actuator Service Declarations
 
   // Commander
   if (TypeExistsOnBus(fastcat::COMMANDER_STATE)) {
-    DeclareServiceCommand<fcat_msgs::srv::CommanderEnableService>(
-      this, "cmd/commander_enable", &Fcat::CommanderEnableSrvCb,
-      CommandDescriptor("Enables the Commander to start issuing internal "
-                        "Fastcat device commands.",
-                        {CommandArgumentDescriptor(
-                          /*arg name*/ "name",
-                          /*description*/ "The Fastcat Device Name")}));
+    services_.push_back(this->create_service<fcat_msgs::srv::CommanderEnableService>(
+      "cmd/commander_enable",
+      std::bind(&Fcat::CommanderEnableSrvCb, this, _1, _2), service_qos_));
 
-    DeclareServiceCommand<fcat_msgs::srv::CommanderDisableService>(
-      this, "cmd/commander_disable", &Fcat::CommanderDisableSrvCb,
-      CommandDescriptor("Disables the Commander device to stop issuing "
-                        "internal Fastcat device commands.",
-                        {CommandArgumentDescriptor(
-                          /*arg name*/ "name",
-                          /*description*/ "The Fastcat Device Name")}));
+    services_.push_back(this->create_service<fcat_msgs::srv::CommanderDisableService>(
+      "cmd/commander_disable",
+      std::bind(&Fcat::CommanderDisableSrvCb, this, _1, _2), service_qos_));
   }  // end Commander Service Declarations
 
   // El2124
   if (TypeExistsOnBus(fastcat::EL2124_STATE)) {
-    DeclareServiceCommand<fcat_msgs::srv::El2124WriteAllChannelsService>(
-      this, "cmd/el2124_write_all_channels", &Fcat::El2124WriteAllChannelsSrvCb,
-      CommandDescriptor(
-        "Command the state of all digital outputs of a EL2124 device.",
-        {CommandArgumentDescriptor(
-           /*arg name*/ "name",
-           /*description*/ "The Fastcat Device Name"),
-         CommandArgumentDescriptor(
-           /*arg name*/ "channel_ch1",
-           /*description*/ "Desired level for channel index 1"),
-         CommandArgumentDescriptor(
-           /*arg name*/ "channel_ch2",
-           /*description*/ "Desired level for channel index 2"),
-         CommandArgumentDescriptor(
-           /*arg name*/ "channel_ch3",
-           /*description*/ "Desired level for channel index 3"),
-         CommandArgumentDescriptor(
-           /*arg name*/ "channel_ch4",
-           /*description*/ "Desired level for channel index 4")}));
+    services_.push_back(
+      this->create_service<fcat_msgs::srv::El2124WriteAllChannelsService>(
+        "cmd/el2124_write_all_channels",
+        std::bind(&Fcat::El2124WriteAllChannelsSrvCb, this, _1, _2),
+        service_qos_));
 
-    DeclareServiceCommand<fcat_msgs::srv::El2124WriteChannelService>(
-      this, "cmd/el2124_write_channel", &Fcat::El2124WriteChannelSrvCb,
-      CommandDescriptor(
-        "Command the state of one digital output of a EL2124 device, "
-        "leaving all other digital outputs unchanged.",
-        {
-          CommandArgumentDescriptor(
-            /*arg name*/ "name",
-            /*description*/ "The Fastcat Device Name"),
-          CommandArgumentDescriptor(
-            /*arg name*/ "channel",
-            /*description*/ "Desired channel index "),
-          CommandArgumentDescriptor(
-            /*arg name*/ "level",
-            /*description*/ "Desired digital output level"),
-        }));
+    services_.push_back(this->create_service<fcat_msgs::srv::El2124WriteChannelService>(
+      "cmd/el2124_write_channel",
+      std::bind(&Fcat::El2124WriteChannelSrvCb, this, _1, _2), service_qos_));
 
   }  // end El2124 Service Declarations
 
   // El2809
   if (TypeExistsOnBus(fastcat::EL2809_STATE)) {
-    DeclareServiceCommand<fcat_msgs::srv::El2809WriteAllChannelsService>(
-      this, "cmd/el2809_write_all_channels", &Fcat::El2809WriteAllChannelsSrvCb,
-      CommandDescriptor(
-        "Command the state of all digital outputs of a EL2809 device.",
-        {CommandArgumentDescriptor(
-           /*arg name*/ "name",
-           /*description*/ "The Fastcat Device Name"),
-         CommandArgumentDescriptor(
-           /*arg name*/ "channel_ch1",
-           /*description*/ "Desired level for channel index 1"),
-         CommandArgumentDescriptor(
-           /*arg name*/ "channel_ch2",
-           /*description*/ "Desired level for channel index 2"),
-         CommandArgumentDescriptor(
-           /*arg name*/ "channel_ch3",
-           /*description*/ "Desired level for channel index 3"),
-         CommandArgumentDescriptor(
-           /*arg name*/ "channel_ch4",
-           /*description*/ "Desired level for channel index 4"),
-         CommandArgumentDescriptor(
-           /*arg name*/ "channel_ch5",
-           /*description*/ "Desired level for channel index 5"),
-         CommandArgumentDescriptor(
-           /*arg name*/ "channel_ch6",
-           /*description*/ "Desired level for channel index 6"),
-         CommandArgumentDescriptor(
-           /*arg name*/ "channel_ch7",
-           /*description*/ "Desired level for channel index 7"),
-         CommandArgumentDescriptor(
-           /*arg name*/ "channel_ch8",
-           /*description*/ "Desired level for channel index 8"),
-         CommandArgumentDescriptor(
-           /*arg name*/ "channel_ch9",
-           /*description*/ "Desired level for channel index 9"),
-         CommandArgumentDescriptor(
-           /*arg name*/ "channel_ch10",
-           /*description*/ "Desired level for channel index 10"),
-         CommandArgumentDescriptor(
-           /*arg name*/ "channel_ch11",
-           /*description*/ "Desired level for channel index 11"),
-         CommandArgumentDescriptor(
-           /*arg name*/ "channel_ch12",
-           /*description*/ "Desired level for channel index 12"),
-         CommandArgumentDescriptor(
-           /*arg name*/ "channel_ch13",
-           /*description*/ "Desired level for channel index 13"),
-         CommandArgumentDescriptor(
-           /*arg name*/ "channel_ch14",
-           /*description*/ "Desired level for channel index 14"),
-         CommandArgumentDescriptor(
-           /*arg name*/ "channel_ch15",
-           /*description*/ "Desired level for channel index 15"),
-         CommandArgumentDescriptor(
-           /*arg name*/ "channel_ch16",
-           /*description*/ "Desired level for channel index 16")}));
+    services_.push_back(
+      this->create_service<fcat_msgs::srv::El2809WriteAllChannelsService>(
+        "cmd/el2809_write_all_channels",
+        std::bind(&Fcat::El2809WriteAllChannelsSrvCb, this, _1, _2),
+        service_qos_));
 
-    DeclareServiceCommand<fcat_msgs::srv::El2809WriteChannelService>(
-      this, "cmd/el2809_write_channel", &Fcat::El2809WriteChannelSrvCb,
-      CommandDescriptor(
-        "Command the state of one digital output of a EL2809 device, "
-        "leaving all other digital outputs unchanged.",
-        {
-          CommandArgumentDescriptor(
-            /*arg name*/ "name",
-            /*description*/ "The Fastcat Device Name"),
-          CommandArgumentDescriptor(
-            /*arg name*/ "channel",
-            /*description*/ "Desired channel index "),
-          CommandArgumentDescriptor(
-            /*arg name*/ "level",
-            /*description*/ "Desired digital output level"),
-        }));
+    services_.push_back(this->create_service<fcat_msgs::srv::El2809WriteChannelService>(
+      "cmd/el2809_write_channel",
+      std::bind(&Fcat::El2809WriteChannelSrvCb, this, _1, _2), service_qos_));
 
   }  // end El2809 Service Declarations
 
   // El2798
   if (TypeExistsOnBus(fastcat::EL2798_STATE)) {
-    DeclareServiceCommand<fcat_msgs::srv::El2798WriteAllChannelsService>(
-        this, "cmd/el2798_write_all_channels",
-        &Fcat::El2798WriteAllChannelsSrvCb,
-        CommandDescriptor(
-            "Command the state of all digital outputs of a EL2798 device.",
-            {CommandArgumentDescriptor(
-                 /*arg name*/ "name",
-                 /*description*/ "The Fastcat Device Name"),
-             CommandArgumentDescriptor(
-                 /*arg name*/ "channel_ch1",
-                 /*description*/ "Desired level for channel index 1"),
-             CommandArgumentDescriptor(
-                 /*arg name*/ "channel_ch2",
-                 /*description*/ "Desired level for channel index 2"),
-             CommandArgumentDescriptor(
-                 /*arg name*/ "channel_ch3",
-                 /*description*/ "Desired level for channel index 3"),
-             CommandArgumentDescriptor(
-                 /*arg name*/ "channel_ch4",
-                 /*description*/ "Desired level for channel index 4"),
-             CommandArgumentDescriptor(
-                 /*arg name*/ "channel_ch5",
-                 /*description*/ "Desired level for channel index 5"),
-             CommandArgumentDescriptor(
-                 /*arg name*/ "channel_ch6",
-                 /*description*/ "Desired level for channel index 6"),
-             CommandArgumentDescriptor(
-                 /*arg name*/ "channel_ch7",
-                 /*description*/ "Desired level for channel index 7"),
-             CommandArgumentDescriptor(
-                 /*arg name*/ "channel_ch8",
-                 /*description*/ "Desired level for channel index 8")}));
+    services_.push_back(
+      this->create_service<fcat_msgs::srv::El2798WriteAllChannelsService>(
+        "cmd/el2798_write_all_channels",
+        std::bind(&Fcat::El2798WriteAllChannelsSrvCb, this, _1, _2),
+        service_qos_));
 
-    DeclareServiceCommand<fcat_msgs::srv::El2798WriteChannelService>(
-        this, "cmd/el2798_write_channel", &Fcat::El2798WriteChannelSrvCb,
-        CommandDescriptor(
-            "Command the state of one digital output of a EL2798 device, "
-            "leaving all other digital outputs unchanged.",
-            {
-                CommandArgumentDescriptor(
-                    /*arg name*/ "name",
-                    /*description*/ "The Fastcat Device Name"),
-                CommandArgumentDescriptor(
-                    /*arg name*/ "channel",
-                    /*description*/ "Desired channel index "),
-                CommandArgumentDescriptor(
-                    /*arg name*/ "level",
-                    /*description*/ "Desired digital output level"),
-            }));
+    services_.push_back(this->create_service<fcat_msgs::srv::El2798WriteChannelService>(
+      "cmd/el2798_write_channel",
+      std::bind(&Fcat::El2798WriteChannelSrvCb, this, _1, _2), service_qos_));
 
   }  // end El2798 Service Declarations
 
   // El2828
   if (TypeExistsOnBus(fastcat::EL2828_STATE)) {
-    DeclareServiceCommand<fcat_msgs::srv::El2828WriteAllChannelsService>(
-        this, "cmd/el2828_write_all_channels",
-        &Fcat::El2828WriteAllChannelsSrvCb,
-        CommandDescriptor(
-            "Command the state of all digital outputs of a EL2828 device.",
-            {CommandArgumentDescriptor(
-                 /*arg name*/ "name",
-                 /*description*/ "The Fastcat Device Name"),
-             CommandArgumentDescriptor(
-                 /*arg name*/ "channel_ch1",
-                 /*description*/ "Desired level for channel index 1"),
-             CommandArgumentDescriptor(
-                 /*arg name*/ "channel_ch2",
-                 /*description*/ "Desired level for channel index 2"),
-             CommandArgumentDescriptor(
-                 /*arg name*/ "channel_ch3",
-                 /*description*/ "Desired level for channel index 3"),
-             CommandArgumentDescriptor(
-                 /*arg name*/ "channel_ch4",
-                 /*description*/ "Desired level for channel index 4"),
-             CommandArgumentDescriptor(
-                 /*arg name*/ "channel_ch5",
-                 /*description*/ "Desired level for channel index 5"),
-             CommandArgumentDescriptor(
-                 /*arg name*/ "channel_ch6",
-                 /*description*/ "Desired level for channel index 6"),
-             CommandArgumentDescriptor(
-                 /*arg name*/ "channel_ch7",
-                 /*description*/ "Desired level for channel index 7"),
-             CommandArgumentDescriptor(
-                 /*arg name*/ "channel_ch8",
-                 /*description*/ "Desired level for channel index 8")}));
+    services_.push_back(
+      this->create_service<fcat_msgs::srv::El2828WriteAllChannelsService>(
+        "cmd/el2828_write_all_channels",
+        std::bind(&Fcat::El2828WriteAllChannelsSrvCb, this, _1, _2),
+        service_qos_));
 
-    DeclareServiceCommand<fcat_msgs::srv::El2828WriteChannelService>(
-        this, "cmd/el2828_write_channel", &Fcat::El2828WriteChannelSrvCb,
-        CommandDescriptor(
-            "Command the state of one digital output of a EL2828 device, "
-            "leaving all other digital outputs unchanged.",
-            {
-                CommandArgumentDescriptor(
-                    /*arg name*/ "name",
-                    /*description*/ "The Fastcat Device Name"),
-                CommandArgumentDescriptor(
-                    /*arg name*/ "channel",
-                    /*description*/ "Desired channel index "),
-                CommandArgumentDescriptor(
-                    /*arg name*/ "level",
-                    /*description*/ "Desired digital output level"),
-            }));
+    services_.push_back(this->create_service<fcat_msgs::srv::El2828WriteChannelService>(
+      "cmd/el2828_write_channel",
+      std::bind(&Fcat::El2828WriteChannelSrvCb, this, _1, _2), service_qos_));
 
   }  // end El2828 Service Declarations
 
 
   // El4102
   if (TypeExistsOnBus(fastcat::EL4102_STATE)) {
-    DeclareServiceCommand<fcat_msgs::srv::El4102WriteAllChannelsService>(
-      this, "cmd/el4102_write_all_channels", &Fcat::El4102WriteAllChannelsSrvCb,
-      CommandDescriptor(
-        "Command all the analog voltage outputs of a EL4102 device.",
-        {
-          CommandArgumentDescriptor(
-            /*arg name*/ "name",
-            /*description*/ "The Fastcat Device Name"),
-          CommandArgumentDescriptor(
-            /*arg name*/ "voltage_output_ch1",
-            /*description*/
-            "Desired voltage output value for channel index 1",
-            /*units*/ "volts"),
-          CommandArgumentDescriptor(
-            /*arg name*/ "voltage_output_ch2",
-            /*description*/
-            "Desired voltage output value for channel index 2",
-            /*units*/ "volts"),
-        }));
+    services_.push_back(
+      this->create_service<fcat_msgs::srv::El4102WriteAllChannelsService>(
+        "cmd/el4102_write_all_channels",
+        std::bind(&Fcat::El4102WriteAllChannelsSrvCb, this, _1, _2),
+        service_qos_));
 
-    DeclareServiceCommand<fcat_msgs::srv::El4102WriteChannelService>(
-      this, "cmd/el4102_write_channel", &Fcat::El4102WriteChannelSrvCb,
-      CommandDescriptor(
-        "Command the state of one analog output of a EL4102 device, "
-        "leaving all other analog outputs unchanged.",
-        {CommandArgumentDescriptor(
-           /*arg name*/ "name",
-           /*description*/ "The Fastcat Device Name"),
-         CommandArgumentDescriptor(
-           /*arg name*/ "channel",
-           /*description*/ "Desired channel index "),
-         CommandArgumentDescriptor(
-           /*arg name*/ "voltage_output",
-           /*description*/ "Desired voltage output value",
-           /*units*/ "volts")}));
+    services_.push_back(this->create_service<fcat_msgs::srv::El4102WriteChannelService>(
+      "cmd/el4102_write_channel",
+      std::bind(&Fcat::El4102WriteChannelSrvCb, this, _1, _2), service_qos_));
 
   }  // end El4102 Service Declarations
 
   // Faulter
   if (TypeExistsOnBus(fastcat::FAULTER_STATE)) {
-    DeclareServiceCommand<fcat_msgs::srv::FaulterEnableService>(
-      this, "cmd/faulter_enable", &Fcat::FaulterEnableSrvCb,
-      CommandDescriptor(
-        "Enables or Disables a Faulter device. When enabled, The Faulter "
-        "will "
-        "raise a fault if the input signal is != 0. When disabled, the "
-        "Faulter "
-        "cannot raise faults regardless of input signal.",
-        {CommandArgumentDescriptor(
-           /*arg name*/ "name",
-           /*description*/ "The Fastcat Device Name"),
-         CommandArgumentDescriptor(
-           /*arg name*/ "enable",
-           /*description*/ "Boolean value to enable or disable the "
-                           "Faulter Device.")}));
+    services_.push_back(this->create_service<fcat_msgs::srv::FaulterEnableService>(
+      "cmd/faulter_enable",
+      std::bind(&Fcat::FaulterEnableSrvCb, this, _1, _2), service_qos_));
 
   }  // end Faulter Service Declarations
 
   // FTS
   if (TypeExistsOnBus(fastcat::FTS_STATE)) {
-    DeclareServiceCommand<fcat_msgs::srv::DeviceTriggerService>(
-      this, "cmd/fts_tare", &Fcat::FtsTareSrvCb,
-      CommandDescriptor("Tare a fts by offsetting the current sample by a "
-                        "bias term such that "
-                        "the tared_wrench reads zero.",
-                        {CommandArgumentDescriptor(
-                          /*arg name*/ "name",
-                          /*description*/ "The Fastcat Device Name")}));
+    services_.push_back(this->create_service<fcat_msgs::srv::DeviceTriggerService>(
+      "cmd/fts_tare",
+      std::bind(&Fcat::FtsTareSrvCb, this, _1, _2), service_qos_));
 
   }  // end FTS Service Declarations
 
   // PID
   if (TypeExistsOnBus(fastcat::PID_STATE)) {
-    DeclareServiceCommand<fcat_msgs::srv::PidActivateService>(
-      this, "cmd/pid_activate", &Fcat::PidActivateSrvCb,
-      CommandDescriptor(
-        "Start the PID Controller with specified parameters without "
-        "blocking.",
-        {CommandArgumentDescriptor(
-           /*arg name*/ "name",
-           /*description*/ "The Fastcat Device Name"),
-         CommandArgumentDescriptor(
-           /*arg name*/ "setpoint",
-           /*description*/ "The controller setpoint",
-           /*Units*/ "EU"),
-         CommandArgumentDescriptor(
-           /*arg name*/ "deadband",
-           /*description*/
-           "The controller deadband tolerange around the setpoint",
-           /*Units*/ "EU"),
-         CommandArgumentDescriptor(
-           /*arg name*/ "persistence_duration",
-           /*description*/
-           "The amount of time the signal must remain with the "
-           "deadband to end control",
-           /*Units*/ "sec"),
-         CommandArgumentDescriptor(
-           /*arg name*/ "max_duration",
-           /*description*/
-           "The maximum duration of the command. Beware: "
-           "negative values can result in indefinite runtime",
-           /*Units*/ "sec")}));
+    services_.push_back(this->create_service<fcat_msgs::srv::PidActivateService>(
+      "cmd/pid_activate",
+      std::bind(&Fcat::PidActivateSrvCb, this, _1, _2), service_qos_));
 
   }  // end PID Service Declarations
 }

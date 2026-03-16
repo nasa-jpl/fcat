@@ -188,289 +188,62 @@ void FcatSrvs::InitPublishers()
 
 void FcatSrvs::InitServices()
 {
-  DeclareServiceCommand<fcat_msgs::srv::ActuatorProfPosService>(
-    this, pub_sub_ns_ + "srv/actuator_prof_pos",
-    &FcatSrvs::ActuatorProfPosSrvCb, services_qos_, cb_group_blocking_,
-    CommandDescriptor(
-      "Command a Profiled Position motion profile to the Actuator",
-      {CommandArgumentDescriptor(
-         /*arg name*/ "name",
-         /*description*/ "The Fastcat Device Name"),
-       CommandArgumentDescriptor(
-         /*arg name*/ "target_position",
-         /*description*/ "Goal Position target of the motion profile",
-         /*Units*/ "EU"),
-       CommandArgumentDescriptor(
-         /*arg name*/ "profile_velocity",
-         /*description*/ "The desired cruise rate of the motion profile",
-         /*Units*/ "EU / sec"),
-       CommandArgumentDescriptor(
-         /*arg name*/ "profile_accel",
-         /*description*/ "The desired acceleration of the motion profile",
-         /*Units*/ "EU/sec^2"),
-       CommandArgumentDescriptor(
-         /*arg name*/ "relative",
-         /*description*/ "If true, the target_position will computed "
-                         "relative "
-                         "to actual position")}));
+  services_.push_back(this->create_service<fcat_msgs::srv::ActuatorProfPosService>(
+    pub_sub_ns_ + "srv/actuator_prof_pos",
+    std::bind(&FcatSrvs::ActuatorProfPosSrvCb, this, _1, _2), services_qos_,
+    cb_group_blocking_));
 
-  DeclareServiceCommand<fcat_msgs::srv::ActuatorProfVelService>(
-    this, pub_sub_ns_ + "srv/actuator_prof_vel",
-    &FcatSrvs::ActuatorProfVelSrvCb, services_qos_, cb_group_blocking_,
-    CommandDescriptor(
-      "Command a Profiled Velocity motion profile to the Actuator",
-      {CommandArgumentDescriptor(
-         /*arg name*/ "name",
-         /*description*/ "The Fastcat Device Name"),
-       CommandArgumentDescriptor(
-         /*arg name*/ "target_velocity",
-         /*description*/ "The desired cruise rate of the motion profile",
-         /*Units*/ "EU/sec"),
-       CommandArgumentDescriptor(
-         /*arg name*/ "profile_accel",
-         /*description*/ "The desired acceleration of the motion profile",
-         /*Units*/ "EU/sec^2"),
-       CommandArgumentDescriptor(
-         /*arg name*/ "max_duration",
-         /*description*/
-         "The duration of the command, negative values result "
-         "in indefinite profiles",
-         /*Units*/ "sec")}));
+  services_.push_back(this->create_service<fcat_msgs::srv::ActuatorProfVelService>(
+    pub_sub_ns_ + "srv/actuator_prof_vel",
+    std::bind(&FcatSrvs::ActuatorProfVelSrvCb, this, _1, _2), services_qos_,
+    cb_group_blocking_));
 
-  DeclareServiceCommand<fcat_msgs::srv::ActuatorProfTorqueService>(
-    this, pub_sub_ns_ + "srv/actuator_prof_torque",
-    &FcatSrvs::ActuatorProfTorqueSrvCb, services_qos_, cb_group_blocking_,
-    CommandDescriptor(
-      "Command a Profiled Torque motion profile to the Actuator. Here, "
-      "Torque"
-      "is equivalent to Current (frome the DS-402 specification)",
-      {CommandArgumentDescriptor(
-         /*arg name*/ "name",
-         /*description*/ "The Fastcat Device Name"),
-       CommandArgumentDescriptor(
-         /*arg name*/ "target_torque_amps",
-         /*description*/ "The desired effort in current",
-         /*Units*/ "Amps"),
-       CommandArgumentDescriptor(
-         /*arg name*/ "max_duration",
-         /*description*/
-         "The duration of the command, "
-         "negative values result in indefinite profiles",
-         /*Units*/ "sec")}));
+  services_.push_back(this->create_service<fcat_msgs::srv::ActuatorProfTorqueService>(
+    pub_sub_ns_ + "srv/actuator_prof_torque",
+    std::bind(&FcatSrvs::ActuatorProfTorqueSrvCb, this, _1, _2),
+    services_qos_, cb_group_blocking_));
 
-  DeclareServiceCommand<fcat_msgs::srv::ActuatorCalibrateService>(
-    this, pub_sub_ns_ + "srv/actuator_calibrate",
-    &FcatSrvs::ActuatorCalibrateSrvCb, services_qos_, cb_group_blocking_,
-    CommandDescriptor(
-      "Command hardstop calibration to the Actuator. The actuator will "
-      "move in "
-      "the signed velocity direction with the specified lowered current "
-      "limit "
-      "to detect the hardstop. From there, the position is set to the "
-      "calibration "
-      "limit defined in the configuration file. Finally, the original "
-      "current is "
-      "restored and the actuator is commanded to the command limit defined "
-      "in the "
-      "configuration file.",
-      {CommandArgumentDescriptor(
-         /*arg name*/ "name",
-         /*description*/ "The Fastcat Device Name"),
-       CommandArgumentDescriptor(
-         /*arg name*/ "velocity",
-         /*description*/
-         "The desired approach velocity for all motions during "
-         "hardstop calibration",
-         /*Units*/ "EU/sec"),
-       CommandArgumentDescriptor(
-         /*arg name*/ "accel",
-         /*description*/ "The desired acceleration of the motion profile",
-         /*Units*/ "EU/sec^2"),
-       CommandArgumentDescriptor(
-         /*arg name*/ "max_current",
-         /*description*/
-         "Overrides the Peak current setting but only during "
-         "hardstop contact motion",
-         /*Units*/ "Amps")}));
+  services_.push_back(this->create_service<fcat_msgs::srv::ActuatorCalibrateService>(
+    pub_sub_ns_ + "srv/actuator_calibrate",
+    std::bind(&FcatSrvs::ActuatorCalibrateSrvCb, this, _1, _2), services_qos_,
+    cb_group_blocking_));
 
-  DeclareServiceCommand<fcat_msgs::srv::ActuatorSetGainSchedulingModeService>(
-    this, pub_sub_ns_ + "srv/actuator_set_gain_scheduling_mode",
-    &FcatSrvs::ActuatorSetGainSchedulingModeSrvCb, services_qos_,
-    cb_group_blocking_,
-    CommandDescriptor(
-      "Set the Gain Schedule Mode for the actuator GS[2]. "
-      "0 - No Gain Scheduling. "
-      "[1,63] - Specific controller from table. "
-      "64 - Enable Speed-based scheduling. "
-      "65 - Enable position-based scheduling. "
-      "66 - Best Settling. "
-      "67 - manually scheduled, high-bits. "
-      "68 - manually scheduled, low-bits."
-      "Use this interface only if you know what you are doing, Caveat "
-      "Emptor!",
-      {CommandArgumentDescriptor(
-         /*arg name*/ "name",
-         /*description*/ "The Fastcat Device Name"),
-       CommandArgumentDescriptor(
-         /*arg name*/ "gain_scheduling_mode",
-         /*description*/ "The desired gain schedule mode value")}));
+  services_.push_back(
+    this->create_service<fcat_msgs::srv::ActuatorSetGainSchedulingModeService>(
+      pub_sub_ns_ + "srv/actuator_set_gain_scheduling_mode",
+      std::bind(&FcatSrvs::ActuatorSetGainSchedulingModeSrvCb, this, _1, _2),
+      services_qos_, cb_group_blocking_));
 
-  DeclareServiceCommand<fcat_msgs::srv::ActuatorSetUnitModeService>(
-    this, pub_sub_ns_ + "srv/actuator_set_unit_mode",
-    &FcatSrvs::ActuatorSetUnitModeSrvCb, services_qos_, cb_group_blocking_,
-    CommandDescriptor("Sets the Unit Mode UM[1]. "
-                      "1 - Torque Control. "
-                      "2 - Speed Control. "
-                      "3 - Stepper Control. "
-                      "5 - Position Control (default). "
-                      "6 - Stepper Open or Closed Loop.",
-                      {CommandArgumentDescriptor(
-                         /*arg name*/ "name",
-                         /*description*/ "The Fastcat Device Name"),
-                       CommandArgumentDescriptor(
-                         /*arg name*/ "gain_scheduling_mode",
-                         /*description*/ "The desired Unit Mode UM[1]. ")}));
+  services_.push_back(
+    this->create_service<fcat_msgs::srv::ActuatorSetUnitModeService>(
+      pub_sub_ns_ + "srv/actuator_set_unit_mode",
+      std::bind(&FcatSrvs::ActuatorSetUnitModeSrvCb, this, _1, _2),
+      services_qos_, cb_group_blocking_));
 
-  DeclareServiceCommand<fcat_msgs::srv::PidActivateService>(
-    this, pub_sub_ns_ + "srv/pid_activate", &FcatSrvs::PidActivateSrvCb,
-    services_qos_, cb_group_blocking_,
-    CommandDescriptor(
-      "Start the PID Controller with specified parameters.  "
-      "Returns failure if it does not converge in the specified duration. "
-      "Returns success and self-disables if the controller converges.",
-      {CommandArgumentDescriptor(
-         /*arg name*/ "name",
-         /*description*/ "The Fastcat Device Name"),
-       CommandArgumentDescriptor(
-         /*arg name*/ "setpoint",
-         /*description*/ "The controller setpoint",
-         /*Units*/ "EU"),
-       CommandArgumentDescriptor(
-         /*arg name*/ "deadband",
-         /*description*/
-         "The controller deadband tolerance around the setpoint",
-         /*Units*/ "EU"),
-       CommandArgumentDescriptor(
-         /*arg name*/ "persistence_duration",
-         /*description*/
-         "The amount of time the signal must remain with the "
-         "deadband to end control",
-         /*Units*/ "sec"),
-       CommandArgumentDescriptor(
-         /*arg name*/ "max_duration",
-         /*description*/
-         "The maximum duration of the command. Beware: "
-         "negative values can result in indefinite runtime",
-         /*Units*/ "sec")}));
+  services_.push_back(this->create_service<fcat_msgs::srv::PidActivateService>(
+    pub_sub_ns_ + "srv/pid_activate",
+    std::bind(&FcatSrvs::PidActivateSrvCb, this, _1, _2), services_qos_,
+    cb_group_blocking_));
 
-  DeclareServiceCommand<fcat_msgs::srv::AsyncSdoWriteService>(
-    this, pub_sub_ns_ + "srv/async_sdo_write",
-    &FcatSrvs::AsyncSdoWriteSrvCb, services_qos_, cb_group_blocking_,
-    CommandDescriptor(
-      "Issues an Asynchronous SDO parameter Write and waits for the "
-      "result of the operation to indicate success or failure.",
-      {CommandArgumentDescriptor(
-         /*arg name*/ "name",
-         /*description*/ "The Fastcat Device Name"),
-       CommandArgumentDescriptor(
-         /*arg name*/ "sdo_index",
-         /*description*/ "The SDO register index in hexidecimal (0x3034) "
-                         "or "
-                         "decimal (12340) form"),
-       CommandArgumentDescriptor(
-         /*arg name*/ "sdo_subindex",
-         /*description*/ "The SDO register subindex (e.g. the 1 in "
-                         "0x3034:1)"),
-       CommandArgumentDescriptor(
-         /*arg name*/ "data",
-         /*description*/ "Data payload to write to the SDO"),
-       CommandArgumentDescriptor(
-         /*arg name*/ "data_type",
-         /*description*/ "The type of the data payload, must be one of: "
-                         "{I8, I16, I32, I64, F32, U8, U16, U32, "
-                         "U64}")}));
+  services_.push_back(this->create_service<fcat_msgs::srv::AsyncSdoWriteService>(
+    pub_sub_ns_ + "srv/async_sdo_write",
+    std::bind(&FcatSrvs::AsyncSdoWriteSrvCb, this, _1, _2), services_qos_,
+    cb_group_blocking_));
 
-  DeclareServiceCommand<fcat_msgs::srv::AsyncSdoReadService>(
-    this, pub_sub_ns_ + "srv/async_sdo_read", &FcatSrvs::AsyncSdoReadSrvCb,
-    services_qos_, cb_group_blocking_,
-    CommandDescriptor(
-      "Issues an Asynchronous SDO parameter Read and waits for the "
-      "result of the operation to indicate success or failure.",
-      {CommandArgumentDescriptor(
-         /*arg name*/ "name",
-         /*description*/ "The Fastcat Device Name"),
-       CommandArgumentDescriptor(
-         /*arg name*/ "sdo_index",
-         /*description*/ "The SDO register index in hexidecimal (0x3034) "
-                         "or "
-                         "decimal (12340) form"),
-       CommandArgumentDescriptor(
-         /*arg name*/ "sdo_subindex",
-         /*description*/ "The SDO register subindex (the 1 in 0x3034:1)"),
-       CommandArgumentDescriptor(
-         /*arg name*/ "data_type",
-         /*description*/ "The type of the data payload, must be one of: "
-                         "{I8, I16, I32, I64, F32, U8, U16, U32, "
-                         "U64}")}));
+  services_.push_back(this->create_service<fcat_msgs::srv::AsyncSdoReadService>(
+    pub_sub_ns_ + "srv/async_sdo_read",
+    std::bind(&FcatSrvs::AsyncSdoReadSrvCb, this, _1, _2), services_qos_,
+    cb_group_blocking_));
 
-  DeclareServiceCommand<fcat_msgs::srv::TlcWriteService>(
-    this, pub_sub_ns_ + "srv/tlc_write", &FcatSrvs::TlcWriteSrvCb,
-    services_qos_, cb_group_blocking_,
-    CommandDescriptor(
-      "Issues a ELMO Two-Letter Command (TLC) which in turn issues an "
-      "Asynchronous SDO "
-      "parameter Write and waits for the result to indicate success or "
-      "failure. Consult "
-      "The MAN-G-CR document for full listing of drive data objects.",
-      {CommandArgumentDescriptor(
-         /*arg name*/ "name",
-         /*description*/ "The Fastcat Device Name"),
-       CommandArgumentDescriptor(
-         /*arg name*/ "tlc",
-         /*description*/ "The Two-Letter Command (TLC) found in the ELMO "
-                         "MAN-G-CR Command Reference Document. These two "
-                         "chars "
-                         "are converted to an SDO index. (e.g. PL, CL)"),
-       CommandArgumentDescriptor(
-         /*arg name*/ "subindex",
-         /*description*/ "The TLC/SDO register subindex (the 1 in "
-                         "PL[1])"),
-       CommandArgumentDescriptor(
-         /*arg name*/ "data",
-         /*description*/ "Data payload to write to the drive"),
-       CommandArgumentDescriptor(
-         /*arg name*/ "data_type",
-         /*description*/ "The type of the data payload, must be one of: "
-                         "{I8, I16, I32, I64, F32, U8, U16, U32, "
-                         "U64}")}));
+  services_.push_back(this->create_service<fcat_msgs::srv::TlcWriteService>(
+    pub_sub_ns_ + "srv/tlc_write",
+    std::bind(&FcatSrvs::TlcWriteSrvCb, this, _1, _2), services_qos_,
+    cb_group_blocking_));
 
-  DeclareServiceCommand<fcat_msgs::srv::TlcReadService>(
-    this, pub_sub_ns_ + "srv/tlc_read", &FcatSrvs::TlcReadSrvCb,
-    services_qos_, cb_group_blocking_,
-    CommandDescriptor(
-      "Issues a ELMO Two-Letter Command (TLC) which in turn issues an "
-      "Asynchronous SDO "
-      "parameter Read and waits for the result to indicate success or "
-      "failure. Consult "
-      "The MAN-G-CR document for full listing of drive data objects.",
-      {CommandArgumentDescriptor(
-         /*arg name*/ "name",
-         /*description*/ "The Fastcat Device Name"),
-       CommandArgumentDescriptor(
-         /*arg name*/ "tlc",
-         /*description*/ "The Two-Letter Command (TLC) found in the ELMO "
-                         "MAN-G-CR Command Reference Document. These two "
-                         "chars "
-                         "are converted to an SDO index. (e.g. PL, CL)"),
-       CommandArgumentDescriptor(
-         /*arg name*/ "subindex",
-         /*description*/ "The TLC/SDO register subindex (the 1 in "
-                         "PL[1])"),
-       CommandArgumentDescriptor(
-         /*arg name*/ "data_type",
-         /*description*/ "The type of the data payload, must be one of: "
-                         "{I8, I16, I32, I64, F32, U8, U16, U32, "
-                         "U64}")}));
+  services_.push_back(this->create_service<fcat_msgs::srv::TlcReadService>(
+    pub_sub_ns_ + "srv/tlc_read",
+    std::bind(&FcatSrvs::TlcReadSrvCb, this, _1, _2), services_qos_,
+    cb_group_blocking_));
 }
 
 //

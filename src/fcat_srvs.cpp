@@ -114,16 +114,7 @@ FcatSrvs::FcatSrvs(const rclcpp::NodeOptions& options)
   InitSubscribers();
   InitPublishers();
   InitServices();
-
-  // Call this only after setting all initialization array params
-  PreventArrayParamSet();
-  InitializeTimerRate();
-
-  // No need to call StartTimer(). Relying on executor.spin(),
-  //   callbackgroups, and rclcpp::Rate instead
-  rate_ = std::make_unique<rclcpp::Rate>(this->GetTimerRate());
-
-  SetActive();
+  rate_ = std::make_unique<rclcpp::Rate>(loop_rate_hz_);
 }
 
 void FcatSrvs::InitSubscribers()

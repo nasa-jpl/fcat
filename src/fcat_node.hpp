@@ -3,6 +3,10 @@
 
 #include "rclcpp/rclcpp.hpp"
 
+#include <chrono>
+#include <functional>
+#include <string>
+
 class FcatNode : public rclcpp::Node
 {
   public:
@@ -10,24 +14,25 @@ class FcatNode : public rclcpp::Node
         const rclcpp::NodeOptions& options = rclcpp::NodeOptions())
       : rclcpp::Node(node_name, namespace_, options)
     {
-      InitializeDefaultParameters();
     }
 
-    void InitializeDefaultParameters()
-    {
-      // set up default parameters
-
-    }
 
     // Must be called before InitializeTimer() to take effect
-    void SetTimerRate(double hz){ target_loop_rate_hz_ = hz; }
+    void InitializeTimerRate(double hz) { target_loop_rate_hz_ = hz; }
+    double GetTimerRate() const { return target_loop_rate_hz_; }
+    void SetTimerCallbackGroup(rclcpp::CallbackGroup::SharedPtr callback_group)
+    {
+      timer_callback_group_ = callback_group;
+    }
 
-    virtual void InitializeTimer()
+    void SetActive() {}
+
+    virtual void StartProcessTimer()
     {
       double period_usec = 1.0e6 / target_loop_rate_hz_;
       std::chrono::duration<double, std::micro> chrono_dur(period_usec);
-      timer_ = this->create_wall_timer(chrono_dur, 
-          std::bind(&FcatNode::Process, this));
+      timer_ = this->create_wall_timer(
+        chrono_dur, std::bind(&FcatNode::Process, this), timer_callback_group_);
     }
 
     virtual void Process() = 0;
@@ -36,6 +41,7 @@ class FcatNode : public rclcpp::Node
 
     double target_loop_rate_hz_ = 250.0;
     rclcpp::TimerBase::SharedPtr timer_ = nullptr;
+    rclcpp::CallbackGroup::SharedPtr timer_callback_group_ = nullptr;
 
 };
 

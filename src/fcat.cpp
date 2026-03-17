@@ -22,7 +22,7 @@ using std::placeholders::_2;
 Fcat::~Fcat() { fcat_manager_.Shutdown(); }
 
 Fcat::Fcat(const rclcpp::NodeOptions& options)
-    : FcatNode("fcat", "fcat"),
+    : FcatNode("fcat", "fcat", options),
       service_qos_(rclcpp::QoSInitialization::from_rmw(rmw_qos_profile_services_default), rmw_qos_profile_services_default)
 {
   process_loop_callback_group_ =
@@ -30,6 +30,8 @@ Fcat::Fcat(const rclcpp::NodeOptions& options)
 
   topic_callback_group_ =
     this->create_callback_group(rclcpp::CallbackGroupType::MutuallyExclusive);
+
+  SetTimerCallbackGroup(process_loop_callback_group_);
 
   std::string fastcat_config_path;
   {
@@ -248,7 +250,7 @@ Fcat::Fcat(const rclcpp::NodeOptions& options)
   last_time_ = this->now().seconds();
   module_state_msg_.faulted = false;
 
-  InitializeTimer();
+  StartProcessTimer();
   // SetActive();
 }
 
@@ -1155,7 +1157,7 @@ void Fcat::InitializeSubscribers()
 {
   rclcpp::SubscriptionOptions options;
 
-  options.callback_group = state_interface_cb_group_;
+  options.callback_group = topic_callback_group_;
 
   // bus reset/fault
   subscriptions_.push_back(this->create_subscription<std_msgs::msg::Empty>(
@@ -1163,8 +1165,6 @@ void Fcat::InitializeSubscribers()
 
   subscriptions_.push_back(this->create_subscription<std_msgs::msg::Empty>(
     "impl/fault", 1, std::bind(&Fcat::FaultCmdCb, this, _1), options));
-
-  options.callback_group = topic_callback_group_;
 
   // Async SDO
   subscriptions_.push_back(
@@ -1715,7 +1715,7 @@ void Fcat::PublishFcatModuleState()
   // Check for fault status and emit logs
   bool is_faulted = fcat_manager_.IsFaulted();
   if (!module_state_msg_.faulted && is_faulted) {
-    Fault();
+    // Fault(); // TODO: use lifecycle nodes
     RCLCPP_WARN(this->get_logger(), "Fastcat bus fault detected");
   } else if (module_state_msg_.faulted && !is_faulted) {
     RCLCPP_INFO(this->get_logger(), "Fastcat bus fault cleared");
@@ -2338,6 +2338,3 @@ void Fcat::PublishLinearInterpolationStates()
     linear_interpolation_pub_->publish(linear_interpolation_states_msg_);
   }
 }
-
-#include "rclcpp_components/register_node_macro.hpp"
-RCLCPP_COMPONENTS_REGISTER_NODE(Fcat)

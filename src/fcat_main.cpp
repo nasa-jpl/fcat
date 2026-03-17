@@ -39,7 +39,6 @@ int main(int argc, char* argv[])
   // spawning individual executors for different callback groups
   rclcpp::executors::StaticSingleThreadedExecutor process_loop_executor;
   rclcpp::executors::SingleThreadedExecutor topic_executor;
-  rclcpp::executors::SingleThreadedExecutor module_state_executor;
 
   auto fcat_node = std::make_shared<Fcat>();
 
@@ -53,17 +52,9 @@ int main(int argc, char* argv[])
   topic_executor.add_callback_group(fcat_node->get_topic_callback_group(),
                                     fcat_node->get_node_base_interface());
 
-  module_state_executor.add_callback_group(
-    fcat_node->get_fault_interface_callback_group(),
-    fcat_node->get_node_base_interface());
-  module_state_executor.add_callback_group(
-    fcat_node->get_state_interface_callback_group(),
-    fcat_node->get_node_base_interface());
-
   auto process_loop_thread =
     std::thread([&]() { process_loop_executor.spin(); });
   auto topic_thread = std::thread([&]() { topic_executor.spin(); });
-  auto module_state_thread = std::thread([&]() { module_state_executor.spin(); });
 
   while (rclcpp::ok()) {
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
@@ -71,7 +62,6 @@ int main(int argc, char* argv[])
   rclcpp::shutdown();
   process_loop_thread.join();
   topic_thread.join();
-  module_state_thread.join();
 #endif
 
   return 0;

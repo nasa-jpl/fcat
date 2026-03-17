@@ -1,4 +1,4 @@
-#include "fcat/fcat_services.hpp"
+#include "fcat/fcat_srvs.hpp"
 #include "rclcpp/rclcpp.hpp"
 #include "rcl_interfaces/msg/floating_point_range.hpp"
 #include "rcl_interfaces/msg/integer_range.hpp"
@@ -7,8 +7,6 @@
 #include "fcat/fcat_utils.hpp"
 #include "jsd/jsd_print.h"
 
-#include "casah_node/utils.hpp"
-
 #include <chrono>
 #include <cstdio>
 using namespace std::chrono_literals;
@@ -16,7 +14,7 @@ using std::placeholders::_1;
 using std::placeholders::_2;
 
 FcatSrvs::FcatSrvs(const rclcpp::NodeOptions& options)
-    : casah_node::BaseInterface("fcat_services", "fcat", options),
+    : rclcpp::Node("fcat_services", "fcat", options),
       services_qos_(rclcpp::QoSInitialization::from_rmw(rmw_qos_profile_services_default), rmw_qos_profile_services_default),
       module_state_last_recv_time_(0),
       act_states_last_recv_time_(0),
@@ -121,7 +119,7 @@ FcatSrvs::FcatSrvs(const rclcpp::NodeOptions& options)
   PreventArrayParamSet();
   InitializeTimerRate();
 
-  // No need to call CasahNode::StartTimer(). Relying on executor.spin(),
+  // No need to call StartTimer(). Relying on executor.spin(),
   //   callbackgroups, and rclcpp::Rate instead
   rate_ = std::make_unique<rclcpp::Rate>(this->GetTimerRate());
 

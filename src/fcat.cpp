@@ -22,7 +22,7 @@ using std::placeholders::_2;
 Fcat::~Fcat() { fcat_manager_.Shutdown(); }
 
 Fcat::Fcat(const rclcpp::NodeOptions& options)
-    : casah_node::BaseInterface("fcat", "fcat", options),
+    : FcatNode("fcat", "fcat"),
       service_qos_(rclcpp::QoSInitialization::from_rmw(rmw_qos_profile_services_default), rmw_qos_profile_services_default)
 {
   process_loop_callback_group_ =
@@ -248,8 +248,8 @@ Fcat::Fcat(const rclcpp::NodeOptions& options)
   last_time_ = this->now().seconds();
   module_state_msg_.faulted = false;
 
-  Fcat::StartProcessTimer();
-  SetActive();
+  InitializeTimer();
+  // SetActive();
 }
 
 void Fcat::SetRealtimePreempt(int scheduler_priority) {
@@ -276,23 +276,6 @@ void Fcat::SetRealtimePreempt(int scheduler_priority) {
   memset(dummy, 0, max_safe_stack);
 }
 
-void Fcat::StartProcessTimer()
-{
-  rclcpp::Parameter rate_param;
-  if (!this->get_parameter("target_loop_rate_hz", rate_param)) {
-    RCLCPP_FATAL(this->get_logger(),
-      "Developer Warning: must call InitializeTimerRate(...) before "
-      "starting timer");
-    rclcpp::shutdown();
-  }
-
-  double period_usec = 1.0e6 / fcat_manager_.GetTargetLoopRate();
-  std::chrono::duration<double, std::micro> chrono_dur(period_usec);
-  process_timer_ =
-    rclcpp::create_timer(this, this->get_clock(), chrono_dur,
-                         std::bind(&casah_node::FaultInterface::Process, this),
-                         process_loop_callback_group_);
-}
 
 rcl_interfaces::msg::SetParametersResult Fcat::SetParametersCb(
   const std::vector<rclcpp::Parameter>& parameters)
@@ -1625,7 +1608,7 @@ void Fcat::Process()
     if(fault_on_cycle_slip_ && dt > cycle_slip_fault_magnitude_ * loop_period_sec_) {      
       fcat_manager_.ExecuteAllDeviceFaults();
       const std::shared_ptr<std_msgs::msg::Empty> msg;
-      FaultInterface::FaultCmdCb(msg);
+      // FaultInterface::FaultCmdCb(msg); // TODO: use lifecyle nodes
       publish_time_stamp_ = now;
       return;
     }

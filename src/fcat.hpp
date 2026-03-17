@@ -1,8 +1,6 @@
 #ifndef FCAT__FCAT_HPP_
 #define FCAT__FCAT_HPP_
 
-#include "casah_node/fault_interface.hpp"
-
 #include "rclcpp/rclcpp.hpp"
 
 #include <sys/time.h>
@@ -95,7 +93,7 @@
 
 using WrenchPublisher = rclcpp::Publisher<geometry_msgs::msg::WrenchStamped>;
 
-class Fcat : public casah_node::FaultInterface
+class Fcat : public FcatNode
 {
  public:
   ~Fcat();
@@ -111,7 +109,6 @@ class Fcat : public casah_node::FaultInterface
 
  private:
   void Process() override;
-  void StartProcessTimer();
   void SetRealtimePreempt(int scheduler_priority);
   void PopulateDeviceStateFields();
   void SetCpuAffinity();

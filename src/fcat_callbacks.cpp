@@ -10,7 +10,7 @@ void Fcat::ResetCmdCb(const std::shared_ptr<std_msgs::msg::Empty> msg)
 {
   reset_in_progress_ = true;
   fcat_manager_.ExecuteAllDeviceResets();
-  FaultInterface::ResetCmdCb(msg);
+  // FaultInterface::ResetCmdCb(msg); // TODO: use lifecyle nodes
   reset_in_progress_ = false;
 }
 
@@ -19,7 +19,7 @@ void Fcat::FaultCmdCb(const std::shared_ptr<std_msgs::msg::Empty> msg)
   (void)msg;
   if (!reset_in_progress_) {
     fcat_manager_.ExecuteAllDeviceFaults();
-    FaultInterface::FaultCmdCb(msg);
+    // FaultInterface::FaultCmdCb(msg); // TODO: use lifecyle nodes
   }
 }
 
@@ -609,7 +609,7 @@ void Fcat::ResetSrvCb(
 {
   RCLCPP_INFO(this->get_logger(), "Handling Reset Command");
   fcat_manager_.ExecuteAllDeviceResets();
-  FaultInterface::ResetSrvCb(request, response);
+  // FaultInterface::ResetSrvCb(request, response); // TODO: use lifecyle nodes
 }
 
 void Fcat::FaultSrvCb(
@@ -618,7 +618,7 @@ void Fcat::FaultSrvCb(
 {
   RCLCPP_INFO(this->get_logger(), "Handling Fault Command");
   fcat_manager_.ExecuteAllDeviceFaults();
-  FaultInterface::FaultSrvCb(request, response);
+  // FaultInterface::FaultSrvCb(request, response); // TODO: use lifecyle nodes
 }
 
 void Fcat::ActuatorHaltSrvCb(

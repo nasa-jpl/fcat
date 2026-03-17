@@ -13,10 +13,9 @@ int main(int argc, char* argv[])
     2                           // Number of threads
   );
 
-  auto node = std::make_shared<FcatServices>();
+  auto node = std::make_shared<FcatSrvs>();
   executor.add_node(node);
   executor.spin();
   rclcpp::shutdown();
   return 0;
 }
-

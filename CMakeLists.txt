@@ -10,9 +10,9 @@ if(NOT CMAKE_C_STANDARD)
     set(CMAKE_C_STANDARD 99)
 endif()
 
-# Default to C++14
+# Default to C++17
 if(NOT CMAKE_CXX_STANDARD)
-    set(CMAKE_CXX_STANDARD 14)
+    set(CMAKE_CXX_STANDARD 17)
 endif()
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
@@ -72,6 +72,7 @@ target_link_libraries(fcat
 add_executable(fcat_srvs
   src/fcat_srvs_main.cpp 
   src/fcat_srvs.cpp
+  src/fcat_utils.cpp
   )
 ament_target_dependencies(fcat_srvs 
   rclcpp 

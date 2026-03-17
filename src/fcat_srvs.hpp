@@ -1,6 +1,7 @@
 #ifndef FCAT__FCAT_SERVICES_HPP_
 #define FCAT__FCAT_SERVICES_HPP_
 
+#include <any>
 #include <sys/time.h>
 #include <queue>
 #include "rclcpp/rclcpp.hpp"
@@ -55,8 +56,6 @@ class FcatSrvs : public rclcpp::Node
   const rclcpp::QoS subscription_qos_ = 
     rclcpp::QoS(subscription_queue_size_).best_effort();
   const rclcpp::QoS services_qos_;
-
-  void Process() override{};
 
   void InitSubscribers();
   void InitPublishers();

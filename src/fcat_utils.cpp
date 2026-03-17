@@ -549,7 +549,7 @@ bool HexOrDecStrToNum(std::string& str, uint16_t& number)
   if (*end == '\0') {
     fprintf(
       stderr,
-      "HexOrDecStrToNum successfully parsed string (%s) to (%lu or 0x%x)",
+      "HexOrDecStrToNum successfully parsed string (%s) to (%lu or 0x%lx)",
       str.c_str(), ulnum, ulnum);
     fprintf(stderr, "\n");
     number = static_cast<uint16_t>(ulnum);

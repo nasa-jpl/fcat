@@ -3,6 +3,7 @@
 
 #include "rclcpp/rclcpp.hpp"
 
+#include <any>
 #include <sys/time.h>
 #include <functional>
 #include <memory>
@@ -90,6 +91,7 @@
 #include "fcat_msgs/msg/module_state.hpp"
 
 #include "fcat/fcat_utils.hpp"
+#include "fcat/fcat_node.hpp"
 
 using WrenchPublisher = rclcpp::Publisher<geometry_msgs::msg::WrenchStamped>;
 
@@ -179,8 +181,8 @@ class Fcat : public FcatNode
   /////// Topic Callbacks //////////
   /////////////////////////////////////
 
-  void ResetCmdCb(const std::shared_ptr<std_msgs::msg::Empty> msg) override;
-  void FaultCmdCb(const std::shared_ptr<std_msgs::msg::Empty> msg) override;
+  void ResetCmdCb(const std::shared_ptr<std_msgs::msg::Empty> msg);
+  void FaultCmdCb(const std::shared_ptr<std_msgs::msg::Empty> msg);
 
   void AsyncSdoReadCmdCb(
     const std::shared_ptr<fcat_msgs::msg::AsyncSdoReadCmd> msg);
@@ -327,11 +329,11 @@ class Fcat : public FcatNode
 
   void ResetSrvCb(
     const std::shared_ptr<std_srvs::srv::Trigger::Request> request,
-    std::shared_ptr<std_srvs::srv::Trigger::Response> response) override;
+    std::shared_ptr<std_srvs::srv::Trigger::Response> response);
 
   void FaultSrvCb(
     const std::shared_ptr<std_srvs::srv::Trigger::Request> request,
-    std::shared_ptr<std_srvs::srv::Trigger::Response> response) override;
+    std::shared_ptr<std_srvs::srv::Trigger::Response> response);
 
   void ActuatorHaltSrvCb(
     const std::shared_ptr<fcat_msgs::srv::ActuatorHaltService::Request> request,
@@ -564,5 +566,8 @@ class Fcat : public FcatNode
     three_node_thermal_model_states_msg_;
 
   size_t command_queue_size_ = 0;
+  bool reset_in_progress_ = false;
+  std::vector<rclcpp::node_interfaces::OnSetParametersCallbackHandle::SharedPtr>
+    param_cb_handles_;
 };
 #endif

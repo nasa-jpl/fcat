@@ -502,7 +502,7 @@ void Fcat::InitializeActuatorParams(
           description_prefix + "low position calibration limit [eu]";
         descriptor.read_only = true;
         rcl_interfaces::msg::FloatingPointRange range;
-        range.from_value = 0.0;
+        range.from_value = std::numeric_limits<double>::lowest();
         range.to_value = std::numeric_limits<double>::max();
         range.step = 0.0;
         descriptor.floating_point_range.push_back(range);
@@ -516,7 +516,7 @@ void Fcat::InitializeActuatorParams(
           description_prefix + "low position command limit [eu]";
         descriptor.read_only = true;
         rcl_interfaces::msg::FloatingPointRange range;
-        range.from_value = 0.0;
+        range.from_value = std::numeric_limits<double>::lowest();
         range.to_value = std::numeric_limits<double>::max();
         range.step = 0.0;
         descriptor.floating_point_range.push_back(range);
@@ -530,7 +530,7 @@ void Fcat::InitializeActuatorParams(
           description_prefix + "high position calibration limit [eu]";
         descriptor.read_only = true;
         rcl_interfaces::msg::FloatingPointRange range;
-        range.from_value = 0.0;
+        range.from_value = std::numeric_limits<double>::lowest();
         range.to_value = std::numeric_limits<double>::max();
         range.step = 0.0;
         descriptor.floating_point_range.push_back(range);
@@ -544,7 +544,7 @@ void Fcat::InitializeActuatorParams(
           description_prefix + "high position command limit [eu]";
         descriptor.read_only = true;
         rcl_interfaces::msg::FloatingPointRange range;
-        range.from_value = 0.0;
+        range.from_value = std::numeric_limits<double>::lowest();
         range.to_value = std::numeric_limits<double>::max();
         range.step = 0.0;
         descriptor.floating_point_range.push_back(range);
@@ -596,7 +596,7 @@ void Fcat::InitializeActuatorParams(
         descriptor.description = description_prefix + "crc value";
         descriptor.read_only = true;
         rcl_interfaces::msg::FloatingPointRange range;
-        range.from_value = 0.0;
+        range.from_value = std::numeric_limits<double>::lowest();
         range.to_value = std::numeric_limits<double>::max();
         range.step = 0.0;
         descriptor.floating_point_range.push_back(range);

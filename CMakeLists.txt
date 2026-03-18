@@ -50,42 +50,42 @@ foreach(include ${includes})
 endforeach()
 
 # Create fcat node
-add_executable(fcat
+add_executable(fcat_node
     src/fcat_main.cpp
     src/fcat.cpp
     src/fcat_callbacks.cpp
     src/fcat_utils.cpp
 )
 
-ament_target_dependencies(fcat 
+ament_target_dependencies(fcat_node 
     rclcpp
     sensor_msgs
     geometry_msgs
     std_srvs
     fcat_msgs
     )
-target_link_libraries(fcat
+target_link_libraries(fcat_node
     fastcat
     )
 
-# Create fcat_srvs node
-add_executable(fcat_srvs
+# Create fcat_services node
+add_executable(fcat_services
   src/fcat_srvs_main.cpp 
   src/fcat_srvs.cpp
   src/fcat_utils.cpp
   )
-ament_target_dependencies(fcat_srvs 
+ament_target_dependencies(fcat_services 
   rclcpp 
   fcat_msgs
   )
 
-target_link_libraries(fcat_srvs
+target_link_libraries(fcat_services
   fastcat
   )
 
 install(TARGETS
-    fcat
-    fcat_srvs
+    fcat_node
+    fcat_services
     DESTINATION lib/${PROJECT_NAME}
     )
 

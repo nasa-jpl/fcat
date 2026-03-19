@@ -35,6 +35,26 @@ find_package(std_msgs REQUIRED)
 find_package(std_srvs REQUIRED)
 find_package(fcat_msgs REQUIRED)
 
+find_program(CLANG_FORMAT_BIN NAMES clang-format)
+if(CLANG_FORMAT_BIN)
+  file(GLOB_RECURSE FCAT_FORMAT_FILES CONFIGURE_DEPENDS
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/*.c"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cc"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/*.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/*.hh"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/*.hpp"
+  )
+
+  add_custom_target(format
+    COMMAND ${CLANG_FORMAT_BIN} -i -style=file ${FCAT_FORMAT_FILES}
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    COMMENT "Running clang-format on source files"
+  )
+else()
+  message(STATUS "clang-format not found; 'format' target is unavailable f or fcat")
+endif()
+
 
 # Copies headers to install space 
 file(GLOB_RECURSE includes RELATIVE
@@ -88,5 +108,14 @@ install(TARGETS
     fcat_services
     DESTINATION lib/${PROJECT_NAME}
     )
+
+if(BUILD_TESTING)
+  find_package(ament_cmake_clang_format QUIET)
+  if(ament_cmake_clang_format_FOUND)
+    ament_clang_format(
+      CONFIG_FILE ${CMAKE_CURRENT_SOURCE_DIR}/.clang-format
+    )
+  endif()
+endif()
 
 ament_package()

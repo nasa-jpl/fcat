@@ -1,4 +1,6 @@
-#include "fcat/fcat.hpp"
+// Copyright 2021 California Institute of Technology
+
+#include "fcat.hpp"
 
 #include <sched.h>
 #include <sys/mman.h>
@@ -688,12 +690,12 @@ bool Fcat::DeviceExistsOnBus(const std::string& name, fastcat::DeviceStateType t
                              std::string& error_message) {
   char str[512];
   if (!(device_name_state_map_.end() != device_name_state_map_.find(name))) {
-    snprintf(str, 512, "Device %s does not exist on bus", name.c_str());
+    snprintf(str, sizeof(str), "Device %s does not exist on bus", name.c_str());
     error_message = str;
     return false;
   }
   if (device_name_state_map_[name]->type != type) {
-    snprintf(str, 512, "Device type does not match for %s", name.c_str());
+    snprintf(str, sizeof(str), "Device type does not match for %s", name.c_str());
     error_message = str;
     return false;
   }
@@ -703,7 +705,7 @@ bool Fcat::DeviceExistsOnBus(const std::string& name, fastcat::DeviceStateType t
 bool Fcat::DeviceExistsOnBus(const std::string& name, fastcat::DeviceStateType type) {
   std::string error_message;
   bool success = DeviceExistsOnBus(name, type, error_message);
-  if (not success) {
+  if (!success) {
     RCLCPP_WARN(this->get_logger(), "%s", error_message.c_str());
   }
   return success;
@@ -1314,7 +1316,6 @@ void Fcat::InitializeServices() {
     services_.push_back(this->create_service<fcat_msgs::srv::ActuatorCalibrateService>(
         "cmd/actuator_calibrate", std::bind(&Fcat::ActuatorCalibrateSrvCb, this, _1, _2),
         service_qos_));
-
   }  // end Actuator Service Declarations
 
   // Commander
@@ -1337,7 +1338,6 @@ void Fcat::InitializeServices() {
     services_.push_back(this->create_service<fcat_msgs::srv::El2124WriteChannelService>(
         "cmd/el2124_write_channel", std::bind(&Fcat::El2124WriteChannelSrvCb, this, _1, _2),
         service_qos_));
-
   }  // end El2124 Service Declarations
 
   // El2809
@@ -1349,7 +1349,6 @@ void Fcat::InitializeServices() {
     services_.push_back(this->create_service<fcat_msgs::srv::El2809WriteChannelService>(
         "cmd/el2809_write_channel", std::bind(&Fcat::El2809WriteChannelSrvCb, this, _1, _2),
         service_qos_));
-
   }  // end El2809 Service Declarations
 
   // El2798
@@ -1361,7 +1360,6 @@ void Fcat::InitializeServices() {
     services_.push_back(this->create_service<fcat_msgs::srv::El2798WriteChannelService>(
         "cmd/el2798_write_channel", std::bind(&Fcat::El2798WriteChannelSrvCb, this, _1, _2),
         service_qos_));
-
   }  // end El2798 Service Declarations
 
   // El2828
@@ -1373,7 +1371,6 @@ void Fcat::InitializeServices() {
     services_.push_back(this->create_service<fcat_msgs::srv::El2828WriteChannelService>(
         "cmd/el2828_write_channel", std::bind(&Fcat::El2828WriteChannelSrvCb, this, _1, _2),
         service_qos_));
-
   }  // end El2828 Service Declarations
 
   // El4102
@@ -1385,28 +1382,24 @@ void Fcat::InitializeServices() {
     services_.push_back(this->create_service<fcat_msgs::srv::El4102WriteChannelService>(
         "cmd/el4102_write_channel", std::bind(&Fcat::El4102WriteChannelSrvCb, this, _1, _2),
         service_qos_));
-
   }  // end El4102 Service Declarations
 
   // Faulter
   if (TypeExistsOnBus(fastcat::FAULTER_STATE)) {
     services_.push_back(this->create_service<fcat_msgs::srv::FaulterEnableService>(
         "cmd/faulter_enable", std::bind(&Fcat::FaulterEnableSrvCb, this, _1, _2), service_qos_));
-
   }  // end Faulter Service Declarations
 
   // FTS
   if (TypeExistsOnBus(fastcat::FTS_STATE)) {
     services_.push_back(this->create_service<fcat_msgs::srv::DeviceTriggerService>(
         "cmd/fts_tare", std::bind(&Fcat::FtsTareSrvCb, this, _1, _2), service_qos_));
-
   }  // end FTS Service Declarations
 
   // PID
   if (TypeExistsOnBus(fastcat::PID_STATE)) {
     services_.push_back(this->create_service<fcat_msgs::srv::PidActivateService>(
         "cmd/pid_activate", std::bind(&Fcat::PidActivateSrvCb, this, _1, _2), service_qos_));
-
   }  // end PID Service Declarations
 }
 

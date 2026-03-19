@@ -1,10 +1,16 @@
-#ifndef FCAT__FCAT_SERVICES_HPP_
-#define FCAT__FCAT_SERVICES_HPP_
+// Copyright 2021 California Institute of Technology
+
+#ifndef FCAT_SRVS_HPP_
+#define FCAT_SRVS_HPP_
 
 #include <sys/time.h>
 
 #include <any>
+#include <memory>
 #include <queue>
+#include <string>
+#include <unordered_map>
+#include <vector>
 
 #include "rclcpp/rclcpp.hpp"
 
@@ -46,6 +52,7 @@ class FcatSrvs : public rclcpp::Node {
   } FcatSrvState;
 
  public:
+  // NOLINTNEXTLINE(runtime/explicit)
   FcatSrvs(const rclcpp::NodeOptions& options = rclcpp::NodeOptions());
 
  private:
@@ -151,4 +158,4 @@ class FcatSrvs : public rclcpp::Node {
   std::vector<std::any> subscriptions_;
 };
 
-#endif
+#endif  // FCAT_SRVS_HPP_

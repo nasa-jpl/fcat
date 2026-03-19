@@ -1,9 +1,12 @@
+// Copyright 2021 California Institute of Technology
+
+#include <unistd.h>
+
 #include <cstdio>
 
 #include "fastcat/jsd/actuator.h"
-#include "fcat/fcat.hpp"
+#include "fcat.hpp"
 #include "rclcpp/rclcpp.hpp"
-#include "unistd.h"
 
 void Fcat::ResetCmdCb(const std::shared_ptr<std_msgs::msg::Empty> msg) {
   reset_in_progress_ = true;

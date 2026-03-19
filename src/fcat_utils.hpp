@@ -1,5 +1,10 @@
-#ifndef FCAT__FCAT_UTILS_HPP_
-#define FCAT__FCAT_UTILS_HPP_
+// Copyright 2021 California Institute of Technology
+
+#ifndef FCAT_UTILS_HPP_
+#define FCAT_UTILS_HPP_
+
+#include <memory>
+#include <string>
 
 #include "fastcat/fastcat.h"
 #include "fcat_msgs/msg/actuator_states.hpp"
@@ -108,4 +113,4 @@ std::string jsd_sdo_request_type_to_string(jsd_sdo_req_type_t req_type);
 std::string jsd_sdo_data_type_to_string(jsd_sdo_data_type_t data_type);
 std::string jsd_sdo_data_to_string(jsd_sdo_data_type_t data_type, jsd_sdo_data_t data);
 
-#endif
+#endif  // FCAT_UTILS_HPP_

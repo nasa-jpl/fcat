@@ -1,5 +1,8 @@
+// Copyright 2021 California Institute of Technology
+
 #include "fcat_utils.hpp"
 
+#include <cinttypes>
 #include <cstdio>
 
 #include "jsd/jsd_print.h"
@@ -487,10 +490,11 @@ bool HexOrDecStrToNum(std::string& str, uint16_t& number) {
   char* end;
   bool success = false;
 
-  unsigned long int ulnum = strtoul(str.c_str(), &end, 0);
+  uint64_t ulnum = strtoul(str.c_str(), &end, 0);
 
   if (*end == '\0') {
-    fprintf(stderr, "HexOrDecStrToNum successfully parsed string (%s) to (%lu or 0x%lx)",
+    fprintf(stderr,
+            "HexOrDecStrToNum successfully parsed string (%s) to (%" PRIu64 " or 0x%" PRIx64 ")",
             str.c_str(), ulnum, ulnum);
     fprintf(stderr, "\n");
     number = static_cast<uint16_t>(ulnum);

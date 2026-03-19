@@ -1,8 +1,10 @@
+// Copyright 2021 California Institute of Technology
+
 #include <sched.h>
 #include <sys/types.h>
 #include <unistd.h>
 
-#include "fcat/fcat_srvs.hpp"
+#include "fcat_srvs.hpp"
 #include "rclcpp/rclcpp.hpp"
 
 int main(int argc, char* argv[]) {

@@ -1,3 +1,5 @@
+// Copyright 2021 California Institute of Technology
+
 #ifndef FCAT_NODE_HPP_
 #define FCAT_NODE_HPP_
 
@@ -37,4 +39,4 @@ class FcatNode : public rclcpp::Node {
   rclcpp::CallbackGroup::SharedPtr timer_callback_group_ = nullptr;
 };
 
-#endif
+#endif  // FCAT_NODE_HPP_

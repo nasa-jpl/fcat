@@ -1,5 +1,7 @@
-#ifndef FCAT__FCAT_HPP_
-#define FCAT__FCAT_HPP_
+// Copyright 2021 California Institute of Technology
+
+#ifndef FCAT_HPP_
+#define FCAT_HPP_
 
 #include <sys/time.h>
 
@@ -8,6 +10,7 @@
 #include <memory>
 #include <string>
 #include <unordered_map>
+#include <vector>
 
 #include "fastcat/fastcat.h"
 #include "jsd/jsd_print.h"
@@ -94,7 +97,8 @@ using WrenchPublisher = rclcpp::Publisher<geometry_msgs::msg::WrenchStamped>;
 class Fcat : public FcatNode {
  public:
   ~Fcat();
-  Fcat(const rclcpp::NodeOptions& options = rclcpp::NodeOptions());
+  // NOLINTNEXTLINE(runtime/explicit)
+  Fcat(const rclcpp::NodeOptions &options = rclcpp::NodeOptions());
   rclcpp::CallbackGroup::SharedPtr get_process_loop_callback_group() {
     return process_loop_callback_group_;
   }
@@ -105,18 +109,18 @@ class Fcat : public FcatNode {
   void SetRealtimePreempt(int scheduler_priority);
   void PopulateDeviceStateFields();
   void SetCpuAffinity();
-  void InitializeActuatorParams(const std::vector<std::string>& actuator_names, int& i);
+  void InitializeActuatorParams(const std::vector<std::string> &actuator_names, int &i);
 
-  void QueueCommand(fastcat::DeviceCmd& cmd) {
+  void QueueCommand(fastcat::DeviceCmd &cmd) {
     command_queue_size_++;
     fcat_manager_.QueueCommand(cmd);
   }
 
-  bool ActuatorExistsOnBus(const std::string& name);
-  bool ActuatorExistsOnBus(const std::string& name, std::string& error_message);
-  bool DeviceExistsOnBus(const std::string& name, fastcat::DeviceStateType type);
-  bool DeviceExistsOnBus(const std::string& name, fastcat::DeviceStateType type,
-                         std::string& error_message);
+  bool ActuatorExistsOnBus(const std::string &name);
+  bool ActuatorExistsOnBus(const std::string &name, std::string &error_message);
+  bool DeviceExistsOnBus(const std::string &name, fastcat::DeviceStateType type);
+  bool DeviceExistsOnBus(const std::string &name, fastcat::DeviceStateType type,
+                         std::string &error_message);
 
   bool TypeExistsOnBus(fastcat::DeviceStateType type);
   void InitializePublishersAndMessages();
@@ -160,10 +164,10 @@ class Fcat : public FcatNode {
   void PublishLinearInterpolationStates();
   void PublishThreeNodeThermalModelStates();
 
-  void CallActuatorCSP(const fcat_msgs::msg::ActuatorCspCmd& csp_cmd, double t);
-  void CallActuatorCSV(const fcat_msgs::msg::ActuatorCsvCmd& csv_cmd);
-  void CallActuatorCST(const fcat_msgs::msg::ActuatorCstCmd& cst_cmd);
-  void CallActuatorProfPos(const fcat_msgs::msg::ActuatorProfPosCmd& prof_pos_cmd);
+  void CallActuatorCSP(const fcat_msgs::msg::ActuatorCspCmd &csp_cmd, double t);
+  void CallActuatorCSV(const fcat_msgs::msg::ActuatorCsvCmd &csv_cmd);
+  void CallActuatorCST(const fcat_msgs::msg::ActuatorCstCmd &cst_cmd);
+  void CallActuatorProfPos(const fcat_msgs::msg::ActuatorProfPosCmd &prof_pos_cmd);
 
   /////////////////////////////////////
   /////// Topic Callbacks //////////
@@ -227,7 +231,7 @@ class Fcat : public FcatNode {
 
   void PidActivateCmdCb(const std::shared_ptr<fcat_msgs::msg::PidActivateCmd> msg);
 
-  rcl_interfaces::msg::SetParametersResult SetParametersCb(const std::vector<rclcpp::Parameter>&);
+  rcl_interfaces::msg::SetParametersResult SetParametersCb(const std::vector<rclcpp::Parameter> &);
 
   ////////////////
   // Publishers //
@@ -467,4 +471,4 @@ class Fcat : public FcatNode {
   bool reset_in_progress_ = false;
   std::vector<rclcpp::node_interfaces::OnSetParametersCallbackHandle::SharedPtr> param_cb_handles_;
 };
-#endif
+#endif  // FCAT_HPP_

@@ -1,10 +1,12 @@
-#include "fcat/fcat_srvs.hpp"
+// Copyright 2021 California Institute of Technology
+
+#include "fcat_srvs.hpp"
 
 #include <chrono>
 #include <cstdio>
 
 #include "fastcat/jsd/actuator.h"
-#include "fcat/fcat_utils.hpp"
+#include "fcat_utils.hpp"
 #include "jsd/jsd_print.h"
 #include "rcl_interfaces/msg/floating_point_range.hpp"
 #include "rcl_interfaces/msg/integer_range.hpp"
@@ -430,21 +432,21 @@ bool FcatSrvs::WaitForSdoResponse(std::string& message, uint16_t app_id) {
       bool success = async_sdo_response_msg_.success;
 
       if (!success) {
-        sprintf(print_str,
-                "SDO Response Failed {Name:(%s) Index:(0x%x)"
-                " Subindex:(%u) Data:(%s) DataType:(%s) AppId:(%u)}",
-                async_sdo_response_msg_.device_name.c_str(), async_sdo_response_msg_.sdo_index,
-                async_sdo_response_msg_.sdo_subindex, async_sdo_response_msg_.data.c_str(),
-                async_sdo_response_msg_.data_type.c_str(), async_sdo_response_msg_.app_id);
+        snprintf(print_str, sizeof(print_str),
+                 "SDO Response Failed {Name:(%s) Index:(0x%x)"
+                 " Subindex:(%u) Data:(%s) DataType:(%s) AppId:(%u)}",
+                 async_sdo_response_msg_.device_name.c_str(), async_sdo_response_msg_.sdo_index,
+                 async_sdo_response_msg_.sdo_subindex, async_sdo_response_msg_.data.c_str(),
+                 async_sdo_response_msg_.data_type.c_str(), async_sdo_response_msg_.app_id);
         message = print_str;
         RCLCPP_WARN(this->get_logger(), "%s", print_str);
       } else {
-        sprintf(print_str,
-                "SDO Response Success {Name:(%s) Index:(0x%x)"
-                " Subindex:(%u) Data:(%s) DataType:(%s) AppId:(%u)}",
-                async_sdo_response_msg_.device_name.c_str(), async_sdo_response_msg_.sdo_index,
-                async_sdo_response_msg_.sdo_subindex, async_sdo_response_msg_.data.c_str(),
-                async_sdo_response_msg_.data_type.c_str(), async_sdo_response_msg_.app_id);
+        snprintf(print_str, sizeof(print_str),
+                 "SDO Response Success {Name:(%s) Index:(0x%x)"
+                 " Subindex:(%u) Data:(%s) DataType:(%s) AppId:(%u)}",
+                 async_sdo_response_msg_.device_name.c_str(), async_sdo_response_msg_.sdo_index,
+                 async_sdo_response_msg_.sdo_subindex, async_sdo_response_msg_.data.c_str(),
+                 async_sdo_response_msg_.data_type.c_str(), async_sdo_response_msg_.app_id);
         message = print_str;
         RCLCPP_INFO(this->get_logger(), "%s", print_str);
       }
@@ -455,10 +457,10 @@ bool FcatSrvs::WaitForSdoResponse(std::string& message, uint16_t app_id) {
   }
 
   // if here, runout timer has expired
-  sprintf(print_str,
-          "SDO Runout timer expired for app_id:(%u). "
-          "Parameter 'sdo_wait_duration_sec' is set to (%lf)",
-          app_id, sdo_wait_duration_sec);
+  snprintf(print_str, sizeof(print_str),
+           "SDO Runout timer expired for app_id:(%u). "
+           "Parameter 'sdo_wait_duration_sec' is set to (%lf)",
+           app_id, sdo_wait_duration_sec);
   message = print_str;
   RCLCPP_WARN(this->get_logger(), "%s", print_str);
   return false;
@@ -709,8 +711,8 @@ void FcatSrvs::AsyncSdoWriteSrvCb(
   // 1) Parse input args
   uint16_t parsed_sdo_index = 0;
   if (!HexOrDecStrToNum(request->sdo_index, parsed_sdo_index)) {
-    sprintf(print_str, "Invalid SDO index string:(%s) conversion to U16",
-            request->sdo_index.c_str());
+    snprintf(print_str, sizeof(print_str), "Invalid SDO index string:(%s) conversion to U16",
+             request->sdo_index.c_str());
 
     response->message = print_str;
     RCLCPP_WARN(this->get_logger(), "%s", print_str);
@@ -719,10 +721,10 @@ void FcatSrvs::AsyncSdoWriteSrvCb(
   }
 
   if (JSD_SDO_DATA_UNSPECIFIED == jsd_sdo_data_type_from_string(request->data_type)) {
-    sprintf(print_str,
-            "Invalid SDO Write data_type:(%s) Must be one of "
-            "{'I8', 'I16', 'I32', 'I64', 'F32', 'U8', 'U16', 'U32', 'U64'}",
-            request->data_type.c_str());
+    snprintf(print_str, sizeof(print_str),
+             "Invalid SDO Write data_type:(%s) Must be one of "
+             "{'I8', 'I16', 'I32', 'I64', 'F32', 'U8', 'U16', 'U32', 'U64'}",
+             request->data_type.c_str());
     response->message = print_str;
     RCLCPP_WARN(this->get_logger(), "%s", print_str);
     return;
@@ -760,8 +762,8 @@ void FcatSrvs::AsyncSdoReadSrvCb(
   // 1) Parse input args
   uint16_t parsed_sdo_index = 0;
   if (!HexOrDecStrToNum(request->sdo_index, parsed_sdo_index)) {
-    sprintf(print_str, "Invalid SDO index string:(%s) conversion to U16",
-            request->sdo_index.c_str());
+    snprintf(print_str, sizeof(print_str), "Invalid SDO index string:(%s) conversion to U16",
+             request->sdo_index.c_str());
 
     response->message = print_str;
     RCLCPP_WARN(this->get_logger(), "%s", print_str);
@@ -769,10 +771,10 @@ void FcatSrvs::AsyncSdoReadSrvCb(
   }
 
   if (JSD_SDO_DATA_UNSPECIFIED == jsd_sdo_data_type_from_string(request->data_type)) {
-    sprintf(print_str,
-            "Invalid SDO Read data_type:(%s) Must be one of "
-            "{'I8', 'I16', 'I32', 'I64', 'F32', 'U8', 'U16', 'U32', 'U64'}",
-            request->data_type.c_str());
+    snprintf(print_str, sizeof(print_str),
+             "Invalid SDO Read data_type:(%s) Must be one of "
+             "{'I8', 'I16', 'I32', 'I64', 'F32', 'U8', 'U16', 'U32', 'U64'}",
+             request->data_type.c_str());
 
     response->message = print_str;
     RCLCPP_WARN(this->get_logger(), "%s", print_str);
@@ -809,7 +811,8 @@ void FcatSrvs::TlcWriteSrvCb(
   // 1) Parse input args
   uint16_t parsed_sdo_index = 0;
   if (!TlcStrToNum(request->tlc, parsed_sdo_index)) {
-    sprintf(print_str, "Invalid TLC string:(%s) conversion to SDO", request->tlc.c_str());
+    snprintf(print_str, sizeof(print_str), "Invalid TLC string:(%s) conversion to SDO",
+             request->tlc.c_str());
 
     response->message = print_str;
     RCLCPP_WARN(this->get_logger(), "%s", print_str);
@@ -817,10 +820,10 @@ void FcatSrvs::TlcWriteSrvCb(
   }
 
   if (JSD_SDO_DATA_UNSPECIFIED == jsd_sdo_data_type_from_string(request->data_type)) {
-    sprintf(print_str,
-            "Invalid SDO Write data_type:(%s) Must be one of "
-            "{'I8', 'I16', 'I32', 'I64', 'F32', 'U8', 'U16', 'U32', 'U64'}",
-            request->data_type.c_str());
+    snprintf(print_str, sizeof(print_str),
+             "Invalid SDO Write data_type:(%s) Must be one of "
+             "{'I8', 'I16', 'I32', 'I64', 'F32', 'U8', 'U16', 'U32', 'U64'}",
+             request->data_type.c_str());
     response->message = print_str;
     RCLCPP_WARN(this->get_logger(), "%s", print_str);
 
@@ -858,7 +861,8 @@ void FcatSrvs::TlcReadSrvCb(const std::shared_ptr<fcat_msgs::srv::TlcReadService
   // 1) Parse input args
   uint16_t parsed_sdo_index = 0;
   if (!TlcStrToNum(request->tlc, parsed_sdo_index)) {
-    sprintf(print_str, "Invalid TLC string:(%s) conversion to SDO", request->tlc.c_str());
+    snprintf(print_str, sizeof(print_str), "Invalid TLC string:(%s) conversion to SDO",
+             request->tlc.c_str());
 
     response->message = print_str;
     RCLCPP_WARN(this->get_logger(), "%s", print_str);
@@ -866,10 +870,10 @@ void FcatSrvs::TlcReadSrvCb(const std::shared_ptr<fcat_msgs::srv::TlcReadService
   }
 
   if (JSD_SDO_DATA_UNSPECIFIED == jsd_sdo_data_type_from_string(request->data_type)) {
-    sprintf(print_str,
-            "Invalid SDO Read data_type:(%s) Must be one of "
-            "{'I8', 'I16', 'I32', 'I64', 'F32', 'U8', 'U16', 'U32', 'U64'}",
-            request->data_type.c_str());
+    snprintf(print_str, sizeof(print_str),
+             "Invalid SDO Read data_type:(%s) Must be one of "
+             "{'I8', 'I16', 'I32', 'I64', 'F32', 'U8', 'U16', 'U32', 'U64'}",
+             request->data_type.c_str());
 
     response->message = print_str;
     RCLCPP_WARN(this->get_logger(), "%s", print_str);

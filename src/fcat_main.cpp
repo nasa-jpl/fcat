@@ -1,3 +1,5 @@
+// Copyright 2021 California Institute of Technology
+
 #include <sched.h>
 #include <sys/types.h>
 #include <unistd.h>
@@ -5,7 +7,7 @@
 #include <chrono>
 #include <thread>
 
-#include "fcat/fcat.hpp"
+#include "fcat.hpp"
 #include "rclcpp/rclcpp.hpp"
 
 int main(int argc, char* argv[]) {

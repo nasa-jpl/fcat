@@ -1,16 +1,17 @@
-#include "fcat/fcat_srvs.hpp"
-#include "rclcpp/rclcpp.hpp"
+// Copyright 2021 California Institute of Technology
+
 #include <sched.h>
 #include <sys/types.h>
 #include <unistd.h>
 
-int main(int argc, char* argv[])
-{
+#include "fcat_srvs.hpp"
+#include "rclcpp/rclcpp.hpp"
+
+int main(int argc, char* argv[]) {
   rclcpp::init(argc, argv);
 
-  rclcpp::executors::MultiThreadedExecutor executor(
-    rclcpp::ExecutorOptions(),  // Default options
-    2                           // Number of threads
+  rclcpp::executors::MultiThreadedExecutor executor(rclcpp::ExecutorOptions(),  // Default options
+                                                    2                           // Number of threads
   );
 
   auto node = std::make_shared<FcatSrvs>();

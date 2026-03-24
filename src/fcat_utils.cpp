@@ -1,12 +1,14 @@
+// Copyright 2021 California Institute of Technology
+
 #include "fcat_utils.hpp"
+
+#include <cinttypes>
+#include <cstdio>
 
 #include "jsd/jsd_print.h"
 
-#include <cstdio>
-
 fcat_msgs::msg::ActuatorState ActuatorStateToMsg(
-  std::shared_ptr<const fastcat::DeviceState> state)
-{
+    std::shared_ptr<const fastcat::DeviceState> state) {
   auto msg = fcat_msgs::msg::ActuatorState();
 
   if (state->type == fastcat::GOLD_ACTUATOR_STATE) {
@@ -19,10 +21,8 @@ fcat_msgs::msg::ActuatorState ActuatorStateToMsg(
     msg.cmd_velocity = state->gold_actuator_state.cmd_velocity;
     msg.cmd_current = state->gold_actuator_state.cmd_current;
     msg.cmd_max_current = state->gold_actuator_state.cmd_max_current;
-    msg.egd_state_machine_state =
-      state->gold_actuator_state.elmo_state_machine_state;
-    msg.egd_mode_of_operation =
-      state->gold_actuator_state.elmo_mode_of_operation;
+    msg.egd_state_machine_state = state->gold_actuator_state.elmo_state_machine_state;
+    msg.egd_mode_of_operation = state->gold_actuator_state.elmo_mode_of_operation;
     msg.sto_engaged = state->gold_actuator_state.sto_engaged;
     msg.hall_state = state->gold_actuator_state.hall_state;
     msg.target_reached = state->gold_actuator_state.target_reached;
@@ -35,8 +35,7 @@ fcat_msgs::msg::ActuatorState ActuatorStateToMsg(
     msg.drive_temperature = state->gold_actuator_state.drive_temperature;
     msg.egd_actual_position = state->gold_actuator_state.elmo_actual_position;
     msg.egd_cmd_position = state->gold_actuator_state.elmo_cmd_position;
-    msg.actuator_state_machine_state =
-      state->gold_actuator_state.actuator_state_machine_state;
+    msg.actuator_state_machine_state = state->gold_actuator_state.actuator_state_machine_state;
   } else if (state->type == fastcat::PLATINUM_ACTUATOR_STATE) {
     msg.read_time = state->time;
     msg.actual_position = state->platinum_actuator_state.actual_position;
@@ -47,10 +46,8 @@ fcat_msgs::msg::ActuatorState ActuatorStateToMsg(
     msg.cmd_velocity = state->platinum_actuator_state.cmd_velocity;
     msg.cmd_current = state->platinum_actuator_state.cmd_current;
     msg.cmd_max_current = state->platinum_actuator_state.cmd_max_current;
-    msg.egd_state_machine_state =
-      state->platinum_actuator_state.elmo_state_machine_state;
-    msg.egd_mode_of_operation =
-      state->platinum_actuator_state.elmo_mode_of_operation;
+    msg.egd_state_machine_state = state->platinum_actuator_state.elmo_state_machine_state;
+    msg.egd_mode_of_operation = state->platinum_actuator_state.elmo_mode_of_operation;
     msg.sto_engaged = state->platinum_actuator_state.sto_engaged;
     msg.hall_state = state->platinum_actuator_state.hall_state;
     msg.target_reached = state->platinum_actuator_state.target_reached;
@@ -61,19 +58,15 @@ fcat_msgs::msg::ActuatorState ActuatorStateToMsg(
     msg.emcy_error_code = state->platinum_actuator_state.emcy_error_code;
     msg.bus_voltage = state->platinum_actuator_state.bus_voltage;
     msg.drive_temperature = state->platinum_actuator_state.drive_temperature;
-    msg.egd_actual_position =
-      state->platinum_actuator_state.elmo_actual_position;
+    msg.egd_actual_position = state->platinum_actuator_state.elmo_actual_position;
     msg.egd_cmd_position = state->platinum_actuator_state.elmo_cmd_position;
-    msg.actuator_state_machine_state =
-      state->platinum_actuator_state.actuator_state_machine_state;
+    msg.actuator_state_machine_state = state->platinum_actuator_state.actuator_state_machine_state;
   }
 
   return msg;
 }
 
-fcat_msgs::msg::EgdState EgdStateToMsg(
-  std::shared_ptr<const fastcat::DeviceState> state)
-{
+fcat_msgs::msg::EgdState EgdStateToMsg(std::shared_ptr<const fastcat::DeviceState> state) {
   auto msg = fcat_msgs::msg::EgdState();
 
   msg.read_time = state->time;
@@ -117,9 +110,7 @@ fcat_msgs::msg::EgdState EgdStateToMsg(
   return msg;
 }
 
-fcat_msgs::msg::El1008State El1008StateToMsg(
-  std::shared_ptr<const fastcat::DeviceState> state)
-{
+fcat_msgs::msg::El1008State El1008StateToMsg(std::shared_ptr<const fastcat::DeviceState> state) {
   auto msg = fcat_msgs::msg::El1008State();
 
   msg.read_time = state->time;
@@ -135,9 +126,7 @@ fcat_msgs::msg::El1008State El1008StateToMsg(
   return msg;
 }
 
-fcat_msgs::msg::El2124State El2124StateToMsg(
-  std::shared_ptr<const fastcat::DeviceState> state)
-{
+fcat_msgs::msg::El2124State El2124StateToMsg(std::shared_ptr<const fastcat::DeviceState> state) {
   auto msg = fcat_msgs::msg::El2124State();
 
   msg.read_time = state->time;
@@ -149,9 +138,7 @@ fcat_msgs::msg::El2124State El2124StateToMsg(
   return msg;
 }
 
-fcat_msgs::msg::El2809State El2809StateToMsg(
-  std::shared_ptr<const fastcat::DeviceState> state)
-{
+fcat_msgs::msg::El2809State El2809StateToMsg(std::shared_ptr<const fastcat::DeviceState> state) {
   auto msg = fcat_msgs::msg::El2809State();
 
   msg.read_time = state->time;
@@ -175,45 +162,39 @@ fcat_msgs::msg::El2809State El2809StateToMsg(
   return msg;
 }
 
-fcat_msgs::msg::El2798State El2798StateToMsg(
-    std::shared_ptr<const fastcat::DeviceState> state)
-{
+fcat_msgs::msg::El2798State El2798StateToMsg(std::shared_ptr<const fastcat::DeviceState> state) {
   auto msg = fcat_msgs::msg::El2798State();
 
-  msg.read_time  = state->time;
-  msg.level_ch1  = state->el2798_state.level_ch1;
-  msg.level_ch2  = state->el2798_state.level_ch2;
-  msg.level_ch3  = state->el2798_state.level_ch3;
-  msg.level_ch4  = state->el2798_state.level_ch4;
-  msg.level_ch5  = state->el2798_state.level_ch5;
-  msg.level_ch6  = state->el2798_state.level_ch6;
-  msg.level_ch7  = state->el2798_state.level_ch7;
-  msg.level_ch8  = state->el2798_state.level_ch8;
+  msg.read_time = state->time;
+  msg.level_ch1 = state->el2798_state.level_ch1;
+  msg.level_ch2 = state->el2798_state.level_ch2;
+  msg.level_ch3 = state->el2798_state.level_ch3;
+  msg.level_ch4 = state->el2798_state.level_ch4;
+  msg.level_ch5 = state->el2798_state.level_ch5;
+  msg.level_ch6 = state->el2798_state.level_ch6;
+  msg.level_ch7 = state->el2798_state.level_ch7;
+  msg.level_ch8 = state->el2798_state.level_ch8;
 
   return msg;
 }
 
-fcat_msgs::msg::El2828State El2828StateToMsg(
-    std::shared_ptr<const fastcat::DeviceState> state)
-{
+fcat_msgs::msg::El2828State El2828StateToMsg(std::shared_ptr<const fastcat::DeviceState> state) {
   auto msg = fcat_msgs::msg::El2828State();
 
-  msg.read_time  = state->time;
-  msg.level_ch1  = state->el2828_state.level_ch1;
-  msg.level_ch2  = state->el2828_state.level_ch2;
-  msg.level_ch3  = state->el2828_state.level_ch3;
-  msg.level_ch4  = state->el2828_state.level_ch4;
-  msg.level_ch5  = state->el2828_state.level_ch5;
-  msg.level_ch6  = state->el2828_state.level_ch6;
-  msg.level_ch7  = state->el2828_state.level_ch7;
-  msg.level_ch8  = state->el2828_state.level_ch8;
+  msg.read_time = state->time;
+  msg.level_ch1 = state->el2828_state.level_ch1;
+  msg.level_ch2 = state->el2828_state.level_ch2;
+  msg.level_ch3 = state->el2828_state.level_ch3;
+  msg.level_ch4 = state->el2828_state.level_ch4;
+  msg.level_ch5 = state->el2828_state.level_ch5;
+  msg.level_ch6 = state->el2828_state.level_ch6;
+  msg.level_ch7 = state->el2828_state.level_ch7;
+  msg.level_ch8 = state->el2828_state.level_ch8;
 
   return msg;
 }
 
-fcat_msgs::msg::El3104State El3104StateToMsg(
-  std::shared_ptr<const fastcat::DeviceState> state)
-{
+fcat_msgs::msg::El3104State El3104StateToMsg(std::shared_ptr<const fastcat::DeviceState> state) {
   auto msg = fcat_msgs::msg::El3104State();
 
   msg.read_time = state->time;
@@ -229,9 +210,7 @@ fcat_msgs::msg::El3104State El3104StateToMsg(
   return msg;
 }
 
-fcat_msgs::msg::El3162State El3162StateToMsg(
-  std::shared_ptr<const fastcat::DeviceState> state)
-{
+fcat_msgs::msg::El3162State El3162StateToMsg(std::shared_ptr<const fastcat::DeviceState> state) {
   auto msg = fcat_msgs::msg::El3162State();
 
   msg.read_time = state->time;
@@ -243,9 +222,7 @@ fcat_msgs::msg::El3162State El3162StateToMsg(
   return msg;
 }
 
-fcat_msgs::msg::El3202State El3202StateToMsg(
-  std::shared_ptr<const fastcat::DeviceState> state)
-{
+fcat_msgs::msg::El3202State El3202StateToMsg(std::shared_ptr<const fastcat::DeviceState> state) {
   auto msg = fcat_msgs::msg::El3202State();
 
   msg.read_time = state->time;
@@ -257,9 +234,7 @@ fcat_msgs::msg::El3202State El3202StateToMsg(
   return msg;
 }
 
-fcat_msgs::msg::El3208State El3208StateToMsg(
-  std::shared_ptr<const fastcat::DeviceState> state)
-{
+fcat_msgs::msg::El3208State El3208StateToMsg(std::shared_ptr<const fastcat::DeviceState> state) {
   auto msg = fcat_msgs::msg::El3208State();
 
   msg.read_time = state->time;
@@ -283,9 +258,7 @@ fcat_msgs::msg::El3208State El3208StateToMsg(
   return msg;
 }
 
-fcat_msgs::msg::El3314State El3314StateToMsg(
-  std::shared_ptr<const fastcat::DeviceState> state)
-{
+fcat_msgs::msg::El3314State El3314StateToMsg(std::shared_ptr<const fastcat::DeviceState> state) {
   auto msg = fcat_msgs::msg::El3314State();
 
   msg.read_time = state->time;
@@ -301,9 +274,7 @@ fcat_msgs::msg::El3314State El3314StateToMsg(
   return msg;
 }
 
-fcat_msgs::msg::El3318State El3318StateToMsg(
-  std::shared_ptr<const fastcat::DeviceState> state)
-{
+fcat_msgs::msg::El3318State El3318StateToMsg(std::shared_ptr<const fastcat::DeviceState> state) {
   auto msg = fcat_msgs::msg::El3318State();
 
   msg.read_time = state->time;
@@ -327,9 +298,7 @@ fcat_msgs::msg::El3318State El3318StateToMsg(
   return msg;
 }
 
-fcat_msgs::msg::El3602State El3602StateToMsg(
-  std::shared_ptr<const fastcat::DeviceState> state)
-{
+fcat_msgs::msg::El3602State El3602StateToMsg(std::shared_ptr<const fastcat::DeviceState> state) {
   auto msg = fcat_msgs::msg::El3602State();
 
   msg.read_time = state->time;
@@ -341,9 +310,7 @@ fcat_msgs::msg::El3602State El3602StateToMsg(
   return msg;
 }
 
-fcat_msgs::msg::El4102State El4102StateToMsg(
-  std::shared_ptr<const fastcat::DeviceState> state)
-{
+fcat_msgs::msg::El4102State El4102StateToMsg(std::shared_ptr<const fastcat::DeviceState> state) {
   auto msg = fcat_msgs::msg::El4102State();
 
   msg.read_time = state->time;
@@ -353,27 +320,23 @@ fcat_msgs::msg::El4102State El4102StateToMsg(
   return msg;
 }
 
-fcat_msgs::msg::El5042State El5042StateToMsg(
-    std::shared_ptr<const fastcat::DeviceState> state)
-{
+fcat_msgs::msg::El5042State El5042StateToMsg(std::shared_ptr<const fastcat::DeviceState> state) {
   auto msg = fcat_msgs::msg::El5042State();
 
-  msg.read_time    = state->time;
+  msg.read_time = state->time;
   msg.position_ch1 = state->el5042_state.position_ch1;
-  msg.warning_ch1  = state->el5042_state.warning_ch1;
-  msg.error_ch1    = state->el5042_state.error_ch1;
-  msg.ready_ch1    = state->el5042_state.ready_ch1;
+  msg.warning_ch1 = state->el5042_state.warning_ch1;
+  msg.error_ch1 = state->el5042_state.error_ch1;
+  msg.ready_ch1 = state->el5042_state.ready_ch1;
   msg.position_ch2 = state->el5042_state.position_ch2;
-  msg.warning_ch2  = state->el5042_state.warning_ch2;
-  msg.error_ch2    = state->el5042_state.error_ch2;
-  msg.ready_ch2    = state->el5042_state.ready_ch2;
+  msg.warning_ch2 = state->el5042_state.warning_ch2;
+  msg.error_ch2 = state->el5042_state.error_ch2;
+  msg.ready_ch2 = state->el5042_state.ready_ch2;
 
   return msg;
 }
 
-fcat_msgs::msg::Ild1900State Ild1900StateToMsg(
-  std::shared_ptr<const fastcat::DeviceState> state)
-{
+fcat_msgs::msg::Ild1900State Ild1900StateToMsg(std::shared_ptr<const fastcat::DeviceState> state) {
   auto msg = fcat_msgs::msg::Ild1900State();
 
   msg.read_time = state->time;
@@ -388,8 +351,7 @@ fcat_msgs::msg::Ild1900State Ild1900StateToMsg(
 }
 
 fcat_msgs::msg::CommanderState CommanderStateToMsg(
-  std::shared_ptr<const fastcat::DeviceState> state)
-{
+    std::shared_ptr<const fastcat::DeviceState> state) {
   auto msg = fcat_msgs::msg::CommanderState();
 
   msg.read_time = state->time;
@@ -399,8 +361,7 @@ fcat_msgs::msg::CommanderState CommanderStateToMsg(
 }
 
 fcat_msgs::msg::ConditionalState ConditionalStateToMsg(
-  std::shared_ptr<const fastcat::DeviceState> state)
-{
+    std::shared_ptr<const fastcat::DeviceState> state) {
   auto msg = fcat_msgs::msg::ConditionalState();
 
   msg.read_time = state->time;
@@ -409,9 +370,7 @@ fcat_msgs::msg::ConditionalState ConditionalStateToMsg(
   return msg;
 }
 
-fcat_msgs::msg::FaulterState FaulterStateToMsg(
-  std::shared_ptr<const fastcat::DeviceState> state)
-{
+fcat_msgs::msg::FaulterState FaulterStateToMsg(std::shared_ptr<const fastcat::DeviceState> state) {
   auto msg = fcat_msgs::msg::FaulterState();
 
   msg.read_time = state->time;
@@ -421,9 +380,7 @@ fcat_msgs::msg::FaulterState FaulterStateToMsg(
   return msg;
 }
 
-fcat_msgs::msg::FilterState FilterStateToMsg(
-  std::shared_ptr<const fastcat::DeviceState> state)
-{
+fcat_msgs::msg::FilterState FilterStateToMsg(std::shared_ptr<const fastcat::DeviceState> state) {
   auto msg = fcat_msgs::msg::FilterState();
 
   msg.read_time = state->time;
@@ -432,9 +389,7 @@ fcat_msgs::msg::FilterState FilterStateToMsg(
   return msg;
 }
 
-fcat_msgs::msg::FtsState FtsStateToMsg(
-  std::shared_ptr<const fastcat::DeviceState> state)
-{
+fcat_msgs::msg::FtsState FtsStateToMsg(std::shared_ptr<const fastcat::DeviceState> state) {
   auto msg = fcat_msgs::msg::FtsState();
 
   msg.read_time = state->time;
@@ -455,8 +410,7 @@ fcat_msgs::msg::FtsState FtsStateToMsg(
 }
 
 fcat_msgs::msg::FunctionState FunctionStateToMsg(
-  std::shared_ptr<const fastcat::DeviceState> state)
-{
+    std::shared_ptr<const fastcat::DeviceState> state) {
   auto msg = fcat_msgs::msg::FunctionState();
 
   msg.read_time = state->time;
@@ -465,9 +419,7 @@ fcat_msgs::msg::FunctionState FunctionStateToMsg(
   return msg;
 }
 
-fcat_msgs::msg::PidState PidStateToMsg(
-  std::shared_ptr<const fastcat::DeviceState> state)
-{
+fcat_msgs::msg::PidState PidStateToMsg(std::shared_ptr<const fastcat::DeviceState> state) {
   auto msg = fcat_msgs::msg::PidState();
 
   msg.read_time = state->time;
@@ -481,8 +433,7 @@ fcat_msgs::msg::PidState PidStateToMsg(
 }
 
 fcat_msgs::msg::SaturationState SaturationStateToMsg(
-  std::shared_ptr<const fastcat::DeviceState> state)
-{
+    std::shared_ptr<const fastcat::DeviceState> state) {
   auto msg = fcat_msgs::msg::SaturationState();
 
   msg.read_time = state->time;
@@ -492,8 +443,7 @@ fcat_msgs::msg::SaturationState SaturationStateToMsg(
 }
 
 fcat_msgs::msg::SchmittTriggerState SchmittTriggerStateToMsg(
-  std::shared_ptr<const fastcat::DeviceState> state)
-{
+    std::shared_ptr<const fastcat::DeviceState> state) {
   auto msg = fcat_msgs::msg::SchmittTriggerState();
 
   msg.read_time = state->time;
@@ -503,8 +453,7 @@ fcat_msgs::msg::SchmittTriggerState SchmittTriggerStateToMsg(
 }
 
 fcat_msgs::msg::SignalGeneratorState SignalGeneratorStateToMsg(
-  std::shared_ptr<const fastcat::DeviceState> state)
-{
+    std::shared_ptr<const fastcat::DeviceState> state) {
   auto msg = fcat_msgs::msg::SignalGeneratorState();
 
   msg.read_time = state->time;
@@ -514,8 +463,7 @@ fcat_msgs::msg::SignalGeneratorState SignalGeneratorStateToMsg(
 }
 
 fcat_msgs::msg::LinearInterpolationState LinearInterpolationStateToMsg(
-  std::shared_ptr<const fastcat::DeviceState> state)
-{
+    std::shared_ptr<const fastcat::DeviceState> state) {
   auto msg = fcat_msgs::msg::LinearInterpolationState();
 
   msg.read_time = state->time;
@@ -526,8 +474,7 @@ fcat_msgs::msg::LinearInterpolationState LinearInterpolationStateToMsg(
 }
 
 fcat_msgs::msg::ThreeNodeThermalModelState ThreeNodeThermalModelStateToMsg(
-  std::shared_ptr<const fastcat::DeviceState> state)
-{
+    std::shared_ptr<const fastcat::DeviceState> state) {
   auto msg = fcat_msgs::msg::ThreeNodeThermalModelState();
 
   msg.read_time = state->time;
@@ -539,18 +486,16 @@ fcat_msgs::msg::ThreeNodeThermalModelState ThreeNodeThermalModelStateToMsg(
   return msg;
 }
 
-bool HexOrDecStrToNum(std::string& str, uint16_t& number)
-{
+bool HexOrDecStrToNum(std::string& str, uint16_t& number) {
   char* end;
   bool success = false;
 
-  unsigned long int ulnum = strtoul(str.c_str(), &end, 0);
+  uint64_t ulnum = strtoul(str.c_str(), &end, 0);
 
   if (*end == '\0') {
-    fprintf(
-      stderr,
-      "HexOrDecStrToNum successfully parsed string (%s) to (%lu or 0x%lx)",
-      str.c_str(), ulnum, ulnum);
+    fprintf(stderr,
+            "HexOrDecStrToNum successfully parsed string (%s) to (%" PRIu64 " or 0x%" PRIx64 ")",
+            str.c_str(), ulnum, ulnum);
     fprintf(stderr, "\n");
     number = static_cast<uint16_t>(ulnum);
     success = true;
@@ -562,39 +507,33 @@ bool HexOrDecStrToNum(std::string& str, uint16_t& number)
   return success;
 }
 
-bool TlcStrToNum(std::string& str, uint16_t& number)
-{
+bool TlcStrToNum(std::string& str, uint16_t& number) {
   if (str.size() != 2) {
-    fprintf(stderr, "TLC string: (%s) must be 2 chars. size: (%zu)\n",
-            str.c_str(), str.size());
+    fprintf(stderr, "TLC string: (%s) must be 2 chars. size: (%zu)\n", str.c_str(), str.size());
     return false;
   }
 
   if ((str[0] < 'A') || (str[0] > 'Z') || (str[1] < 'A') || (str[1] > 'Z')) {
-    fprintf(stderr, "TLC string: (%s) must be upper chars [A-Z]\n",
-            str.c_str());
+    fprintf(stderr, "TLC string: (%s) must be upper chars [A-Z]\n", str.c_str());
     return false;
   }
 
   number = 0x3000 + (26 * (str[0] - 65)) + (str[1] - 65);
 
   if (number < 0x3000 || number > 0x3FFF) {
-    fprintf(
-      stderr,
-      "TLC conversion is out of range: %s -> 0x%X not in "
-      "range (0x3000,0x3FFF)",
-      str.c_str(), number);
+    fprintf(stderr,
+            "TLC conversion is out of range: %s -> 0x%X not in "
+            "range (0x3000,0x3FFF)",
+            str.c_str(), number);
     fprintf(stderr, "\n");
     return false;
   }
 
-  fprintf(stderr, "Converted TLC string: (%s) to U16: (0x%X)\n",
-          str.c_str(), number);
+  fprintf(stderr, "Converted TLC string: (%s) to U16: (0x%X)\n", str.c_str(), number);
   return true;
 }
 
-jsd_sdo_data_type_t jsd_sdo_data_type_from_string(std::string& str)
-{
+jsd_sdo_data_type_t jsd_sdo_data_type_from_string(std::string& str) {
   jsd_sdo_data_type_t type = {};
 
   if (0 == str.compare("I8")) {
@@ -622,9 +561,7 @@ jsd_sdo_data_type_t jsd_sdo_data_type_from_string(std::string& str)
   return type;
 }
 
-jsd_sdo_data_t jsd_sdo_data_from_string(jsd_sdo_data_type_t& type,
-                                        std::string& str)
-{
+jsd_sdo_data_t jsd_sdo_data_from_string(jsd_sdo_data_type_t& type, std::string& str) {
   jsd_sdo_data_t data = {};
 
   switch (type) {
@@ -661,8 +598,7 @@ jsd_sdo_data_t jsd_sdo_data_from_string(jsd_sdo_data_type_t& type,
   return data;
 }
 
-std::string jsd_sdo_request_type_to_string(jsd_sdo_req_type_t req_type)
-{
+std::string jsd_sdo_request_type_to_string(jsd_sdo_req_type_t req_type) {
   switch (req_type) {
     case JSD_SDO_REQ_TYPE_READ:
       return "READ";
@@ -678,8 +614,7 @@ std::string jsd_sdo_request_type_to_string(jsd_sdo_req_type_t req_type)
   return "INVALID";
 }
 
-std::string jsd_sdo_data_type_to_string(jsd_sdo_data_type_t data_type)
-{
+std::string jsd_sdo_data_type_to_string(jsd_sdo_data_type_t data_type) {
   switch (data_type) {
     case JSD_SDO_DATA_I8:
       return "I8";
@@ -714,9 +649,7 @@ std::string jsd_sdo_data_type_to_string(jsd_sdo_data_type_t data_type)
   return "UNSPECIFIED";
 }
 
-std::string jsd_sdo_data_to_string(jsd_sdo_data_type_t data_type,
-                                   jsd_sdo_data_t data)
-{
+std::string jsd_sdo_data_to_string(jsd_sdo_data_type_t data_type, jsd_sdo_data_t data) {
   switch (data_type) {
     case JSD_SDO_DATA_I8:
       return std::to_string(data.as_i8);

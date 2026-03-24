@@ -1,3 +1,5 @@
+// Copyright 2021 California Institute of Technology
+
 #include <sched.h>
 #include <sys/types.h>
 #include <unistd.h>
@@ -5,12 +7,10 @@
 #include <chrono>
 #include <thread>
 
-#include "fcat/fcat.hpp"
-
+#include "fcat.hpp"
 #include "rclcpp/rclcpp.hpp"
 
-int main(int argc, char* argv[])
-{
+int main(int argc, char* argv[]) {
   rclcpp::init(argc, argv);
 
 #ifdef ROS2_FOXY
@@ -23,9 +23,8 @@ int main(int argc, char* argv[])
   // subscriptions periodically at run-time, which may intermittently delay the
   // main process loop; therefore it is recommended to use ROS2 humble or later
   // when running at higher loop rates
-  rclcpp::executors::MultiThreadedExecutor executor(
-    rclcpp::ExecutorOptions(),  // Default options
-    2                           // Number of threads
+  rclcpp::executors::MultiThreadedExecutor executor(rclcpp::ExecutorOptions(),  // Default options
+                                                    2                           // Number of threads
   );
   auto fcat_node = std::make_shared<Fcat>();
   executor.add_node(fcat_node);
@@ -42,18 +41,16 @@ int main(int argc, char* argv[])
 
   auto fcat_node = std::make_shared<Fcat>();
 
-  process_loop_executor.add_callback_group(
-    fcat_node->get_process_loop_callback_group(),
-    fcat_node->get_node_base_interface());
+  process_loop_executor.add_callback_group(fcat_node->get_process_loop_callback_group(),
+                                           fcat_node->get_node_base_interface());
 
   topic_executor.add_callback_group(
-    fcat_node->get_node_base_interface()->get_default_callback_group(),
-    fcat_node->get_node_base_interface());
+      fcat_node->get_node_base_interface()->get_default_callback_group(),
+      fcat_node->get_node_base_interface());
   topic_executor.add_callback_group(fcat_node->get_topic_callback_group(),
                                     fcat_node->get_node_base_interface());
 
-  auto process_loop_thread =
-    std::thread([&]() { process_loop_executor.spin(); });
+  auto process_loop_thread = std::thread([&]() { process_loop_executor.spin(); });
   auto topic_thread = std::thread([&]() { topic_executor.spin(); });
 
   while (rclcpp::ok()) {

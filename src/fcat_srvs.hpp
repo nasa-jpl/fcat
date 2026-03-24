@@ -1,9 +1,17 @@
-#ifndef FCAT__FCAT_SERVICES_HPP_
-#define FCAT__FCAT_SERVICES_HPP_
+// Copyright 2021 California Institute of Technology
+
+#ifndef FCAT_SRVS_HPP_
+#define FCAT_SRVS_HPP_
+
+#include <sys/time.h>
 
 #include <any>
-#include <sys/time.h>
+#include <memory>
 #include <queue>
+#include <string>
+#include <unordered_map>
+#include <vector>
+
 #include "rclcpp/rclcpp.hpp"
 
 // Service messages
@@ -36,8 +44,7 @@
 #include "fcat_msgs/msg/module_state.hpp"
 #include "fcat_msgs/msg/pid_states.hpp"
 
-class FcatSrvs : public rclcpp::Node
-{
+class FcatSrvs : public rclcpp::Node {
  private:
   typedef enum {
     FCAT_SRV_STATE_IDLE_CHECKING,
@@ -45,6 +52,7 @@ class FcatSrvs : public rclcpp::Node
   } FcatSrvState;
 
  public:
+  // NOLINTNEXTLINE(runtime/explicit)
   FcatSrvs(const rclcpp::NodeOptions& options = rclcpp::NodeOptions());
 
  private:
@@ -53,8 +61,7 @@ class FcatSrvs : public rclcpp::Node
   static constexpr double liveliness_duration_sec_ = 1.0;
   static constexpr double loop_rate_hz_ = 100.0;
 
-  const rclcpp::QoS subscription_qos_ = 
-    rclcpp::QoS(subscription_queue_size_).best_effort();
+  const rclcpp::QoS subscription_qos_ = rclcpp::QoS(subscription_queue_size_).best_effort();
   const rclcpp::QoS services_qos_;
 
   void InitSubscribers();
@@ -62,13 +69,10 @@ class FcatSrvs : public rclcpp::Node
   void InitServices();
 
   // Fcat State Subscription Callbacks
-  void FcatModuleStateCb(
-    const std::shared_ptr<fcat_msgs::msg::ModuleState> msg);
-  void ActuatorStatesCb(
-    const std::shared_ptr<fcat_msgs::msg::ActuatorStates> msg);
+  void FcatModuleStateCb(const std::shared_ptr<fcat_msgs::msg::ModuleState> msg);
+  void ActuatorStatesCb(const std::shared_ptr<fcat_msgs::msg::ActuatorStates> msg);
   void PidStatesCb(const std::shared_ptr<fcat_msgs::msg::PidStates> msg);
-  void AsyncSdoResponseCb(
-    const std::shared_ptr<fcat_msgs::msg::AsyncSdoResponse> msg);
+  void AsyncSdoResponseCb(const std::shared_ptr<fcat_msgs::msg::AsyncSdoResponse> msg);
 
   // Helper functions
   bool ActuatorCmdPrechecks(std::string name, std::string& message);
@@ -79,80 +83,56 @@ class FcatSrvs : public rclcpp::Node
 
   // Commander Services and Callbacks
   void ActuatorProfPosSrvCb(
-    const std::shared_ptr<fcat_msgs::srv::ActuatorProfPosService::Request>
-      request,
-    std::shared_ptr<fcat_msgs::srv::ActuatorProfPosService::Response> response);
+      const std::shared_ptr<fcat_msgs::srv::ActuatorProfPosService::Request> request,
+      std::shared_ptr<fcat_msgs::srv::ActuatorProfPosService::Response> response);
 
   void ActuatorProfVelSrvCb(
-    const std::shared_ptr<fcat_msgs::srv::ActuatorProfVelService::Request>
-      request,
-    std::shared_ptr<fcat_msgs::srv::ActuatorProfVelService::Response> response);
+      const std::shared_ptr<fcat_msgs::srv::ActuatorProfVelService::Request> request,
+      std::shared_ptr<fcat_msgs::srv::ActuatorProfVelService::Response> response);
 
   void ActuatorProfTorqueSrvCb(
-    const std::shared_ptr<fcat_msgs::srv::ActuatorProfTorqueService::Request>
-      request,
-    std::shared_ptr<fcat_msgs::srv::ActuatorProfTorqueService::Response>
-      response);
+      const std::shared_ptr<fcat_msgs::srv::ActuatorProfTorqueService::Request> request,
+      std::shared_ptr<fcat_msgs::srv::ActuatorProfTorqueService::Response> response);
 
   void ActuatorCalibrateSrvCb(
-    const std::shared_ptr<fcat_msgs::srv::ActuatorCalibrateService::Request>
-      request,
-    std::shared_ptr<fcat_msgs::srv::ActuatorCalibrateService::Response>
-      response);
+      const std::shared_ptr<fcat_msgs::srv::ActuatorCalibrateService::Request> request,
+      std::shared_ptr<fcat_msgs::srv::ActuatorCalibrateService::Response> response);
 
   void ActuatorSetGainSchedulingModeSrvCb(
-    const std::shared_ptr<
-      fcat_msgs::srv::ActuatorSetGainSchedulingModeService::Request>
-      request,
-    std::shared_ptr<
-      fcat_msgs::srv::ActuatorSetGainSchedulingModeService::Response>
-      response);
+      const std::shared_ptr<fcat_msgs::srv::ActuatorSetGainSchedulingModeService::Request> request,
+      std::shared_ptr<fcat_msgs::srv::ActuatorSetGainSchedulingModeService::Response> response);
 
   void ActuatorSetUnitModeSrvCb(
-    const std::shared_ptr<fcat_msgs::srv::ActuatorSetUnitModeService::Request>
-      request,
-    std::shared_ptr<fcat_msgs::srv::ActuatorSetUnitModeService::Response>
-      response);
+      const std::shared_ptr<fcat_msgs::srv::ActuatorSetUnitModeService::Request> request,
+      std::shared_ptr<fcat_msgs::srv::ActuatorSetUnitModeService::Response> response);
 
-  void PidActivateSrvCb(
-    const std::shared_ptr<fcat_msgs::srv::PidActivateService::Request> request,
-    std::shared_ptr<fcat_msgs::srv::PidActivateService::Response> response);
+  void PidActivateSrvCb(const std::shared_ptr<fcat_msgs::srv::PidActivateService::Request> request,
+                        std::shared_ptr<fcat_msgs::srv::PidActivateService::Response> response);
 
   void AsyncSdoWriteSrvCb(
-    const std::shared_ptr<fcat_msgs::srv::AsyncSdoWriteService::Request>
-      request,
-    std::shared_ptr<fcat_msgs::srv::AsyncSdoWriteService::Response> response);
+      const std::shared_ptr<fcat_msgs::srv::AsyncSdoWriteService::Request> request,
+      std::shared_ptr<fcat_msgs::srv::AsyncSdoWriteService::Response> response);
 
   void AsyncSdoReadSrvCb(
-    const std::shared_ptr<fcat_msgs::srv::AsyncSdoReadService::Request> request,
-    std::shared_ptr<fcat_msgs::srv::AsyncSdoReadService::Response> response);
+      const std::shared_ptr<fcat_msgs::srv::AsyncSdoReadService::Request> request,
+      std::shared_ptr<fcat_msgs::srv::AsyncSdoReadService::Response> response);
 
-  void TlcWriteSrvCb(
-    const std::shared_ptr<fcat_msgs::srv::TlcWriteService::Request> request,
-    std::shared_ptr<fcat_msgs::srv::TlcWriteService::Response> response);
+  void TlcWriteSrvCb(const std::shared_ptr<fcat_msgs::srv::TlcWriteService::Request> request,
+                     std::shared_ptr<fcat_msgs::srv::TlcWriteService::Response> response);
 
-  void TlcReadSrvCb(
-    const std::shared_ptr<fcat_msgs::srv::TlcReadService::Request> request,
-    std::shared_ptr<fcat_msgs::srv::TlcReadService::Response> response);
+  void TlcReadSrvCb(const std::shared_ptr<fcat_msgs::srv::TlcReadService::Request> request,
+                    std::shared_ptr<fcat_msgs::srv::TlcReadService::Response> response);
 
  private:
   // Fcat Cmd Publishers
-  rclcpp::Publisher<fcat_msgs::msg::ActuatorProfPosCmd>::SharedPtr
-    act_prof_pos_pub_;
-  rclcpp::Publisher<fcat_msgs::msg::ActuatorProfVelCmd>::SharedPtr
-    act_prof_vel_pub_;
-  rclcpp::Publisher<fcat_msgs::msg::ActuatorProfTorqueCmd>::SharedPtr
-    act_prof_torque_pub_;
-  rclcpp::Publisher<fcat_msgs::msg::ActuatorCalibrateCmd>::SharedPtr
-    act_calibrate_pub_;
-  rclcpp::Publisher<fcat_msgs::msg::PidActivateCmd>::SharedPtr
-    pid_activate_pub_;
-  rclcpp::Publisher<fcat_msgs::msg::AsyncSdoWriteCmd>::SharedPtr
-    async_sdo_write_pub_;
-  rclcpp::Publisher<fcat_msgs::msg::AsyncSdoReadCmd>::SharedPtr
-    async_sdo_read_pub_;
-  rclcpp::Publisher<fcat_msgs::msg::ActuatorSetDigitalOutputCmd>::SharedPtr
-    act_digital_output_pub_;
+  rclcpp::Publisher<fcat_msgs::msg::ActuatorProfPosCmd>::SharedPtr act_prof_pos_pub_;
+  rclcpp::Publisher<fcat_msgs::msg::ActuatorProfVelCmd>::SharedPtr act_prof_vel_pub_;
+  rclcpp::Publisher<fcat_msgs::msg::ActuatorProfTorqueCmd>::SharedPtr act_prof_torque_pub_;
+  rclcpp::Publisher<fcat_msgs::msg::ActuatorCalibrateCmd>::SharedPtr act_calibrate_pub_;
+  rclcpp::Publisher<fcat_msgs::msg::PidActivateCmd>::SharedPtr pid_activate_pub_;
+  rclcpp::Publisher<fcat_msgs::msg::AsyncSdoWriteCmd>::SharedPtr async_sdo_write_pub_;
+  rclcpp::Publisher<fcat_msgs::msg::AsyncSdoReadCmd>::SharedPtr async_sdo_read_pub_;
+  rclcpp::Publisher<fcat_msgs::msg::ActuatorSetDigitalOutputCmd>::SharedPtr act_digital_output_pub_;
 
   fcat_msgs::msg::ModuleState fcat_module_state_msg_;
   fcat_msgs::msg::ActuatorStates actuator_states_msg_;
@@ -178,4 +158,4 @@ class FcatSrvs : public rclcpp::Node
   std::vector<std::any> subscriptions_;
 };
 
-#endif
+#endif  // FCAT_SRVS_HPP_

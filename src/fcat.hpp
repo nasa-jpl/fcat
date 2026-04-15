@@ -94,6 +94,9 @@
 
 using WrenchPublisher = rclcpp::Publisher<geometry_msgs::msg::WrenchStamped>;
 
+// enum for state machine states
+enum class FcatState { UNCONFIGURED, INACTIVE, ACTIVE, FINALIZED };
+
 class Fcat : public FcatNode {
  public:
   ~Fcat();
@@ -174,7 +177,9 @@ class Fcat : public FcatNode {
   /////////////////////////////////////
 
   void ResetCmdCb(const std::shared_ptr<std_msgs::msg::Empty> msg);
+  void Reset();
   void FaultCmdCb(const std::shared_ptr<std_msgs::msg::Empty> msg);
+  void Fault();
 
   void AsyncSdoReadCmdCb(const std::shared_ptr<fcat_msgs::msg::AsyncSdoReadCmd> msg);
   void AsyncSdoWriteCmdCb(const std::shared_ptr<fcat_msgs::msg::AsyncSdoWriteCmd> msg);
@@ -469,6 +474,7 @@ class Fcat : public FcatNode {
 
   size_t command_queue_size_ = 0;
   bool reset_in_progress_ = false;
+  FcatState fcat_state_ = FcatState::UNCONFIGURED;
   std::vector<rclcpp::node_interfaces::OnSetParametersCallbackHandle::SharedPtr> param_cb_handles_;
 };
 #endif  // FCAT_HPP_

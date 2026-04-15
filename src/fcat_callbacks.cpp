@@ -9,18 +9,44 @@
 #include "rclcpp/rclcpp.hpp"
 
 void Fcat::ResetCmdCb(const std::shared_ptr<std_msgs::msg::Empty> msg) {
-  reset_in_progress_ = true;
   fcat_manager_.ExecuteAllDeviceResets();
-  // FaultInterface::ResetCmdCb(msg); // TODO: use lifecyle nodes
-  reset_in_progress_ = false;
+  Reset(); // TODO: use lifecyle nodes
+}
+
+void Fcat::Reset() {
+  RCLCPP_INFO(this->get_logger(), "Resetting all devices on the bus");
+  if (fcat_state_ == FcatState::ACTIVE) {
+    RCLCPP_INFO(this->get_logger(), "Fcat already in ACTIVE state; Reset command will not cause state transition");
+  } else if (fcat_state_ == FcatState::INACTIVE) {
+    RCLCPP_INFO(this->get_logger(), "Transitioning from INACTIVE to ACTIVE state");
+    fcat_state_ = FcatState::ACTIVE;
+  } else {
+    RCLCPP_WARN(this->get_logger(),
+                "Reset command received, but FCAT is in state %d; no state transition "
+                "performed",
+                static_cast<int>(fcat_state_));
+  }
 }
 
 void Fcat::FaultCmdCb(const std::shared_ptr<std_msgs::msg::Empty> msg) {
-  (void)msg;
-  if (!reset_in_progress_) {
     fcat_manager_.ExecuteAllDeviceFaults();
-    // FaultInterface::FaultCmdCb(msg); // TODO: use lifecyle nodes
+    Fault(); // TODO: use lifecyle nodes
+}
+
+void Fcat::Fault() {
+  RCLCPP_INFO(this->get_logger(), "Faulting all devices on the bus");
+  if (fcat_state_ == FcatState::INACTIVE) {
+    RCLCPP_INFO(this->get_logger(), "Fcat already in INACTIVE state; Fault command will not cause state transition");
+  } else if (fcat_state_ == FcatState::ACTIVE) {
+    RCLCPP_INFO(this->get_logger(), "Transitioning from ACTIVE to INACTIVE (faulted) state");
+    fcat_state_ = FcatState::INACTIVE;
+  } else {
+    RCLCPP_WARN(this->get_logger(),
+                "Fault command received, but FCAT is in state %d; no state transition "
+                "performed",
+                static_cast<int>(fcat_state_));
   }
+
 }
 
 void Fcat::AsyncSdoReadCmdCb(const std::shared_ptr<fcat_msgs::msg::AsyncSdoReadCmd> msg) {
@@ -538,14 +564,18 @@ void Fcat::ResetSrvCb(const std::shared_ptr<std_srvs::srv::Trigger::Request> req
                       std::shared_ptr<std_srvs::srv::Trigger::Response> response) {
   RCLCPP_INFO(this->get_logger(), "Handling Reset Command");
   fcat_manager_.ExecuteAllDeviceResets();
-  // FaultInterface::ResetSrvCb(request, response); // TODO: use lifecyle nodes
+  Reset(); // TODO: use lifecyle nodes
+  response->success = true;
+  response->message = "All devices reset";
 }
 
 void Fcat::FaultSrvCb(const std::shared_ptr<std_srvs::srv::Trigger::Request> request,
                       std::shared_ptr<std_srvs::srv::Trigger::Response> response) {
   RCLCPP_INFO(this->get_logger(), "Handling Fault Command");
   fcat_manager_.ExecuteAllDeviceFaults();
-  // FaultInterface::FaultSrvCb(request, response); // TODO: use lifecyle nodes
+  Fault(); // TODO: use lifecyle nodes
+  response->success = true;
+  response->message = "All devices faulted";
 }
 
 void Fcat::ActuatorHaltSrvCb(

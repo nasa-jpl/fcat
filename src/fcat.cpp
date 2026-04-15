@@ -223,26 +223,27 @@ Fcat::Fcat(const rclcpp::NodeOptions& options)
   }
 
   PopulateDeviceStateFields();
-
+  
   // Must populate certain device state fields before initializing pub/sub
   InitializePublishersAndMessages();
   InitializeSubscribers();
   InitializeServices();
-
+  
   param_cb_handles_.push_back(
-      this->add_on_set_parameters_callback(std::bind(&Fcat::SetParametersCb, this, _1)));
+    this->add_on_set_parameters_callback(std::bind(&Fcat::SetParametersCb, this, _1)));
 
   // pull the Timer Rate from the Fastcat YAML
   InitializeTimerRate(fcat_manager_.GetTargetLoopRate());
   RCLCPP_INFO(this->get_logger(), "Starting Wall Timer at %lf hz",
-              fcat_manager_.GetTargetLoopRate());
+  fcat_manager_.GetTargetLoopRate());
 
   loop_period_sec_ = 1.0 / fcat_manager_.GetTargetLoopRate();
   last_time_ = this->now().seconds();
   module_state_msg_.faulted = false;
-
+  
+  fcat_state_ = FcatState::INACTIVE;
   StartProcessTimer();
-  // SetActive();
+  fcat_state_ = FcatState::ACTIVE;
 }
 
 void Fcat::SetRealtimePreempt(int scheduler_priority) {
@@ -1458,7 +1459,7 @@ void Fcat::Process() {
     if (fault_on_cycle_slip_ && dt > cycle_slip_fault_magnitude_ * loop_period_sec_) {
       fcat_manager_.ExecuteAllDeviceFaults();
       const std::shared_ptr<std_msgs::msg::Empty> msg;
-      // FaultInterface::FaultCmdCb(msg); // TODO: use lifecyle nodes
+      Fault(); // TODO: use lifecyle nodes
       publish_time_stamp_ = now;
       return;
     }
@@ -1565,7 +1566,7 @@ void Fcat::PublishFcatModuleState() {
   // Check for fault status and emit logs
   bool is_faulted = fcat_manager_.IsFaulted();
   if (!module_state_msg_.faulted && is_faulted) {
-    // Fault(); // TODO: use lifecycle nodes
+    Fault(); // TODO: use lifecycle nodes
     RCLCPP_WARN(this->get_logger(), "Fastcat bus fault detected");
   } else if (module_state_msg_.faulted && !is_faulted) {
     RCLCPP_INFO(this->get_logger(), "Fastcat bus fault cleared");

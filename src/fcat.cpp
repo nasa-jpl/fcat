@@ -240,7 +240,11 @@ Fcat::Fcat(const rclcpp::NodeOptions& options)
   loop_period_sec_ = 1.0 / fcat_manager_.GetTargetLoopRate();
   last_time_ = this->now().seconds();
   module_state_msg_.faulted = false;
-  
+
+  if (!fcat_manager_.InitHardware()) {
+    throw std::invalid_argument("Fastcat Manager failed to initialize EtherCAT hardware.");
+  }
+
   fcat_state_ = FcatState::INACTIVE;
   StartProcessTimer();
   fcat_state_ = FcatState::ACTIVE;

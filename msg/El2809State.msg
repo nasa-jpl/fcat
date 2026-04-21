@@ -1,0 +1,17 @@
+float64 read_time
+uint8 level_ch1
+uint8 level_ch2
+uint8 level_ch3
+uint8 level_ch4
+uint8 level_ch5
+uint8 level_ch6
+uint8 level_ch7
+uint8 level_ch8
+uint8 level_ch9
+uint8 level_ch10
+uint8 level_ch11
+uint8 level_ch12
+uint8 level_ch13
+uint8 level_ch14
+uint8 level_ch15
+uint8 level_ch16

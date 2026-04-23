@@ -48,7 +48,7 @@ Fcat::Fcat(const rclcpp::NodeOptions& options)
   RCLCPP_INFO(this->get_logger(), "loading Yaml from %s", fastcat_config_path.c_str());
   YAML::Node node = YAML::LoadFile(fastcat_config_path);
 
-  if (!fcat_manager_.ConfigFromYaml(node)) {
+  if (!fcat_manager_.CreateConfigFromYaml(node)) {
     throw std::invalid_argument("Fastcat Manager failed to process bus configuration YAML file.");
   }
 

@@ -1,0 +1,12 @@
+uint16 status
+uint32 ticks
+float32 voltage_hv
+float32 voltage_lv
+float32 voltage_12v
+float32 temp_ambient
+float32 temp_actuator
+float32 humidity
+float32 pressure
+uint16 brake_current
+uint16 brake_cc_val
+uint16 cmd

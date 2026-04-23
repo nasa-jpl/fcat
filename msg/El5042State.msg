@@ -1,0 +1,9 @@
+float64 read_time
+int64 position_ch1
+int8 warning_ch1
+int8 error_ch1
+int8 ready_ch1
+int64 position_ch2
+int8 warning_ch2
+int8 error_ch2
+int8 ready_ch2

@@ -2,24 +2,25 @@
 <?xml-model href="http://download.ros.org/schema/package_format2.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
   <name>fcat_msgs</name>
-  <version>0.5.0</version>
-  <description>Message Definitions for FCAT Node</description>
-  <maintainer email="alexander.brinkman@jpl.nasa.gov">Alex Brinkman</maintainer>
-  <license>CALTECH_2021 (see License.md)</license>
+  <version>0.9.22</version>
+  <description>ROS2 FCAT Messages</description>
+  <maintainer email="alexander.brinkman@jpl.nasa.gov">dev</maintainer>
+  <license>JPL/Caltech</license>
 
-  <buildtool_depend>ament_cmake</buildtool_depend>
-  <buildtool_depend>rosidl_default_generators</buildtool_depend>
+  <!-- ROS2 build dependencies -->
+  <buildtool_depend >ament_cmake</buildtool_depend>
+  <buildtool_depend >rosidl_default_generators</buildtool_depend>
 
-  <build_depend>builtin_interfaces</build_depend>
-  <build_depend>geometry_msgs</build_depend>
+  <build_depend >builtin_interfaces</build_depend>
+  <build_depend >std_msgs</build_depend>
 
-  <exec_depend>builtin_interfaces</exec_depend>
-  <exec_depend>geometry_msgs</exec_depend>
-  <exec_depend>rosidl_default_runtime</exec_depend>
+  <exec_depend >builtin_interfaces</exec_depend>
+  <exec_depend >std_msgs</exec_depend>
+  <exec_depend >rosidl_default_runtime</exec_depend>
 
-  <member_of_group>rosidl_interface_packages</member_of_group>
+  <member_of_group >rosidl_interface_packages</member_of_group>
 
   <export>
-    <build_type>ament_cmake</build_type>
+    <build_type >ament_cmake</build_type>
   </export>
 </package>

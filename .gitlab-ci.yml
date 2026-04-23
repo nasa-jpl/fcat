@@ -1,0 +1,3 @@
+include:
+  - project: casah/build/ci_scripts
+    file: ci/rosx-ci.yml

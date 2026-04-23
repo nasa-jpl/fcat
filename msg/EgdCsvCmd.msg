@@ -1,4 +1,0 @@
-string name
-int32 target_velocity
-int32 velocity_offset
-float64 torque_offset_amps

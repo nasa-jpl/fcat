@@ -1,24 +1,13 @@
 cmake_minimum_required(VERSION 3.11)
 project(fcat_msgs
-  VERSION 0.9.22
+  VERSION 0.10.0
   DESCRIPTION "ROS2 FCAT Messages"
-  LANGUAGES C CXX
 )
 
-# Default to C99
-if(NOT CMAKE_C_STANDARD)
-  set(CMAKE_C_STANDARD 99)
-endif()
-
-
-# Default to C++17
-if(NOT CMAKE_CXX_STANDARD)
-  set(CMAKE_CXX_STANDARD 17)
-endif()
-
-if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-  add_compile_options(-Wall -Wextra -Wpedantic)
-endif()
+find_package(ament_cmake REQUIRED)
+find_package(builtin_interfaces REQUIRED)
+find_package(std_msgs REQUIRED)
+find_package(rosidl_default_generators REQUIRED)
 
 # Define the files that contain all the messages and services
 set(msg_files
@@ -41,12 +30,6 @@ set(msg_files
   "msg/ActuatorSetUnitModeCmd.msg"
   "msg/ActuatorState.msg"
   "msg/ActuatorStates.msg"
-  "msg/PlatinumActuatorState.msg"
-  "msg/PlatinumActuatorStates.msg"
-  "msg/ActuatorSetGainSchedulingModeCmd.msg"
-  "msg/ActuatorSetGainSchedulingModeCmds.msg"
-  "msg/ActuatorSetGainSchedulingIndexCmd.msg"
-  "msg/ActuatorSetGainSchedulingIndexCmds.msg"
   "msg/ActuatorSetProfDisengagingTimeoutCmd.msg"
   "msg/AsyncSdoWriteCmd.msg"
   "msg/AsyncSdoReadCmd.msg"
@@ -57,9 +40,6 @@ set(msg_files
   "msg/CommanderStates.msg"
   "msg/ConditionalState.msg"
   "msg/ConditionalStates.msg"
-  "msg/EgdCspCmd.msg"
-  "msg/EgdCstCmd.msg"
-  "msg/EgdCsvCmd.msg"
   "msg/EgdState.msg"
   "msg/EgdStates.msg"
   "msg/El1008State.msg"
@@ -103,11 +83,6 @@ set(msg_files
   "msg/FaulterEnableCmd.msg"
   "msg/FaulterState.msg"
   "msg/FaulterStates.msg"
-  "msg/FbcState.msg"
-  "msg/FbcStates.msg"
-  "msg/FbcRequestDataCmd.msg"
-  "msg/FbcTriggerEstopCmd.msg"
-  "msg/FbcResetFaultCmd.msg"
   "msg/FilterState.msg"
   "msg/FilterStates.msg"
   "msg/FtsState.msg"
@@ -117,9 +92,6 @@ set(msg_files
   "msg/FunctionStates.msg"
   "msg/Ild1900State.msg"
   "msg/Ild1900States.msg"
-  "msg/JedSetCmdValueCmd.msg"
-  "msg/JedState.msg"
-  "msg/JedStates.msg"
   "msg/LinearInterpolationState.msg"
   "msg/LinearInterpolationStates.msg"
   "msg/ModuleState.msg"
@@ -132,8 +104,6 @@ set(msg_files
   "msg/SchmittTriggerStates.msg"
   "msg/SignalGeneratorState.msg"
   "msg/SignalGeneratorStates.msg"
-  "msg/JcbState.msg"
-  "msg/JcbStates.msg"
   "msg/ThreeNodeThermalModelState.msg"
   "msg/ThreeNodeThermalModelStates.msg"
   )
@@ -172,14 +142,7 @@ set(srv_files
   "srv/DeviceTriggerService.srv"
   )
 
-# Check if ament_cmake is present, indicating ROS2
-find_package(ament_cmake QUIET)
-
-find_package(builtin_interfaces REQUIRED)
-find_package(std_msgs REQUIRED)
-find_package(rosidl_default_generators REQUIRED)
-
-rosidl_generate_interfaces(fcat_msgs
+rosidl_generate_interfaces(${PROJECT_NAME}
   ${msg_files}
   ${srv_files}
   DEPENDENCIES builtin_interfaces std_msgs

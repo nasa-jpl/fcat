@@ -14,7 +14,7 @@ An optional ROS2 node called `fcat_srvs` is provided in this package. The purpos
 
 ## Quickstart
 
-Due to a potential issue in the default RMW implementation, the cyclone vendor is recommended for use as of the Feb 2021 ROS2 Foxy release.
+Due to a potential issue in the default RMW implementation, the cyclone vendor is recommended for use:
 
 ``` bash
 sudo apt install ros-${ROS_DISTRO}-rmw-cyclonedds-cpp

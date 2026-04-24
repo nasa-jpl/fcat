@@ -23,7 +23,7 @@ endif()
 include(FetchContent)
 FetchContent_Declare(fastcat
   GIT_REPOSITORY https://github.com/nasa-jpl/fastcat.git
-  GIT_TAG v0.13.13
+  GIT_TAG v0.13.15
 )
 FetchContent_MakeAvailable(fastcat)
 

@@ -1,0 +1,9 @@
+float64 read_time
+float64 output_ch1
+int16 adc_value_ch1
+float64 output_ch2
+int16 adc_value_ch2
+float64 output_ch3
+int16 adc_value_ch3
+float64 output_ch4
+int16 adc_value_ch4

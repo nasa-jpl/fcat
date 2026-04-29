@@ -1,0 +1,6 @@
+string name
+float64 max_current
+
+---
+bool success
+string message

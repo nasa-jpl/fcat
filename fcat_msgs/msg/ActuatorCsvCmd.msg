@@ -1,0 +1,4 @@
+string name
+float64 target_velocity
+float64 velocity_offset
+float64 torque_offset_amps

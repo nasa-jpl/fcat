@@ -1,0 +1,7 @@
+string name
+string tlc
+uint8 subindex
+string data_type
+---
+bool success
+string message

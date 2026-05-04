@@ -1,4 +1,6 @@
 
+# FCAT ROS 2 Integration
+
 This repository contains `fcat` and `fcat_msgs`, the ROS 2 integration layer for the FCAT EtherCAT stack.
 
 At a high level:

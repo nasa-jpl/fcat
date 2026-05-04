@@ -1,0 +1,3 @@
+string name
+uint8 channel
+float64 voltage_output

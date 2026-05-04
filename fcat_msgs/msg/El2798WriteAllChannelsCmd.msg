@@ -1,0 +1,9 @@
+string name
+uint8 channel_ch1
+uint8 channel_ch2
+uint8 channel_ch3
+uint8 channel_ch4
+uint8 channel_ch5
+uint8 channel_ch6
+uint8 channel_ch7
+uint8 channel_ch8

@@ -1,0 +1,4 @@
+string name
+float64 velocity
+float64 accel
+float64 max_current

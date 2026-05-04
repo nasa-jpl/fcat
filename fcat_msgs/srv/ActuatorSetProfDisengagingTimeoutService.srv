@@ -1,0 +1,6 @@
+string name
+float64 timeout
+
+---
+bool success
+string message

@@ -1,0 +1,9 @@
+float64 read_time
+float64 voltage_ch1
+int32 adc_value_ch1
+float64 voltage_ch2
+int32 adc_value_ch2
+float64 voltage_ch3
+int32 adc_value_ch3
+float64 voltage_ch4
+int32 adc_value_ch4

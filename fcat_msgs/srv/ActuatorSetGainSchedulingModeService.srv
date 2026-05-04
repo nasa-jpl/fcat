@@ -1,0 +1,6 @@
+string name
+uint8 gain_scheduling_mode
+
+---
+bool success
+string message

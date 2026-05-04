@@ -1,0 +1,4 @@
+string name
+float64 target_velocity
+float64 profile_accel
+float64 max_duration

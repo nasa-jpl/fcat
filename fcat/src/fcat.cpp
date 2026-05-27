@@ -1608,7 +1608,7 @@ void Fcat::PublishAsyncSdoResponse() {
 
     msg.data = jsd_sdo_data_to_string(sdo_resp.response.data_type, sdo_resp.response.data);
 
-    fprintf(stderr, "Publishing new AsyncSdoResponse\n");
+    RCLCPP_DEBUG(this->get_logger(), "Publishing new AsyncSdoResponse");
 
     async_sdo_response_pub_->publish(msg);
   }

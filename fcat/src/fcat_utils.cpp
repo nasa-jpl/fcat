@@ -6,6 +6,7 @@
 #include <cstdio>
 
 #include "jsd/jsd_print.h"
+#include "rclcpp/rclcpp.hpp"
 
 fcat_msgs::msg::ActuatorState ActuatorStateToMsg(
     std::shared_ptr<const fastcat::DeviceState> state) {
@@ -493,15 +494,15 @@ bool HexOrDecStrToNum(std::string& str, uint16_t& number) {
   uint64_t ulnum = strtoul(str.c_str(), &end, 0);
 
   if (*end == '\0') {
-    fprintf(stderr,
-            "HexOrDecStrToNum successfully parsed string (%s) to (%" PRIu64 " or 0x%" PRIx64 ")",
-            str.c_str(), ulnum, ulnum);
-    fprintf(stderr, "\n");
+    RCLCPP_DEBUG(rclcpp::get_logger("fcat_utils"),
+                 "HexOrDecStrToNum successfully parsed string (%s) to (%" PRIu64 " or 0x%" PRIx64 ")",
+                 str.c_str(), ulnum, ulnum);
     number = static_cast<uint16_t>(ulnum);
     success = true;
 
   } else {
-    fprintf(stderr, "HexOrDecStrToNum could not parse string (%s)\n", str.c_str());
+    RCLCPP_WARN(rclcpp::get_logger("fcat_utils"),
+                "HexOrDecStrToNum could not parse string (%s)", str.c_str());
   }
 
   return success;
@@ -509,27 +510,29 @@ bool HexOrDecStrToNum(std::string& str, uint16_t& number) {
 
 bool TlcStrToNum(std::string& str, uint16_t& number) {
   if (str.size() != 2) {
-    fprintf(stderr, "TLC string: (%s) must be 2 chars. size: (%zu)\n", str.c_str(), str.size());
+    RCLCPP_WARN(rclcpp::get_logger("fcat_utils"),
+                "TLC string: (%s) must be 2 chars. size: (%zu)", str.c_str(), str.size());
     return false;
   }
 
   if ((str[0] < 'A') || (str[0] > 'Z') || (str[1] < 'A') || (str[1] > 'Z')) {
-    fprintf(stderr, "TLC string: (%s) must be upper chars [A-Z]\n", str.c_str());
+    RCLCPP_WARN(rclcpp::get_logger("fcat_utils"),
+                "TLC string: (%s) must be upper chars [A-Z]", str.c_str());
     return false;
   }
 
   number = 0x3000 + (26 * (str[0] - 65)) + (str[1] - 65);
 
   if (number < 0x3000 || number > 0x3FFF) {
-    fprintf(stderr,
-            "TLC conversion is out of range: %s -> 0x%X not in "
-            "range (0x3000,0x3FFF)",
-            str.c_str(), number);
-    fprintf(stderr, "\n");
+    RCLCPP_WARN(rclcpp::get_logger("fcat_utils"),
+                "TLC conversion is out of range: %s -> 0x%X not in "
+                "range (0x3000,0x3FFF)",
+                str.c_str(), number);
     return false;
   }
 
-  fprintf(stderr, "Converted TLC string: (%s) to U16: (0x%X)\n", str.c_str(), number);
+  RCLCPP_DEBUG(rclcpp::get_logger("fcat_utils"),
+               "Converted TLC string: (%s) to U16: (0x%X)", str.c_str(), number);
   return true;
 }
 
@@ -593,7 +596,7 @@ jsd_sdo_data_t jsd_sdo_data_from_string(jsd_sdo_data_type_t& type, std::string& 
       data.as_u64 = static_cast<uint64_t>(atoll(str.c_str()));
       break;
     default:
-      fprintf(stderr, "SDO data type: %d\n", static_cast<int>(type));
+      RCLCPP_WARN(rclcpp::get_logger("fcat_utils"), "SDO data type: %d", static_cast<int>(type));
   }
   return data;
 }
@@ -609,7 +612,8 @@ std::string jsd_sdo_request_type_to_string(jsd_sdo_req_type_t req_type) {
       break;
 
     default:
-      fprintf(stderr, "Invalid request type: %d\n", static_cast<int>(req_type));
+      RCLCPP_WARN(rclcpp::get_logger("fcat_utils"),
+                  "Invalid request type: %d", static_cast<int>(req_type));
   }
   return "INVALID";
 }
@@ -644,7 +648,8 @@ std::string jsd_sdo_data_type_to_string(jsd_sdo_data_type_t data_type) {
       return "U64";
       break;
     default:
-      fprintf(stderr, "Invalid data type: %d\n", static_cast<int>(data_type));
+      RCLCPP_WARN(rclcpp::get_logger("fcat_utils"),
+                  "Invalid data type: %d", static_cast<int>(data_type));
   }
   return "UNSPECIFIED";
 }
@@ -679,7 +684,7 @@ std::string jsd_sdo_data_to_string(jsd_sdo_data_type_t data_type, jsd_sdo_data_t
       return std::to_string(data.as_u64);
       break;
     default:
-      fprintf(stderr, "Bad data type\n");
+      RCLCPP_WARN(rclcpp::get_logger("fcat_utils"), "Bad data type");
   }
   return "invalid result";
 }

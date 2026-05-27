@@ -12,6 +12,7 @@
 #include <cstdio>
 #include <limits>
 
+#include "fcat_log.h"
 #include "rcl_interfaces/msg/floating_point_range.hpp"
 #include "rcl_interfaces/msg/integer_range.hpp"
 #include "rcl_interfaces/msg/parameter_descriptor.hpp"
@@ -27,6 +28,17 @@ Fcat::Fcat(const rclcpp::NodeOptions& options)
     : FcatNode("fcat", "fcat", options),
       service_qos_(rclcpp::QoSInitialization::from_rmw(rmw_qos_profile_services_default),
                    rmw_qos_profile_services_default) {
+  auto level = this->get_logger().get_effective_level();
+  if (level <= rclcpp::Logger::Level::Debug) {
+    fcat_log_set_level(FCAT_LOG_LEVEL_DEBUG);
+  } else if (level <= rclcpp::Logger::Level::Info) {
+    fcat_log_set_level(FCAT_LOG_LEVEL_INFO);
+  } else if (level <= rclcpp::Logger::Level::Warn) {
+    fcat_log_set_level(FCAT_LOG_LEVEL_WARN);
+  } else {
+    fcat_log_set_level(FCAT_LOG_LEVEL_ERROR);
+  }
+
   process_loop_callback_group_ =
       this->create_callback_group(rclcpp::CallbackGroupType::MutuallyExclusive);
 

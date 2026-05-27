@@ -6,6 +6,7 @@
 #include <cstdio>
 
 #include "fastcat/jsd/actuator.h"
+#include "fcat_log.h"
 #include "fcat_utils.hpp"
 #include "jsd/jsd_print.h"
 #include "rcl_interfaces/msg/floating_point_range.hpp"
@@ -24,6 +25,17 @@ FcatSrvs::FcatSrvs(const rclcpp::NodeOptions& options)
       act_states_last_recv_time_(0),
       pid_states_last_recv_time_(0),
       srv_state_(FCAT_SRV_STATE_IDLE_CHECKING) {
+  auto level = this->get_logger().get_effective_level();
+  if (level <= rclcpp::Logger::Level::Debug) {
+    fcat_log_set_level(FCAT_LOG_LEVEL_DEBUG);
+  } else if (level <= rclcpp::Logger::Level::Info) {
+    fcat_log_set_level(FCAT_LOG_LEVEL_INFO);
+  } else if (level <= rclcpp::Logger::Level::Warn) {
+    fcat_log_set_level(FCAT_LOG_LEVEL_WARN);
+  } else {
+    fcat_log_set_level(FCAT_LOG_LEVEL_ERROR);
+  }
+
   cb_group_blocking_ = this->create_callback_group(rclcpp::CallbackGroupType::MutuallyExclusive);
 
   cb_group_non_blocking_ =

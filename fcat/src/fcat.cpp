@@ -1448,7 +1448,6 @@ void Fcat::SetCpuAffinity() {
 }
 
 void Fcat::Process() {
-  fprintf(stderr, "Handling Process() loop\n");
   auto now = this->get_clock()->now();
 
   bool report_cycle_slips = this->get_parameter("report_cycle_slips").as_bool();

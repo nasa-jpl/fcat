@@ -21,9 +21,12 @@ endif()
 
 # Dependencies
 include(FetchContent)
+# TODO: point GIT_REPOSITORY at the pushed astrobud fastcat fork remote.
+# Local fork clone (branch astrobud-atomic-save, tag v0.13.15-astrobud1) adds a
+# crash-safe atomic actuator-position save + public locked SaveActuatorPositions().
 FetchContent_Declare(fastcat
-  GIT_REPOSITORY https://github.com/nasa-jpl/fastcat.git
-  GIT_TAG v0.13.15
+  GIT_REPOSITORY /home/tnet/fastcat-fork
+  GIT_TAG v0.13.15-astrobud1
 )
 FetchContent_MakeAvailable(fastcat)
 

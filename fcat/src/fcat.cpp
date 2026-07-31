@@ -21,7 +21,28 @@ using namespace std::chrono_literals;
 using std::placeholders::_1;
 using std::placeholders::_2;
 
-Fcat::~Fcat() { fcat_manager_.Shutdown(); }
+Fcat::~Fcat() {
+  // Deregister the pre-shutdown callback first so it cannot fire on a
+  // destroyed node if the context outlives this object.
+  auto context = this->get_node_base_interface()->get_context();
+  if (context) {
+    context->remove_pre_shutdown_callback(pre_shutdown_cb_handle_);
+  }
+  // Fallback save for the plain return-from-main exit. The normal shutdown
+  // (SIGINT/SIGTERM/rclcpp::shutdown) saves earlier via the pre-shutdown
+  // callback; std::call_once makes this a no-op in that case.
+  SaveState();
+}
+
+void Fcat::SaveState() {
+  // Runs at most once, whether triggered by the pre-shutdown callback (signal
+  // thread, process loop possibly still running) or the destructor. The
+  // manager serializes the actual capture+write against Process() internally.
+  std::call_once(save_state_flag_, [this]() {
+    RCLCPP_INFO(this->get_logger(), "Saving actuator positions on shutdown");
+    fcat_manager_.SaveActuatorPositions();
+  });
+}
 
 Fcat::Fcat(const rclcpp::NodeOptions& options)
     : FcatNode("fcat", "fcat", options),
@@ -248,6 +269,15 @@ Fcat::Fcat(const rclcpp::NodeOptions& options)
   fcat_state_ = FcatState::INACTIVE;
   StartProcessTimer();
   fcat_state_ = FcatState::ACTIVE;
+
+  // Persist actuator positions deterministically on shutdown. This fires in the
+  // signal-handling thread before the context is torn down (SIGINT/SIGTERM/any
+  // rclcpp::shutdown), so the save does not depend on the destructor running
+  // during stack unwind. SaveActuatorPositions() locks the manager's process
+  // mutex, so it is safe even though the process loop may still be spinning here.
+  pre_shutdown_cb_handle_ =
+      this->get_node_base_interface()->get_context()->add_pre_shutdown_callback(
+          [this]() { SaveState(); });
 }
 
 void Fcat::SetRealtimePreempt(int scheduler_priority) {

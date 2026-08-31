@@ -21,10 +21,9 @@ endif()
 
 # Dependencies
 include(FetchContent)
-# TODO: point to a released version of fastcat once it is available
 FetchContent_Declare(fastcat
   GIT_REPOSITORY https://github.com/nasa-jpl/fastcat.git
-  GIT_TAG astrobud-atomic-save
+  GIT_TAG v0.13.20
 )
 FetchContent_MakeAvailable(fastcat)
 

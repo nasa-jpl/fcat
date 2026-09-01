@@ -6,8 +6,8 @@
 #include <cstdio>
 
 #include "fastcat/jsd/actuator.h"
+#include "fcat_log.h"
 #include "fcat_utils.hpp"
-#include "jsd/jsd_print.h"
 #include "rcl_interfaces/msg/floating_point_range.hpp"
 #include "rcl_interfaces/msg/integer_range.hpp"
 #include "rcl_interfaces/msg/parameter_descriptor.hpp"
@@ -17,13 +17,17 @@ using std::placeholders::_1;
 using std::placeholders::_2;
 
 FcatSrvs::FcatSrvs(const rclcpp::NodeOptions& options)
-    : rclcpp::Node("fcat_services", "fcat", options),
+    // See Fcat::Fcat() re: enable_logger_service.
+    : rclcpp::Node("fcat_services", "fcat",
+                   rclcpp::NodeOptions(options).enable_logger_service(true)),
       services_qos_(rclcpp::QoSInitialization::from_rmw(rmw_qos_profile_services_default),
                     rmw_qos_profile_services_default),
       module_state_last_recv_time_(0),
       act_states_last_recv_time_(0),
       pid_states_last_recv_time_(0),
       srv_state_(FCAT_SRV_STATE_IDLE_CHECKING) {
+  fcat_log_set_name(this->get_logger().get_name());
+
   cb_group_blocking_ = this->create_callback_group(rclcpp::CallbackGroupType::MutuallyExclusive);
 
   cb_group_non_blocking_ =
@@ -421,11 +425,10 @@ bool FcatSrvs::WaitForSdoResponse(std::string& message, uint16_t app_id) {
 
       // Check the app id, discard and keep waiting if it does not match
       if (app_id != async_sdo_response_msg_.app_id) {
-        fprintf(stderr,
-                "SDO Response received but actual app_id:(%u) does not match "
-                "expected app_id:(%u). Continuing to wait...",
-                async_sdo_response_msg_.app_id, app_id);
-        fprintf(stderr, "\n");
+        RCLCPP_WARN(this->get_logger(),
+                    "SDO Response received but actual app_id:(%u) does not match "
+                    "expected app_id:(%u). Continuing to wait...",
+                    async_sdo_response_msg_.app_id, app_id);
         continue;
       }
 

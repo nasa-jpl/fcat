@@ -132,6 +132,7 @@ void Fcat::ActuatorCSPCmdCb(const std::shared_ptr<fcat_msgs::msg::ActuatorCspCmd
 }
 
 void Fcat::ActuatorCSPCmdsCb(const std::shared_ptr<fcat_msgs::msg::ActuatorCspCmds> msg) {
+  RCLCPP_DEBUG(this->get_logger(), "Processing ActuatorCSPCmdsCb");
   double t = this->now().seconds();
   for (auto csp_cmd : msg->commands) {
     CallActuatorCSP(csp_cmd, t);
@@ -171,6 +172,7 @@ void Fcat::ActuatorCSVCmdCb(const std::shared_ptr<fcat_msgs::msg::ActuatorCsvCmd
 }
 
 void Fcat::ActuatorCSVCmdsCb(const std::shared_ptr<fcat_msgs::msg::ActuatorCsvCmds> msg) {
+  RCLCPP_DEBUG(this->get_logger(), "Processing ActuatorCSVCmdsCb");
   for (auto csv_cmd : msg->commands) {
     CallActuatorCSV(csv_cmd);
   }
@@ -208,6 +210,7 @@ void Fcat::ActuatorCSTCmdCb(const std::shared_ptr<fcat_msgs::msg::ActuatorCstCmd
 }
 
 void Fcat::ActuatorCSTCmdsCb(const std::shared_ptr<fcat_msgs::msg::ActuatorCstCmds> msg) {
+  RCLCPP_DEBUG(this->get_logger(), "Processing ActuatorCSTCmdsCb");
   for (auto cst_cmd : msg->commands) {
     CallActuatorCST(cst_cmd);
   }

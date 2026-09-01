@@ -1,8 +1,5 @@
-cmake_minimum_required(VERSION 3.11)
-project(fcat_msgs
-  VERSION 0.10.0
-  DESCRIPTION "ROS2 FCAT Messages"
-)
+cmake_minimum_required(VERSION 3.22)
+project(fcat_msgs)
 
 find_package(ament_cmake REQUIRED)
 find_package(builtin_interfaces REQUIRED)

@@ -12,6 +12,7 @@
 #include <cstdio>
 #include <limits>
 
+#include "fcat_log.h"
 #include "rcl_interfaces/msg/floating_point_range.hpp"
 #include "rcl_interfaces/msg/integer_range.hpp"
 #include "rcl_interfaces/msg/parameter_descriptor.hpp"
@@ -45,9 +46,15 @@ void Fcat::SaveState() {
 }
 
 Fcat::Fcat(const rclcpp::NodeOptions& options)
-    : FcatNode("fcat", "fcat", options),
+    // enable_logger_service defaults to false, leaving set_logger_levels
+    // unadvertised; enable it so verbosity is changeable at run time.
+    : FcatNode("fcat", "fcat", rclcpp::NodeOptions(options).enable_logger_service(true)),
       service_qos_(rclcpp::QoSInitialization::from_rmw(rmw_qos_profile_services_default),
                    rmw_qos_profile_services_default) {
+  // Route the jsd/fastcat log macros to this node's logger. Must precede the
+  // first jsd/fastcat call and the creation of any other thread.
+  fcat_log_set_name(this->get_logger().get_name());
+
   process_loop_callback_group_ =
       this->create_callback_group(rclcpp::CallbackGroupType::MutuallyExclusive);
 
@@ -1478,6 +1485,10 @@ void Fcat::SetCpuAffinity() {
 }
 
 void Fcat::Process() {
+  // Throttle jsd/fastcat ERROR/WARNING logged from here; a fault reasserts every
+  // cycle. Thread-local store, so repeating it per cycle is free.
+  fcat_log_mark_rt_thread();
+
   auto now = this->get_clock()->now();
 
   bool report_cycle_slips = this->get_parameter("report_cycle_slips").as_bool();
@@ -1638,6 +1649,7 @@ void Fcat::PublishAsyncSdoResponse() {
 
     msg.data = jsd_sdo_data_to_string(sdo_resp.response.data_type, sdo_resp.response.data);
 
+    RCLCPP_DEBUG(this->get_logger(), "Publishing new AsyncSdoResponse");
     async_sdo_response_pub_->publish(msg);
   }
 }

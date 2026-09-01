@@ -1,9 +1,5 @@
-cmake_minimum_required(VERSION 3.11)
-project(fcat
-  VERSION 0.6.1
-  LANGUAGES C CXX
-  DESCRIPTION "ROS2 Fastcat Node"
-)
+cmake_minimum_required(VERSION 3.22)
+project(fcat LANGUAGES C CXX)
 
 # Default to C99
 if(NOT CMAKE_C_STANDARD)
@@ -19,6 +15,19 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra)
 endif()
 
+# Compile-time maximum log level for jsd/fastcat (levels above this are removed entirely)
+# 1=ERROR, 2=WARN, 3=INFO, 4=DEBUG
+set(FCAT_MAX_LOG_LEVEL "3" CACHE STRING
+  "Compile-time max log level for jsd/fastcat: 1=ERROR, 2=+WARN, 3=+INFO, 4=+DEBUG")
+
+# Bounds jsd/fastcat ERROR/WARNING logged from the realtime process thread, where
+# a bus fault reasserts every cycle. 0 disables throttling.
+set(FCAT_LOG_THROTTLE_MS "1000" CACHE STRING
+  "Throttle interval (ms) for realtime-thread jsd/fastcat ERROR/WARNING; 0 = no throttling")
+
+# Needed before FetchContent below, which compiles against the rcutils headers.
+find_package(rcutils REQUIRED)
+
 # Dependencies
 include(FetchContent)
 FetchContent_Declare(fastcat
@@ -26,6 +35,30 @@ FetchContent_Declare(fastcat
   GIT_TAG v0.13.20
 )
 FetchContent_MakeAvailable(fastcat)
+
+# Override jsd_print.h so jsd/fastcat log macros go through rcutils instead of
+# fprintf(stderr). BEFORE makes src/jsd/jsd_print.h win over the copy in
+# ${CMAKE_BINARY_DIR}/include that "jsd/jsd_print.h" normally resolves to.
+#
+# The two target_link_libraries() calls must keep the signature each target was
+# first linked with upstream; mixing plain and keyword on one target is fatal.
+target_include_directories(fastcat BEFORE PRIVATE
+  ${CMAKE_CURRENT_SOURCE_DIR}/src
+)
+target_compile_definitions(fastcat PRIVATE
+  FCAT_MAX_LOG_LEVEL=${FCAT_MAX_LOG_LEVEL}
+  FCAT_LOG_THROTTLE_MS=${FCAT_LOG_THROTTLE_MS}
+)
+target_link_libraries(fastcat rcutils::rcutils)  # plain signature, matching upstream
+target_include_directories(jsd-lib BEFORE PRIVATE
+  ${CMAKE_CURRENT_SOURCE_DIR}/src
+)
+target_compile_definitions(jsd-lib PRIVATE
+  FCAT_MAX_LOG_LEVEL=${FCAT_MAX_LOG_LEVEL}
+  FCAT_LOG_THROTTLE_MS=${FCAT_LOG_THROTTLE_MS}
+)
+target_link_libraries(jsd-lib PRIVATE rcutils::rcutils)  # keyword signature, matching upstream
+target_sources(jsd-lib PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/fcat_log.c)
 
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
@@ -76,14 +109,22 @@ add_executable(fcat_node
   src/fcat_utils.cpp
 )
 
-ament_target_dependencies(fcat_node
-  rclcpp
-  sensor_msgs
-  geometry_msgs
-  std_srvs
-  fcat_msgs
+target_include_directories(fcat_node BEFORE PRIVATE
+  ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
+target_compile_definitions(fcat_node PRIVATE
+  FCAT_MAX_LOG_LEVEL=${FCAT_MAX_LOG_LEVEL}
+  FCAT_LOG_THROTTLE_MS=${FCAT_LOG_THROTTLE_MS}
+)
+
 target_link_libraries(fcat_node
+  rclcpp::rclcpp
+  rcutils::rcutils
+  ${sensor_msgs_TARGETS}
+  ${geometry_msgs_TARGETS}
+  ${std_msgs_TARGETS}
+  ${std_srvs_TARGETS}
+  ${fcat_msgs_TARGETS}
   fastcat
 )
 
@@ -93,12 +134,19 @@ add_executable(fcat_services
   src/fcat_srvs.cpp
   src/fcat_utils.cpp
 )
-ament_target_dependencies(fcat_services
-  rclcpp
-  fcat_msgs
+
+target_include_directories(fcat_services BEFORE PRIVATE
+  ${CMAKE_CURRENT_SOURCE_DIR}/src
+)
+target_compile_definitions(fcat_services PRIVATE
+  FCAT_MAX_LOG_LEVEL=${FCAT_MAX_LOG_LEVEL}
+  FCAT_LOG_THROTTLE_MS=${FCAT_LOG_THROTTLE_MS}
 )
 
 target_link_libraries(fcat_services
+  rclcpp::rclcpp
+  rcutils::rcutils
+  ${fcat_msgs_TARGETS}
   fastcat
 )
 

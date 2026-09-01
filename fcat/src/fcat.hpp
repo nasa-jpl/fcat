@@ -14,7 +14,6 @@
 #include <vector>
 
 #include "fastcat/fastcat.h"
-#include "jsd/jsd_print.h"
 #include "rclcpp/rclcpp.hpp"
 
 // Standard Messages

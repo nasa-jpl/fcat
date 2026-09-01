@@ -2,25 +2,37 @@
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
   <name>fcat_msgs</name>
-  <version>0.10.0</version>
-  <description>ROS2 FCAT Messages</description>
-  <maintainer email="daniel.pastor.moreno@jpl.nasa.gov">dev</maintainer>
-  <license>JPL/Caltech</license>
+  <version>0.14.0</version>
+  <description>Message and service definitions for the fcat ROS 2 node.</description>
+
+  <url type="repository">https://github.com/nasa-jpl/fcat</url>
+  <url type="bugtracker">https://github.com/nasa-jpl/fcat/issues</url>
+
+  <maintainer email="daniel.pastor.moreno@jpl.nasa.gov">Daniel Pastor</maintainer>
+  <maintainer email="kwehage@jpl.nasa.gov">Kristopher Wehage</maintainer>
+
+  <author>Alex Brinkman</author>
+  <author email="bowkett@jpl.nasa.gov">Joseph Bowkett</author>
+  <author>Justin Morris</author>
+  <author>Daniel Loret de Mola Lemus</author>
+  <author email="prestonr@jpl.nasa.gov">Preston Rogers</author>
+
+  <license>Apache-2.0</license>
 
   <!-- ROS2 build dependencies -->
-  <buildtool_depend >ament_cmake</buildtool_depend>
-  <buildtool_depend >rosidl_default_generators</buildtool_depend>
+  <buildtool_depend>ament_cmake</buildtool_depend>
+  <buildtool_depend>rosidl_default_generators</buildtool_depend>
 
-  <build_depend >builtin_interfaces</build_depend>
-  <build_depend >std_msgs</build_depend>
+  <build_depend>builtin_interfaces</build_depend>
+  <build_depend>std_msgs</build_depend>
 
-  <exec_depend >builtin_interfaces</exec_depend>
-  <exec_depend >std_msgs</exec_depend>
-  <exec_depend >rosidl_default_runtime</exec_depend>
+  <exec_depend>builtin_interfaces</exec_depend>
+  <exec_depend>std_msgs</exec_depend>
+  <exec_depend>rosidl_default_runtime</exec_depend>
 
-  <member_of_group >rosidl_interface_packages</member_of_group>
+  <member_of_group>rosidl_interface_packages</member_of_group>
 
   <export>
-    <build_type >ament_cmake</build_type>
+    <build_type>ament_cmake</build_type>
   </export>
 </package>

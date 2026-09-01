@@ -1,9 +1,5 @@
 cmake_minimum_required(VERSION 3.22)
-project(fcat
-  VERSION 0.6.1
-  LANGUAGES C CXX
-  DESCRIPTION "ROS2 Fastcat Node"
-)
+project(fcat LANGUAGES C CXX)
 
 # Default to C99
 if(NOT CMAKE_C_STANDARD)
@@ -126,6 +122,7 @@ ament_target_dependencies(fcat_node
   rcutils
   sensor_msgs
   geometry_msgs
+  std_msgs
   std_srvs
   fcat_msgs
 )

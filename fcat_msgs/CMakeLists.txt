@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.11)
+cmake_minimum_required(VERSION 3.22)
 project(fcat_msgs
   VERSION 0.10.0
   DESCRIPTION "ROS2 FCAT Messages"

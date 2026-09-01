@@ -5,7 +5,6 @@
 #include <cinttypes>
 #include <cstdio>
 
-#include "jsd/jsd_print.h"
 #include "rclcpp/rclcpp.hpp"
 
 fcat_msgs::msg::ActuatorState ActuatorStateToMsg(

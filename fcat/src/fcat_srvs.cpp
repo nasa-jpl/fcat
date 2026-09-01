@@ -8,7 +8,6 @@
 #include "fastcat/jsd/actuator.h"
 #include "fcat_log.h"
 #include "fcat_utils.hpp"
-#include "jsd/jsd_print.h"
 #include "rcl_interfaces/msg/floating_point_range.hpp"
 #include "rcl_interfaces/msg/integer_range.hpp"
 #include "rcl_interfaces/msg/parameter_descriptor.hpp"
@@ -18,23 +17,16 @@ using std::placeholders::_1;
 using std::placeholders::_2;
 
 FcatSrvs::FcatSrvs(const rclcpp::NodeOptions& options)
-    : rclcpp::Node("fcat_services", "fcat", options),
+    // See Fcat::Fcat() re: enable_logger_service.
+    : rclcpp::Node("fcat_services", "fcat",
+                   rclcpp::NodeOptions(options).enable_logger_service(true)),
       services_qos_(rclcpp::QoSInitialization::from_rmw(rmw_qos_profile_services_default),
                     rmw_qos_profile_services_default),
       module_state_last_recv_time_(0),
       act_states_last_recv_time_(0),
       pid_states_last_recv_time_(0),
       srv_state_(FCAT_SRV_STATE_IDLE_CHECKING) {
-  auto level = this->get_logger().get_effective_level();
-  if (level <= rclcpp::Logger::Level::Debug) {
-    fcat_log_set_level(FCAT_LOG_LEVEL_DEBUG);
-  } else if (level <= rclcpp::Logger::Level::Info) {
-    fcat_log_set_level(FCAT_LOG_LEVEL_INFO);
-  } else if (level <= rclcpp::Logger::Level::Warn) {
-    fcat_log_set_level(FCAT_LOG_LEVEL_WARN);
-  } else {
-    fcat_log_set_level(FCAT_LOG_LEVEL_ERROR);
-  }
+  fcat_log_set_name(this->get_logger().get_name());
 
   cb_group_blocking_ = this->create_callback_group(rclcpp::CallbackGroupType::MutuallyExclusive);
 

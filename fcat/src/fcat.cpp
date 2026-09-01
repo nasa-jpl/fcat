@@ -46,19 +46,14 @@ void Fcat::SaveState() {
 }
 
 Fcat::Fcat(const rclcpp::NodeOptions& options)
-    : FcatNode("fcat", "fcat", options),
+    // enable_logger_service defaults to false, leaving set_logger_levels
+    // unadvertised; enable it so verbosity is changeable at run time.
+    : FcatNode("fcat", "fcat", rclcpp::NodeOptions(options).enable_logger_service(true)),
       service_qos_(rclcpp::QoSInitialization::from_rmw(rmw_qos_profile_services_default),
                    rmw_qos_profile_services_default) {
-  auto level = this->get_logger().get_effective_level();
-  if (level <= rclcpp::Logger::Level::Debug) {
-    fcat_log_set_level(FCAT_LOG_LEVEL_DEBUG);
-  } else if (level <= rclcpp::Logger::Level::Info) {
-    fcat_log_set_level(FCAT_LOG_LEVEL_INFO);
-  } else if (level <= rclcpp::Logger::Level::Warn) {
-    fcat_log_set_level(FCAT_LOG_LEVEL_WARN);
-  } else {
-    fcat_log_set_level(FCAT_LOG_LEVEL_ERROR);
-  }
+  // Route the jsd/fastcat log macros to this node's logger. Must precede the
+  // first jsd/fastcat call and the creation of any other thread.
+  fcat_log_set_name(this->get_logger().get_name());
 
   process_loop_callback_group_ =
       this->create_callback_group(rclcpp::CallbackGroupType::MutuallyExclusive);
@@ -1490,6 +1485,10 @@ void Fcat::SetCpuAffinity() {
 }
 
 void Fcat::Process() {
+  // Throttle jsd/fastcat ERROR/WARNING logged from here; a fault reasserts every
+  // cycle. Thread-local store, so repeating it per cycle is free.
+  fcat_log_mark_rt_thread();
+
   auto now = this->get_clock()->now();
 
   bool report_cycle_slips = this->get_parameter("report_cycle_slips").as_bool();

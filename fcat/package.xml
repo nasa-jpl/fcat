@@ -12,6 +12,7 @@
   <build_depend>python3-cogapp</build_depend>
 
   <depend>rclcpp</depend>
+  <depend>rcutils</depend>
   <depend>fcat_msgs</depend>
   <depend>sensor_msgs</depend>
   <depend>geometry_msgs</depend>

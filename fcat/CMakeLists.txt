@@ -117,16 +117,14 @@ target_compile_definitions(fcat_node PRIVATE
   FCAT_LOG_THROTTLE_MS=${FCAT_LOG_THROTTLE_MS}
 )
 
-ament_target_dependencies(fcat_node
-  rclcpp
-  rcutils
-  sensor_msgs
-  geometry_msgs
-  std_msgs
-  std_srvs
-  fcat_msgs
-)
 target_link_libraries(fcat_node
+  rclcpp::rclcpp
+  rcutils::rcutils
+  ${sensor_msgs_TARGETS}
+  ${geometry_msgs_TARGETS}
+  ${std_msgs_TARGETS}
+  ${std_srvs_TARGETS}
+  ${fcat_msgs_TARGETS}
   fastcat
 )
 
@@ -145,13 +143,10 @@ target_compile_definitions(fcat_services PRIVATE
   FCAT_LOG_THROTTLE_MS=${FCAT_LOG_THROTTLE_MS}
 )
 
-ament_target_dependencies(fcat_services
-  rclcpp
-  rcutils
-  fcat_msgs
-)
-
 target_link_libraries(fcat_services
+  rclcpp::rclcpp
+  rcutils::rcutils
+  ${fcat_msgs_TARGETS}
   fastcat
 )
 

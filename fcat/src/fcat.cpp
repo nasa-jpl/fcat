@@ -22,22 +22,22 @@ using std::placeholders::_1;
 using std::placeholders::_2;
 
 Fcat::~Fcat() {
-  // Deregister the pre-shutdown callback first so it cannot fire on a
+  // Best-effort deregistration so the callback is not left pointing at a
   // destroyed node if the context outlives this object.
   auto context = this->get_node_base_interface()->get_context();
   if (context) {
     context->remove_pre_shutdown_callback(pre_shutdown_cb_handle_);
   }
-  // Fallback save for the plain return-from-main exit. The normal shutdown
-  // (SIGINT/SIGTERM/rclcpp::shutdown) saves earlier via the pre-shutdown
-  // callback; std::call_once makes this a no-op in that case.
+  // Fallback for a destruction that is not preceded by rclcpp::shutdown().
+  // Normally the pre-shutdown callback has already saved and call_once makes
+  // this a no-op.
   SaveState();
 }
 
 void Fcat::SaveState() {
-  // Runs at most once, whether triggered by the pre-shutdown callback (signal
-  // thread, process loop possibly still running) or the destructor. The
-  // manager serializes the actual capture+write against Process() internally.
+  // Runs at most once, whether triggered by the pre-shutdown callback or the
+  // destructor. The manager serializes the capture+write against Process()
+  // internally.
   std::call_once(save_state_flag_, [this]() {
     RCLCPP_INFO(this->get_logger(), "Saving actuator positions on shutdown");
     fcat_manager_.SaveActuatorPositions();
@@ -270,11 +270,11 @@ Fcat::Fcat(const rclcpp::NodeOptions& options)
   StartProcessTimer();
   fcat_state_ = FcatState::ACTIVE;
 
-  // Persist actuator positions deterministically on shutdown. This fires in the
-  // signal-handling thread before the context is torn down (SIGINT/SIGTERM/any
-  // rclcpp::shutdown), so the save does not depend on the destructor running
-  // during stack unwind. SaveActuatorPositions() locks the manager's process
-  // mutex, so it is safe even though the process loop may still be spinning here.
+  // Persist actuator positions on shutdown. Runs on whichever thread initiates
+  // shutdown (the signal thread for SIGINT/SIGTERM), before the context is torn
+  // down, so the save does not depend on destructor ordering.
+  // SaveActuatorPositions() takes the manager's process mutex, so it is safe
+  // even though the process loop may still be spinning here.
   pre_shutdown_cb_handle_ =
       this->get_node_base_interface()->get_context()->add_pre_shutdown_callback(
           [this]() { SaveState(); });
@@ -1478,7 +1478,6 @@ void Fcat::SetCpuAffinity() {
 }
 
 void Fcat::Process() {
-  // fprintf(stderr, "Handling Process() loop\n");
   auto now = this->get_clock()->now();
 
   bool report_cycle_slips = this->get_parameter("report_cycle_slips").as_bool();
@@ -1638,8 +1637,6 @@ void Fcat::PublishAsyncSdoResponse() {
     msg.success = sdo_resp.response.success;
 
     msg.data = jsd_sdo_data_to_string(sdo_resp.response.data_type, sdo_resp.response.data);
-
-    fprintf(stderr, "Publishing new AsyncSdoResponse\n");
 
     async_sdo_response_pub_->publish(msg);
   }

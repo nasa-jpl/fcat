@@ -50,7 +50,7 @@ void Fcat::Fault() {
 }
 
 void Fcat::AsyncSdoReadCmdCb(const std::shared_ptr<fcat_msgs::msg::AsyncSdoReadCmd> msg) {
-  fastcat::DeviceCmd cmd;
+  fastcat::DeviceCmd cmd{};
   cmd.name = msg->name;
   cmd.type = fastcat::ASYNC_SDO_READ_CMD;
   cmd.async_sdo_read_cmd.sdo_index = msg->sdo_index;
@@ -63,7 +63,7 @@ void Fcat::AsyncSdoReadCmdCb(const std::shared_ptr<fcat_msgs::msg::AsyncSdoReadC
   }
 }
 void Fcat::AsyncSdoWriteCmdCb(const std::shared_ptr<fcat_msgs::msg::AsyncSdoWriteCmd> msg) {
-  fastcat::DeviceCmd cmd;
+  fastcat::DeviceCmd cmd{};
   cmd.name = msg->name;
   cmd.type = fastcat::ASYNC_SDO_WRITE_CMD;
   cmd.async_sdo_write_cmd.sdo_index = msg->sdo_index;
@@ -97,7 +97,7 @@ void Fcat::CallActuatorCSP(const fcat_msgs::msg::ActuatorCspCmd& msg, double t) 
     subscription_cpu_affinity_initialized_ = true;
   }
 
-  fastcat::DeviceCmd cmd;
+  fastcat::DeviceCmd cmd{};
   cmd.name = msg.name;
   cmd.type = fastcat::ACTUATOR_CSP_CMD;
   cmd.actuator_csp_cmd.request_time = msg.request_time;
@@ -156,7 +156,7 @@ void Fcat::CallActuatorCSV(const fcat_msgs::msg::ActuatorCsvCmd& msg) {
     subscription_cpu_affinity_initialized_ = true;
   }
 
-  fastcat::DeviceCmd cmd;
+  fastcat::DeviceCmd cmd{};
   cmd.name = msg.name;
   cmd.type = fastcat::ACTUATOR_CSV_CMD;
   cmd.actuator_csv_cmd.target_velocity = msg.target_velocity;
@@ -195,7 +195,7 @@ void Fcat::CallActuatorCST(const fcat_msgs::msg::ActuatorCstCmd& msg) {
     subscription_cpu_affinity_initialized_ = true;
   }
 
-  fastcat::DeviceCmd cmd;
+  fastcat::DeviceCmd cmd{};
   cmd.name = msg.name;
   cmd.type = fastcat::ACTUATOR_CST_CMD;
   cmd.actuator_cst_cmd.target_torque_amps = msg.target_torque_amps;
@@ -217,7 +217,7 @@ void Fcat::ActuatorCSTCmdsCb(const std::shared_ptr<fcat_msgs::msg::ActuatorCstCm
 }
 
 void Fcat::ActuatorCalibrateCmdCb(const std::shared_ptr<fcat_msgs::msg::ActuatorCalibrateCmd> msg) {
-  fastcat::DeviceCmd cmd;
+  fastcat::DeviceCmd cmd{};
   cmd.name = msg->name;
   cmd.type = fastcat::ACTUATOR_CALIBRATE_CMD;
   cmd.actuator_calibrate_cmd.velocity = msg->velocity;
@@ -229,13 +229,16 @@ void Fcat::ActuatorCalibrateCmdCb(const std::shared_ptr<fcat_msgs::msg::Actuator
 }
 
 void Fcat::CallActuatorProfPos(const fcat_msgs::msg::ActuatorProfPosCmd& msg) {
-  fastcat::DeviceCmd cmd;
+  fastcat::DeviceCmd cmd{};
   cmd.name = msg.name;
   cmd.type = fastcat::ACTUATOR_PROF_POS_CMD;
   cmd.actuator_prof_pos_cmd.target_position = msg.target_position;
   cmd.actuator_prof_pos_cmd.profile_velocity = msg.profile_velocity;
   cmd.actuator_prof_pos_cmd.profile_accel = msg.profile_accel;
   cmd.actuator_prof_pos_cmd.relative = msg.relative;
+  // No end_velocity in ActuatorProfPosCmd; fastcat checks it against the speed
+  // limit, so pin it to 0 (stop at goal).
+  cmd.actuator_prof_pos_cmd.end_velocity = 0.0;
   if (ActuatorExistsOnBus(cmd.name)) {
     QueueCommand(cmd);
   }
@@ -246,7 +249,7 @@ void Fcat::ActuatorProfPosCmdCb(const std::shared_ptr<fcat_msgs::msg::ActuatorPr
 }
 void Fcat::ActuatorProfTorqueCmdCb(
     const std::shared_ptr<fcat_msgs::msg::ActuatorProfTorqueCmd> msg) {
-  fastcat::DeviceCmd cmd;
+  fastcat::DeviceCmd cmd{};
   cmd.name = msg->name;
   cmd.type = fastcat::ACTUATOR_PROF_TORQUE_CMD;
   cmd.actuator_prof_torque_cmd.target_torque_amps = msg->target_torque_amps;
@@ -256,7 +259,7 @@ void Fcat::ActuatorProfTorqueCmdCb(
   }
 }
 void Fcat::ActuatorProfVelCmdCb(const std::shared_ptr<fcat_msgs::msg::ActuatorProfVelCmd> msg) {
-  fastcat::DeviceCmd cmd;
+  fastcat::DeviceCmd cmd{};
   cmd.name = msg->name;
   cmd.type = fastcat::ACTUATOR_PROF_VEL_CMD;
   cmd.actuator_prof_vel_cmd.target_velocity = msg->target_velocity;
@@ -275,7 +278,7 @@ void Fcat::ActuatorProfPosCmdsCb(const std::shared_ptr<fcat_msgs::msg::ActuatorP
 
 void Fcat::ActuatorSetOutputPositionCmdCb(
     const std::shared_ptr<fcat_msgs::msg::ActuatorSetOutputPositionCmd> msg) {
-  fastcat::DeviceCmd cmd;
+  fastcat::DeviceCmd cmd{};
   cmd.name = msg->name;
   cmd.type = fastcat::ACTUATOR_SET_OUTPUT_POSITION_CMD;
   cmd.actuator_set_output_position_cmd.position = msg->position;
@@ -286,7 +289,7 @@ void Fcat::ActuatorSetOutputPositionCmdCb(
 
 void Fcat::ActuatorSetDigitalOutputCmdCb(
     const std::shared_ptr<fcat_msgs::msg::ActuatorSetDigitalOutputCmd> msg) {
-  fastcat::DeviceCmd cmd;
+  fastcat::DeviceCmd cmd{};
   cmd.name = msg->name;
   cmd.type = fastcat::ACTUATOR_SET_DIGITAL_OUTPUT_CMD;
   cmd.actuator_set_digital_output_cmd.digital_output_index = msg->digital_output_index;
@@ -298,7 +301,7 @@ void Fcat::ActuatorSetDigitalOutputCmdCb(
 
 void Fcat::ActuatorSetMaxCurrentCmdCb(
     const std::shared_ptr<fcat_msgs::msg::ActuatorSetMaxCurrentCmd> msg) {
-  fastcat::DeviceCmd cmd;
+  fastcat::DeviceCmd cmd{};
   cmd.name = msg->name;
   cmd.type = fastcat::ACTUATOR_SET_MAX_CURRENT_CMD;
   cmd.actuator_set_max_current_cmd.current = msg->max_current;
@@ -310,7 +313,7 @@ void Fcat::ActuatorSetMaxCurrentCmdCb(
 
 void Fcat::ActuatorSetUnitModeCmdCb(
     const std::shared_ptr<fcat_msgs::msg::ActuatorSetUnitModeCmd> msg) {
-  fastcat::DeviceCmd cmd;
+  fastcat::DeviceCmd cmd{};
   cmd.name = msg->name;
   cmd.type = fastcat::ACTUATOR_SDO_SET_UNIT_MODE_CMD;
   cmd.actuator_sdo_set_unit_mode_cmd.mode = msg->mode;
@@ -322,7 +325,7 @@ void Fcat::ActuatorSetUnitModeCmdCb(
 
 void Fcat::ActuatorSetProfDisengagingTimeoutCmdCb(
     const std::shared_ptr<fcat_msgs::msg::ActuatorSetProfDisengagingTimeoutCmd> msg) {
-  fastcat::DeviceCmd cmd;
+  fastcat::DeviceCmd cmd{};
   cmd.name = msg->name;
   cmd.type = fastcat::ACTUATOR_SET_PROF_DISENGAGING_TIMEOUT_CMD;
   cmd.actuator_set_prof_disengaging_timeout_cmd.timeout = msg->timeout;
@@ -332,7 +335,7 @@ void Fcat::ActuatorSetProfDisengagingTimeoutCmdCb(
 }
 
 void Fcat::ActuatorHaltCmdCb(const std::shared_ptr<fcat_msgs::msg::ActuatorHaltCmd> msg) {
-  fastcat::DeviceCmd cmd;
+  fastcat::DeviceCmd cmd{};
   cmd.name = msg->name;
   cmd.type = fastcat::ACTUATOR_HALT_CMD;
   if (ActuatorExistsOnBus(cmd.name)) {
@@ -342,7 +345,7 @@ void Fcat::ActuatorHaltCmdCb(const std::shared_ptr<fcat_msgs::msg::ActuatorHaltC
 
 void Fcat::ActuatorHaltCmdsCb(const std::shared_ptr<fcat_msgs::msg::ActuatorHaltCmds> msg) {
   for (auto& name : msg->names) {
-    fastcat::DeviceCmd cmd;
+    fastcat::DeviceCmd cmd{};
     cmd.name = name;
     cmd.type = fastcat::ACTUATOR_HALT_CMD;
     if (ActuatorExistsOnBus(cmd.name)) {
@@ -352,7 +355,7 @@ void Fcat::ActuatorHaltCmdsCb(const std::shared_ptr<fcat_msgs::msg::ActuatorHalt
 }
 
 void Fcat::CommanderEnableCmdCb(const std::shared_ptr<fcat_msgs::msg::CommanderEnableCmd> msg) {
-  fastcat::DeviceCmd cmd;
+  fastcat::DeviceCmd cmd{};
   cmd.name = msg->name;
   cmd.type = fastcat::COMMANDER_ENABLE_CMD;
   cmd.commander_enable_cmd.duration = msg->duration;
@@ -363,7 +366,7 @@ void Fcat::CommanderEnableCmdCb(const std::shared_ptr<fcat_msgs::msg::CommanderE
 }
 
 void Fcat::CommanderDisableCmdCb(const std::shared_ptr<fcat_msgs::msg::CommanderDisableCmd> msg) {
-  fastcat::DeviceCmd cmd;
+  fastcat::DeviceCmd cmd{};
   cmd.name = msg->name;
   cmd.type = fastcat::COMMANDER_DISABLE_CMD;
 
@@ -374,7 +377,7 @@ void Fcat::CommanderDisableCmdCb(const std::shared_ptr<fcat_msgs::msg::Commander
 
 void Fcat::El2124WriteAllChannelsCmdCb(
     const std::shared_ptr<fcat_msgs::msg::El2124WriteAllChannelsCmd> msg) {
-  fastcat::DeviceCmd cmd;
+  fastcat::DeviceCmd cmd{};
   cmd.name = msg->name;
   cmd.type = fastcat::EL2124_WRITE_ALL_CHANNELS_CMD;
   cmd.el2124_write_all_channels_cmd.channel_ch1 = msg->channel_ch1;
@@ -388,7 +391,7 @@ void Fcat::El2124WriteAllChannelsCmdCb(
 }
 void Fcat::El2124WriteChannelCmdCb(
     const std::shared_ptr<fcat_msgs::msg::El2124WriteChannelCmd> msg) {
-  fastcat::DeviceCmd cmd;
+  fastcat::DeviceCmd cmd{};
   cmd.name = msg->name;
   cmd.type = fastcat::EL2124_WRITE_CHANNEL_CMD;
   cmd.el2124_write_channel_cmd.channel = msg->channel;
@@ -401,7 +404,7 @@ void Fcat::El2124WriteChannelCmdCb(
 
 void Fcat::El2809WriteAllChannelsCmdCb(
     const std::shared_ptr<fcat_msgs::msg::El2809WriteAllChannelsCmd> msg) {
-  fastcat::DeviceCmd cmd;
+  fastcat::DeviceCmd cmd{};
   cmd.name = msg->name;
   cmd.type = fastcat::EL2809_WRITE_ALL_CHANNELS_CMD;
   cmd.el2809_write_all_channels_cmd.channel_ch1 = msg->channel_ch1;
@@ -427,7 +430,7 @@ void Fcat::El2809WriteAllChannelsCmdCb(
 }
 void Fcat::El2809WriteChannelCmdCb(
     const std::shared_ptr<fcat_msgs::msg::El2809WriteChannelCmd> msg) {
-  fastcat::DeviceCmd cmd;
+  fastcat::DeviceCmd cmd{};
   cmd.name = msg->name;
   cmd.type = fastcat::EL2809_WRITE_CHANNEL_CMD;
   cmd.el2809_write_channel_cmd.channel = msg->channel;
@@ -440,7 +443,7 @@ void Fcat::El2809WriteChannelCmdCb(
 
 void Fcat::El2798WriteAllChannelsCmdCb(
     const std::shared_ptr<fcat_msgs::msg::El2798WriteAllChannelsCmd> msg) {
-  fastcat::DeviceCmd cmd;
+  fastcat::DeviceCmd cmd{};
   cmd.name = msg->name;
   cmd.type = fastcat::EL2798_WRITE_ALL_CHANNELS_CMD;
   cmd.el2798_write_all_channels_cmd.channel_ch1 = msg->channel_ch1;
@@ -458,7 +461,7 @@ void Fcat::El2798WriteAllChannelsCmdCb(
 }
 void Fcat::El2798WriteChannelCmdCb(
     const std::shared_ptr<fcat_msgs::msg::El2798WriteChannelCmd> msg) {
-  fastcat::DeviceCmd cmd;
+  fastcat::DeviceCmd cmd{};
   cmd.name = msg->name;
   cmd.type = fastcat::EL2798_WRITE_CHANNEL_CMD;
   cmd.el2798_write_channel_cmd.channel = msg->channel;
@@ -471,7 +474,7 @@ void Fcat::El2798WriteChannelCmdCb(
 
 void Fcat::El2828WriteAllChannelsCmdCb(
     const std::shared_ptr<fcat_msgs::msg::El2828WriteAllChannelsCmd> msg) {
-  fastcat::DeviceCmd cmd;
+  fastcat::DeviceCmd cmd{};
   cmd.name = msg->name;
   cmd.type = fastcat::EL2828_WRITE_ALL_CHANNELS_CMD;
   cmd.el2828_write_all_channels_cmd.channel_ch1 = msg->channel_ch1;
@@ -489,7 +492,7 @@ void Fcat::El2828WriteAllChannelsCmdCb(
 }
 void Fcat::El2828WriteChannelCmdCb(
     const std::shared_ptr<fcat_msgs::msg::El2828WriteChannelCmd> msg) {
-  fastcat::DeviceCmd cmd;
+  fastcat::DeviceCmd cmd{};
   cmd.name = msg->name;
   cmd.type = fastcat::EL2828_WRITE_CHANNEL_CMD;
   cmd.el2828_write_channel_cmd.channel = msg->channel;
@@ -502,7 +505,7 @@ void Fcat::El2828WriteChannelCmdCb(
 
 void Fcat::El4102WriteAllChannelsCmdCb(
     const std::shared_ptr<fcat_msgs::msg::El4102WriteAllChannelsCmd> msg) {
-  fastcat::DeviceCmd cmd;
+  fastcat::DeviceCmd cmd{};
   cmd.name = msg->name;
   cmd.type = fastcat::EL4102_WRITE_ALL_CHANNELS_CMD;
   cmd.el4102_write_all_channels_cmd.voltage_output_ch1 = msg->voltage_output_ch1;
@@ -514,7 +517,7 @@ void Fcat::El4102WriteAllChannelsCmdCb(
 }
 void Fcat::El4102WriteChannelCmdCb(
     const std::shared_ptr<fcat_msgs::msg::El4102WriteChannelCmd> msg) {
-  fastcat::DeviceCmd cmd;
+  fastcat::DeviceCmd cmd{};
   cmd.name = msg->name;
   cmd.type = fastcat::EL4102_WRITE_CHANNEL_CMD;
   cmd.el4102_write_channel_cmd.channel = msg->channel;
@@ -526,7 +529,7 @@ void Fcat::El4102WriteChannelCmdCb(
 }
 
 void Fcat::FaulterEnableCmdCb(const std::shared_ptr<fcat_msgs::msg::FaulterEnableCmd> msg) {
-  fastcat::DeviceCmd cmd;
+  fastcat::DeviceCmd cmd{};
   cmd.name = msg->name;
   cmd.type = fastcat::FAULTER_ENABLE_CMD;
   cmd.faulter_enable_cmd.enable = msg->enable;
@@ -537,7 +540,7 @@ void Fcat::FaulterEnableCmdCb(const std::shared_ptr<fcat_msgs::msg::FaulterEnabl
 }
 
 void Fcat::FtsTareCmdCb(const std::shared_ptr<fcat_msgs::msg::FtsTareCmd> msg) {
-  fastcat::DeviceCmd cmd;
+  fastcat::DeviceCmd cmd{};
   cmd.name = msg->name;
   cmd.type = fastcat::FTS_TARE_CMD;
 
@@ -547,7 +550,7 @@ void Fcat::FtsTareCmdCb(const std::shared_ptr<fcat_msgs::msg::FtsTareCmd> msg) {
 }
 
 void Fcat::PidActivateCmdCb(const std::shared_ptr<fcat_msgs::msg::PidActivateCmd> msg) {
-  fastcat::DeviceCmd cmd;
+  fastcat::DeviceCmd cmd{};
   cmd.name = msg->name;
   cmd.type = fastcat::PID_ACTIVATE_CMD;
   cmd.pid_activate_cmd.setpoint = msg->setpoint;
@@ -582,7 +585,7 @@ void Fcat::ActuatorHaltSrvCb(
     const std::shared_ptr<fcat_msgs::srv::ActuatorHaltService::Request> request,
     std::shared_ptr<fcat_msgs::srv::ActuatorHaltService::Response> response) {
   RCLCPP_INFO(this->get_logger(), "Handling Actuator Halt Command");
-  fastcat::DeviceCmd cmd;
+  fastcat::DeviceCmd cmd{};
   cmd.name = request->name;
   cmd.type = fastcat::ACTUATOR_HALT_CMD;
 
@@ -596,7 +599,7 @@ void Fcat::ActuatorSetGainSchedulingIndexSrvCb(
     const std::shared_ptr<fcat_msgs::srv::ActuatorSetGainSchedulingIndexService::Request> request,
     std::shared_ptr<fcat_msgs::srv::ActuatorSetGainSchedulingIndexService::Response> response) {
   RCLCPP_INFO(this->get_logger(), "Handling Actuator Set Gain Scheduling Index Command");
-  fastcat::DeviceCmd cmd;
+  fastcat::DeviceCmd cmd{};
   cmd.name = request->name;
   cmd.type = fastcat::ACTUATOR_SET_GAIN_SCHEDULING_INDEX_CMD;
   cmd.actuator_set_gain_scheduling_index_cmd.gain_scheduling_index = request->gain_scheduling_index;
@@ -611,7 +614,7 @@ void Fcat::ActuatorSetMaxCurrentSrvCb(
     const std::shared_ptr<fcat_msgs::srv::ActuatorSetMaxCurrentService::Request> request,
     std::shared_ptr<fcat_msgs::srv::ActuatorSetMaxCurrentService::Response> response) {
   RCLCPP_INFO(this->get_logger(), "Handling Actuator Set Max Current Command");
-  fastcat::DeviceCmd cmd;
+  fastcat::DeviceCmd cmd{};
   cmd.name = request->name;
   cmd.type = fastcat::ACTUATOR_SET_MAX_CURRENT_CMD;
   cmd.actuator_set_max_current_cmd.current = request->max_current;
@@ -626,7 +629,7 @@ void Fcat::ActuatorSetDigitalOutputSrvCb(
     const std::shared_ptr<fcat_msgs::srv::ActuatorSetDigitalOutputService::Request> request,
     std::shared_ptr<fcat_msgs::srv::ActuatorSetDigitalOutputService::Response> response) {
   RCLCPP_INFO(this->get_logger(), "Handling Actuator Set Digital Output Command");
-  fastcat::DeviceCmd cmd;
+  fastcat::DeviceCmd cmd{};
   cmd.name = request->name;
   cmd.type = fastcat::ACTUATOR_SET_DIGITAL_OUTPUT_CMD;
   cmd.actuator_set_digital_output_cmd.digital_output_index = request->digital_output_index;
@@ -642,7 +645,7 @@ void Fcat::ActuatorSetProfDisengagingTimeoutSrvCb(
         request,
     std::shared_ptr<fcat_msgs::srv::ActuatorSetProfDisengagingTimeoutService::Response> response) {
   RCLCPP_INFO(this->get_logger(), "Handling Actuator Set Profile Disengaging Timeout Command");
-  fastcat::DeviceCmd cmd;
+  fastcat::DeviceCmd cmd{};
   cmd.name = request->name;
   cmd.type = fastcat::ACTUATOR_SET_PROF_DISENGAGING_TIMEOUT_CMD;
   cmd.actuator_set_prof_disengaging_timeout_cmd.timeout = request->timeout;
@@ -657,7 +660,7 @@ void Fcat::ActuatorSetOutputPositionSrvCb(
     const std::shared_ptr<fcat_msgs::srv::ActuatorSetOutputPositionService::Request> request,
     std::shared_ptr<fcat_msgs::srv::ActuatorSetOutputPositionService::Response> response) {
   RCLCPP_INFO(this->get_logger(), "Handling Actuator Set Output Position Command");
-  fastcat::DeviceCmd cmd;
+  fastcat::DeviceCmd cmd{};
   cmd.name = request->name;
   cmd.type = fastcat::ACTUATOR_SET_OUTPUT_POSITION_CMD;
   cmd.actuator_set_output_position_cmd.position = request->position;
@@ -671,7 +674,7 @@ void Fcat::ActuatorCalibrateSrvCb(
     const std::shared_ptr<fcat_msgs::srv::ActuatorCalibrateService::Request> request,
     std::shared_ptr<fcat_msgs::srv::ActuatorCalibrateService::Response> response) {
   RCLCPP_INFO(this->get_logger(), "Handling Actuator Calibrate Command");
-  fastcat::DeviceCmd cmd;
+  fastcat::DeviceCmd cmd{};
   cmd.name = request->name;
   cmd.type = fastcat::ACTUATOR_CALIBRATE_CMD;
   cmd.actuator_calibrate_cmd.velocity = request->velocity;
@@ -687,13 +690,16 @@ void Fcat::ActuatorProfPosSrvCb(
     const std::shared_ptr<fcat_msgs::srv::ActuatorProfPosService::Request> request,
     std::shared_ptr<fcat_msgs::srv::ActuatorProfPosService::Response> response) {
   RCLCPP_INFO(this->get_logger(), "Handling Actuator Set Prof Pos Command");
-  fastcat::DeviceCmd cmd;
+  fastcat::DeviceCmd cmd{};
   cmd.name = request->name;
   cmd.type = fastcat::ACTUATOR_PROF_POS_CMD;
   cmd.actuator_prof_pos_cmd.target_position = request->target_position;
   cmd.actuator_prof_pos_cmd.profile_velocity = request->profile_velocity;
   cmd.actuator_prof_pos_cmd.profile_accel = request->profile_accel;
   cmd.actuator_prof_pos_cmd.relative = request->relative;
+  // No end_velocity in ActuatorProfPosService; fastcat checks it against the
+  // speed limit, so pin it to 0 (stop at goal).
+  cmd.actuator_prof_pos_cmd.end_velocity = 0.0;
   response->success = ActuatorExistsOnBus(cmd.name, response->message);
   if (response->success) {
     QueueCommand(cmd);
@@ -704,7 +710,7 @@ void Fcat::ActuatorProfVelSrvCb(
     const std::shared_ptr<fcat_msgs::srv::ActuatorProfVelService::Request> request,
     std::shared_ptr<fcat_msgs::srv::ActuatorProfVelService::Response> response) {
   RCLCPP_INFO(this->get_logger(), "Handling Actuator Set Prof Vel Command");
-  fastcat::DeviceCmd cmd;
+  fastcat::DeviceCmd cmd{};
   cmd.name = request->name;
   cmd.type = fastcat::ACTUATOR_PROF_VEL_CMD;
   cmd.actuator_prof_vel_cmd.target_velocity = request->target_velocity;
@@ -720,7 +726,7 @@ void Fcat::ActuatorProfTorqueSrvCb(
     const std::shared_ptr<fcat_msgs::srv::ActuatorProfTorqueService::Request> request,
     std::shared_ptr<fcat_msgs::srv::ActuatorProfTorqueService::Response> response) {
   RCLCPP_INFO(this->get_logger(), "Handling Actuator Set Prof Torque Command");
-  fastcat::DeviceCmd cmd;
+  fastcat::DeviceCmd cmd{};
   cmd.name = request->name;
   cmd.type = fastcat::ACTUATOR_PROF_TORQUE_CMD;
   cmd.actuator_prof_torque_cmd.target_torque_amps = request->target_torque_amps;
@@ -735,7 +741,7 @@ void Fcat::CommanderEnableSrvCb(
     const std::shared_ptr<fcat_msgs::srv::CommanderEnableService::Request> request,
     std::shared_ptr<fcat_msgs::srv::CommanderEnableService::Response> response) {
   RCLCPP_INFO(this->get_logger(), "Handling Commander Enable Command");
-  fastcat::DeviceCmd cmd;
+  fastcat::DeviceCmd cmd{};
   cmd.name = request->name;
   cmd.type = fastcat::COMMANDER_ENABLE_CMD;
   cmd.commander_enable_cmd.duration = request->duration;
@@ -750,7 +756,7 @@ void Fcat::CommanderDisableSrvCb(
     const std::shared_ptr<fcat_msgs::srv::CommanderDisableService::Request> request,
     std::shared_ptr<fcat_msgs::srv::CommanderDisableService::Response> response) {
   RCLCPP_INFO(this->get_logger(), "Handling Commander Disable Command");
-  fastcat::DeviceCmd cmd;
+  fastcat::DeviceCmd cmd{};
   cmd.name = request->name;
   cmd.type = fastcat::COMMANDER_DISABLE_CMD;
 
@@ -764,7 +770,7 @@ void Fcat::El2124WriteAllChannelsSrvCb(
     const std::shared_ptr<fcat_msgs::srv::El2124WriteAllChannelsService::Request> request,
     std::shared_ptr<fcat_msgs::srv::El2124WriteAllChannelsService::Response> response) {
   RCLCPP_INFO(this->get_logger(), "Handling EL2124 Write All Channels Command");
-  fastcat::DeviceCmd cmd;
+  fastcat::DeviceCmd cmd{};
 
   cmd.name = request->name;
   cmd.type = fastcat::EL2124_WRITE_ALL_CHANNELS_CMD;
@@ -783,7 +789,7 @@ void Fcat::El2124WriteChannelSrvCb(
     const std::shared_ptr<fcat_msgs::srv::El2124WriteChannelService::Request> request,
     std::shared_ptr<fcat_msgs::srv::El2124WriteChannelService::Response> response) {
   RCLCPP_INFO(this->get_logger(), "Handling EL2124 Write Channel Command");
-  fastcat::DeviceCmd cmd;
+  fastcat::DeviceCmd cmd{};
 
   cmd.name = request->name;
   cmd.type = fastcat::EL2124_WRITE_CHANNEL_CMD;
@@ -800,7 +806,7 @@ void Fcat::El2809WriteAllChannelsSrvCb(
     const std::shared_ptr<fcat_msgs::srv::El2809WriteAllChannelsService::Request> request,
     std::shared_ptr<fcat_msgs::srv::El2809WriteAllChannelsService::Response> response) {
   RCLCPP_INFO(this->get_logger(), "Handling EL2809 Write All Channels Command");
-  fastcat::DeviceCmd cmd;
+  fastcat::DeviceCmd cmd{};
 
   cmd.name = request->name;
   cmd.type = fastcat::EL2809_WRITE_ALL_CHANNELS_CMD;
@@ -831,7 +837,7 @@ void Fcat::El2809WriteChannelSrvCb(
     const std::shared_ptr<fcat_msgs::srv::El2809WriteChannelService::Request> request,
     std::shared_ptr<fcat_msgs::srv::El2809WriteChannelService::Response> response) {
   RCLCPP_INFO(this->get_logger(), "Handling EL2809 Write Channel Command");
-  fastcat::DeviceCmd cmd;
+  fastcat::DeviceCmd cmd{};
 
   cmd.name = request->name;
   cmd.type = fastcat::EL2809_WRITE_CHANNEL_CMD;
@@ -848,7 +854,7 @@ void Fcat::El2798WriteAllChannelsSrvCb(
     const std::shared_ptr<fcat_msgs::srv::El2798WriteAllChannelsService::Request> request,
     std::shared_ptr<fcat_msgs::srv::El2798WriteAllChannelsService::Response> response) {
   RCLCPP_INFO(this->get_logger(), "Handling EL2798 Write All Channels Command");
-  fastcat::DeviceCmd cmd;
+  fastcat::DeviceCmd cmd{};
 
   cmd.name = request->name;
   cmd.type = fastcat::EL2798_WRITE_ALL_CHANNELS_CMD;
@@ -871,7 +877,7 @@ void Fcat::El2828WriteAllChannelsSrvCb(
     const std::shared_ptr<fcat_msgs::srv::El2828WriteAllChannelsService::Request> request,
     std::shared_ptr<fcat_msgs::srv::El2828WriteAllChannelsService::Response> response) {
   RCLCPP_INFO(this->get_logger(), "Handling EL2828 Write All Channels Command");
-  fastcat::DeviceCmd cmd;
+  fastcat::DeviceCmd cmd{};
 
   cmd.name = request->name;
   cmd.type = fastcat::EL2828_WRITE_ALL_CHANNELS_CMD;
@@ -894,7 +900,7 @@ void Fcat::El2798WriteChannelSrvCb(
     const std::shared_ptr<fcat_msgs::srv::El2798WriteChannelService::Request> request,
     std::shared_ptr<fcat_msgs::srv::El2798WriteChannelService::Response> response) {
   RCLCPP_INFO(this->get_logger(), "Handling EL2798 Write Channel Command");
-  fastcat::DeviceCmd cmd;
+  fastcat::DeviceCmd cmd{};
 
   cmd.name = request->name;
   cmd.type = fastcat::EL2798_WRITE_CHANNEL_CMD;
@@ -911,7 +917,7 @@ void Fcat::El2828WriteChannelSrvCb(
     const std::shared_ptr<fcat_msgs::srv::El2828WriteChannelService::Request> request,
     std::shared_ptr<fcat_msgs::srv::El2828WriteChannelService::Response> response) {
   RCLCPP_INFO(this->get_logger(), "Handling EL2828 Write Channel Command");
-  fastcat::DeviceCmd cmd;
+  fastcat::DeviceCmd cmd{};
 
   cmd.name = request->name;
   cmd.type = fastcat::EL2828_WRITE_CHANNEL_CMD;
@@ -928,7 +934,7 @@ void Fcat::El4102WriteAllChannelsSrvCb(
     const std::shared_ptr<fcat_msgs::srv::El4102WriteAllChannelsService::Request> request,
     std::shared_ptr<fcat_msgs::srv::El4102WriteAllChannelsService::Response> response) {
   RCLCPP_INFO(this->get_logger(), "Handling EL4102 Write All Channels Command");
-  fastcat::DeviceCmd cmd;
+  fastcat::DeviceCmd cmd{};
 
   cmd.name = request->name;
   cmd.type = fastcat::EL4102_WRITE_ALL_CHANNELS_CMD;
@@ -945,7 +951,7 @@ void Fcat::El4102WriteChannelSrvCb(
     const std::shared_ptr<fcat_msgs::srv::El4102WriteChannelService::Request> request,
     std::shared_ptr<fcat_msgs::srv::El4102WriteChannelService::Response> response) {
   RCLCPP_INFO(this->get_logger(), "Handling EL4102 Write Channel Command");
-  fastcat::DeviceCmd cmd;
+  fastcat::DeviceCmd cmd{};
 
   cmd.name = request->name;
   cmd.type = fastcat::EL4102_WRITE_CHANNEL_CMD;
@@ -962,7 +968,7 @@ void Fcat::FaulterEnableSrvCb(
     const std::shared_ptr<fcat_msgs::srv::FaulterEnableService::Request> request,
     std::shared_ptr<fcat_msgs::srv::FaulterEnableService::Response> response) {
   RCLCPP_INFO(this->get_logger(), "Handling Faulter Enable Command");
-  fastcat::DeviceCmd cmd;
+  fastcat::DeviceCmd cmd{};
 
   cmd.name = request->name;
   cmd.type = fastcat::FAULTER_ENABLE_CMD;
@@ -978,7 +984,7 @@ void Fcat::FtsTareSrvCb(
     const std::shared_ptr<fcat_msgs::srv::DeviceTriggerService::Request> request,
     std::shared_ptr<fcat_msgs::srv::DeviceTriggerService::Response> response) {
   RCLCPP_INFO(this->get_logger(), "Handling FTS Tare Command");
-  fastcat::DeviceCmd cmd;
+  fastcat::DeviceCmd cmd{};
   cmd.name = request->name;
   cmd.type = fastcat::FTS_TARE_CMD;
 
@@ -992,7 +998,8 @@ void Fcat::PidActivateSrvCb(
     const std::shared_ptr<fcat_msgs::srv::PidActivateService::Request> request,
     std::shared_ptr<fcat_msgs::srv::PidActivateService::Response> response) {
   RCLCPP_INFO(this->get_logger(), "Handling PID Activate Command");
-  fastcat::DeviceCmd cmd;
+  fastcat::DeviceCmd cmd{};
+  cmd.name = request->name;
   cmd.type = fastcat::PID_ACTIVATE_CMD;
   cmd.pid_activate_cmd.setpoint = request->setpoint;
   cmd.pid_activate_cmd.deadband = request->deadband;

@@ -8,6 +8,7 @@
 #include <any>
 #include <functional>
 #include <memory>
+#include <mutex>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -109,6 +110,9 @@ class Fcat : public FcatNode {
 
  private:
   void Process() override;
+  // Capture + persist actuator positions on shutdown. Idempotent (guarded by
+  // save_state_flag_); invoked by both the pre-shutdown callback and the dtor.
+  void SaveState();
   void SetRealtimePreempt(int scheduler_priority);
   void PopulateDeviceStateFields();
   void SetCpuAffinity();
@@ -476,5 +480,8 @@ class Fcat : public FcatNode {
   bool reset_in_progress_ = false;
   FcatState fcat_state_ = FcatState::UNCONFIGURED;
   std::vector<rclcpp::node_interfaces::OnSetParametersCallbackHandle::SharedPtr> param_cb_handles_;
+
+  std::once_flag save_state_flag_;
+  rclcpp::PreShutdownCallbackHandle pre_shutdown_cb_handle_;
 };
 #endif  // FCAT_HPP_

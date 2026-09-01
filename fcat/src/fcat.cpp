@@ -22,7 +22,28 @@ using namespace std::chrono_literals;
 using std::placeholders::_1;
 using std::placeholders::_2;
 
-Fcat::~Fcat() { fcat_manager_.Shutdown(); }
+Fcat::~Fcat() {
+  // Best-effort deregistration so the callback is not left pointing at a
+  // destroyed node if the context outlives this object.
+  auto context = this->get_node_base_interface()->get_context();
+  if (context) {
+    context->remove_pre_shutdown_callback(pre_shutdown_cb_handle_);
+  }
+  // Fallback for a destruction that is not preceded by rclcpp::shutdown().
+  // Normally the pre-shutdown callback has already saved and call_once makes
+  // this a no-op.
+  SaveState();
+}
+
+void Fcat::SaveState() {
+  // Runs at most once, whether triggered by the pre-shutdown callback or the
+  // destructor. The manager serializes the capture+write against Process()
+  // internally.
+  std::call_once(save_state_flag_, [this]() {
+    RCLCPP_INFO(this->get_logger(), "Saving actuator positions on shutdown");
+    fcat_manager_.SaveActuatorPositions();
+  });
+}
 
 Fcat::Fcat(const rclcpp::NodeOptions& options)
     : FcatNode("fcat", "fcat", options),
@@ -260,6 +281,15 @@ Fcat::Fcat(const rclcpp::NodeOptions& options)
   fcat_state_ = FcatState::INACTIVE;
   StartProcessTimer();
   fcat_state_ = FcatState::ACTIVE;
+
+  // Persist actuator positions on shutdown. Runs on whichever thread initiates
+  // shutdown (the signal thread for SIGINT/SIGTERM), before the context is torn
+  // down, so the save does not depend on destructor ordering.
+  // SaveActuatorPositions() takes the manager's process mutex, so it is safe
+  // even though the process loop may still be spinning here.
+  pre_shutdown_cb_handle_ =
+      this->get_node_base_interface()->get_context()->add_pre_shutdown_callback(
+          [this]() { SaveState(); });
 }
 
 void Fcat::SetRealtimePreempt(int scheduler_priority) {
@@ -1621,7 +1651,6 @@ void Fcat::PublishAsyncSdoResponse() {
     msg.data = jsd_sdo_data_to_string(sdo_resp.response.data_type, sdo_resp.response.data);
 
     RCLCPP_DEBUG(this->get_logger(), "Publishing new AsyncSdoResponse");
-
     async_sdo_response_pub_->publish(msg);
   }
 }
